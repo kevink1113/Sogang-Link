@@ -17,6 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from backend.views import my_login_view, offline
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', my_login_view, name='login'),
+    path('offline/', offline, name='offline'),
 ]
