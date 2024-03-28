@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4c7225ea-be13-404a-a8c9-427fc340ab32" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/backend/library.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/crawl_courses.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/crawl_courses.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawl_courses.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lecture/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/lecture/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lecture/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/lecture/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,7 +85,7 @@
       <option name="presentableId" value="Default" />
       <updated>1711299365312</updated>
       <workItem from="1711299373087" duration="1160000" />
-      <workItem from="1711596727104" duration="2979000" />
+      <workItem from="1711596727104" duration="4122000" />
     </task>
     <servers />
   </component>

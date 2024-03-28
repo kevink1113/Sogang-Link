@@ -100,8 +100,8 @@ columns = [
 def crawl_courses(year, semester):
     """
     개설교과목 정보 페이지에서 selenium 이용 크롤링 후 pandas DataFrame으로 반환
-    @param year: 개설년도
-    @param semester: 개설학기
+    @param year: 개설년도 (ex. '2024')
+    @param semester: 개설학기 (ex. '1', 's', '2', 'w')
     @return: 개설교과목 정보 DataFrame
     """
     print(f'{year} year, {semester} semester crawling start.')
@@ -345,17 +345,18 @@ daytoint = {'월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6, '일': 7
 def get_current_courses():
     # 반복되는 함수 course를 받아와서 데이터베이스에 저장해줌
     crawls = None
-    crawls = crawl_courses('24', '1')
+    crawls = crawl_courses('24', '1')   # TODO: Dynamic year and semester
     print(crawls)
     if crawls is not None:
         for i in range(len(crawls)):
-            course = Course.get_course_by_id(crawls['과목번호'][i] + '-' + crawls['분반'][i], 241)
+            course = Course.get_course_by_id(crawls['과목번호'][i] + '-' + crawls['분반'][i], 241)    # TODO: Dynamic semester
             # print(crawls['subject_id'][i])
             if course is None:
                 course = Course()
             course.advisor = crawls['교수진'][i]
             course.classroom = crawls['강의실'][i]
             course.course_id = crawls['과목번호'][i] + '-' + crawls['분반'][i]
+            course.major = crawls['학과'][i]
             # print(crawls['요일1'][i])
             if len(crawls['요일1'][i]) == 0 or len(crawls['요일1'][i]) > 5:
                 day = 88
@@ -371,7 +372,7 @@ def get_current_courses():
                 course.end_time = datetime.strptime(crawls['종료시간1'][i], '%H:%M').time()
                 course.start_time = datetime.strptime(crawls['시작시간1'][i], '%H:%M').time()
             course.name = crawls['과목명'][i]
-            course.semester = 241
+            course.semester = 241   # TODO: Dynamic semester
             course.save()
 
     # 여기서부터 19년도 1학기
