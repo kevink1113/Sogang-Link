@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'sogang_link.apps.SogangLinkConfig',
     'drf_yasg',
     'rest_framework',
+    'rest_framework.authtoken',
     'users.apps.UsersConfig',
     'lecture.apps.LectureConfig',
 ]
@@ -102,12 +103,21 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ],
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 

@@ -15,13 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
 
 from backend import settings
-from backend.views import my_login_view, offline
+from backend.views import offline, my_login_view
+from .views import LoginView
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -37,8 +39,10 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', my_login_view, name='login'),
+    path('login/', LoginView.as_view(), name='login'),
+    # path('login/', my_login_view, name='my_login_view'),
     path('offline/', offline, name='offline'),
+    path('users/', include('users.urls'))
 ]
 
 if settings.DEBUG:
