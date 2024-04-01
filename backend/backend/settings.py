@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sogang_link.apps.SogangLinkConfig',
+    'drf_yasg',
+    'rest_framework',
     'users.apps.UsersConfig',
     'lecture.apps.LectureConfig',
 ]
