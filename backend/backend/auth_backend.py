@@ -1,6 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
 from users.models import User
 # from pybo.models import *
+from lecture.models import *
 from .crawl_saint import get_saint_cookies, pretty_print_takes_info, get_takes_info, get_student_info, \
     get_takes_info_by_semester
 
@@ -32,21 +33,23 @@ class PasswordlessAuthBackend(ModelBackend):
         user.login_cookie = cookies
         user.save()
         print(f"{user.username} 정보 업데이트 함.")
-        # info = get_takes_info_by_semester(cookies, '2023010')
-        # takes = User.get_takes(username=username)
-        # for i in takes.all():
-        #     if i.real is True & i.course.semester == 231:
-        #         print(i)
-        #         Takes.delete_takes(i)
-        # print(info)
-        # for key,value in info.items():
-        #     take = Takes()
-        #     print(value)
-        #     take.course = Course.get_course_by_id(value['course_number']+'-'+value['course_class'],231)
-        #     take.student = user
-        #     take.real = True
-        #     take.save()
-        # info = get_takes_info_by_semester(cookies,'2019010')
+        # TODO: Uncomment this code after implementing the Course model,Dynamic semester, and Takes model
+        info = get_takes_info_by_semester(cookies, '2024010')
+        takes = User.get_takes(username=username)
+        for i in takes.all():
+            if i.real is True & i.course.semester == 241:
+                print(i)
+                Takes.delete_takes(i)
+        print(info)
+        for key, value in info.items():
+            take = Takes()
+            print(value)
+            # TODO: Dynamic semester
+            take.course = Course.get_course_by_id(value['course_number'] + '-' + value['course_class'], 241)
+            take.student = user
+            take.real = True
+            take.save()
+        # info = get_takes_info_by_semester(cookies, '2019010')
         # takes = User.get_takes(username=username)
         # for i in takes.all():
         #     if i.real is True & i.course.semester == 191:
