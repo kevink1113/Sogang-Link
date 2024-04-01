@@ -42,7 +42,8 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     # path('login/', my_login_view, name='my_login_view'),
     path('offline/', offline, name='offline'),
-    path('users/', include('users.urls'))
+    path('users/', include('users.urls')),
+    path('lecture/', include('lecture.urls'))
 ]
 
 if settings.DEBUG:
