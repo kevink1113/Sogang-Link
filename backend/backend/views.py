@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.shortcuts import redirect, render
+from drf_yasg import openapi
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,26 +9,37 @@ from .crawl_saint import get_saint_cookies
 from .auth_backend import PasswordlessAuthBackend
 from django.contrib.auth import login as auth_login
 
+from drf_yasg.utils import swagger_auto_schema
 
 class LoginView(APIView):
     """
-        post:
-        사용자 로그인(회원가입)을 위한 엔드포인트
+    post:
+    사용자 로그인(회원가입)을 위한 엔드포인트
 
-        username과 password를 JSON 형태로 전달받아 인증을 수행
-        인증에 성공하면, 사용자 토큰을 반환
+    username과 password를 JSON 형태로 전달받아 인증을 수행
+    인증에 성공하면, 사용자 토큰을 반환
 
-        요청 예시:
-        {
-            "username": "2019xxxx",
-            "password": "password123"
+    요청 예시:
+    {
+        "username": "2019xxxx",
+        "password": "password123"
+    }
+
+    응답 예시:
+    {
+        "token": "1234567890abcdef"
+    }
+    """
+    @swagger_auto_schema(request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='학번'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='비밀번호')
         }
+        # response 정의
 
-        응답 예시:
-        {
-            "token": "1234567890abcdef"
-        }
-        """
+    ))
+    # @swagger_auto_schema(operation_description="POST 요청을 위한 엔드포인트입니다.")
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')

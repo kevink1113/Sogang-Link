@@ -19,6 +19,7 @@ class PasswordlessAuthBackend(ModelBackend):
             print("기존 사용자 로그인")
         except User.DoesNotExist:
             user = User(username=username)
+            user.set_unusable_password()  # 비밀번호를 설정하지 않습니다.
             user.save()
             # student = User()
             print("새 사용자 만듦")
@@ -41,6 +42,8 @@ class PasswordlessAuthBackend(ModelBackend):
                 print(i)
                 Takes.delete_takes(i)
         print(info)
+
+        # TODO: 로그인 할 때 중복 수강 정보는 추가하지 않기
         for key, value in info.items():
             take = Takes()
             print(value)

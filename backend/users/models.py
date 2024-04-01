@@ -10,8 +10,8 @@ class User(AbstractUser):
     semester = models.IntegerField(null=True)                                               # 학기
     major = models.CharField(max_length=100, null=True)                                     # 전공
     advisor = models.CharField(max_length=30, null=True)                                    # 지도교수
-    login_cookie = models.CharField(max_length=50, null=True)                               # 로그인 쿠키
-    nickname = models.CharField(max_length=30, default='', null=True)                       # 닉네임
+    login_cookie = models.CharField(max_length=500, null=True)                              # 로그인 쿠키
+    nickname = models.CharField(max_length=30, default='', null=True, blank=True)           # 닉네임
     avatar = models.ImageField(upload_to="avatars", blank=True)                             # 프로필 사진
 
     def save(self, *args, **kwargs):
