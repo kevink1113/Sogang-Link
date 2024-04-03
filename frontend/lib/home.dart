@@ -1,108 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:soganglink/homepage.dart';
-
 import 'package:soganglink/timetable.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
+
   @override
-  _Home createState() => _Home();
+  _HomeState createState() => _HomeState();
 }
 
-class _Home extends State<Home> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  Widget bodyPage = const HomePage();
-  @override
-  void initState() {
-    super.initState();
+class _HomeState extends State<Home> {
+  int _selectedIndex = 2;
+  final List<Widget> _pages = [
+    const HomePage(),
+    const TimeTable(),
+    const HomePage(), // 게시판 페이지 예시로 임시로 HomePage 사용
+    const HomePage(), // 설정 페이지 예시로 임시로 HomePage 사용
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-
     return Scaffold(
-        key: scaffoldKey,
-        backgroundColor: Colors.grey,
-        appBar: AppBar(
-          title: const Center(
-            child: Text(
-              'Sogang Link',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white, // Set text color to white
-              ),
-            ),
-          ),
-          backgroundColor: Colors.redAccent,
+      backgroundColor: Colors.grey.shade200, // 밝은 회색으로 배경색 설정
+      appBar: AppBar(
+        title: const Text(
+          'Sogang Link',
+          style: TextStyle(color: Colors.white),
         ),
-        body: bodyPage,
-        bottomNavigationBar: BottomAppBar(
-          height: 50,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Flexible(
-                child: Column(
-                  children: [
-                    Icon(Icons.dehaze),
-                    Text('기능'),
-                  ],
-                ),
-                flex: 1,
-              ),
-              Flexible(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      bodyPage = const TimeTable();
-                    });
-                  },
-                  child: Column(
-                    children: [
-                      Icon(Icons.date_range),
-                      Text('시간표'),
-                    ],
-                  ),
-                ),
-                flex: 1,
-              ),
-              Flexible(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      bodyPage = const HomePage();
-                    });
-                  },
-                  child: Column(
-                    children: [
-                      Icon(Icons.home),
-                      Text('홈'),
-                    ],
-                  ),
-                ),
-              ),
-              Flexible(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Icon(Icons.mode_comment),
-                    Text('게시판'),
-                  ],
-                ),
-              ),
-              Flexible(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Icon(Icons.settings),
-                    Text('설정'),
-                  ],
-                ),
-              ),
-            ],
+        backgroundColor: Colors.redAccent, // AppBar 색상 변경
+        elevation: 0, // AppBar 그림자 제거
+        centerTitle: true, // 제목 중앙 정렬
+      ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dehaze),
+            label: '기능',
           ),
-        ));
+          BottomNavigationBarItem(
+            icon: Icon(Icons.date_range),
+            label: '시간표',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: '홈',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.mode_comment),
+            label: '게시판',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: '설정',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.red[300], // 선택된 아이템 색상 변경
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed, // 4개 이상의 아이템에도 배경색 유지
+        backgroundColor: Colors.white, // BottomNavigationBar 배경색 변경
+        unselectedItemColor: Colors.grey, // 선택되지 않은 아이템 색상 변경
+        elevation: 10.0, // BottomNavigationBar 그림자 추가
+      ),
+    );
   }
 }

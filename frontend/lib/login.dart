@@ -1,33 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:soganglink/home.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
-import 'data/login/User.dart';
+import 'package:soganglink/home.dart';
 import 'homepage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
+
   @override
-  _Login createState() => _Login();
+  _LoginState createState() => _LoginState();
 }
 
-class _Login extends State<Login> {
-  final idcontroller = TextEditingController();
-  final passwordcontroller = TextEditingController();
+class _LoginState extends State<Login> {
+  final idController = TextEditingController();
+  final passwordController = TextEditingController();
+  final String url = "http://127.0.0.1:8000/login";
 
-  final url = "http://127.0.0.1:8000/login/";
+  Future<void> login() async {
+    try {
+      var request = Uri.parse(url);
+      final response = await http.post(request, body: {
+        "username": idController.text,
+        "password": passwordController.text
+      });
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+      if (response.statusCode == 200) {
+        // Assuming 'Home' is your home widget after login success
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Home()));
+      } else {
+        Fluttertoast.showToast(
+            msg: "로그인 실패",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "네트워크 오류",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       body: Column(
         children: [
@@ -37,35 +62,39 @@ class _Login extends State<Login> {
               child: Container(
                 width: 200,
                 height: 150,
-                /*decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(50.0)),*/
-                child: Icon(Icons.logo_dev),
+                child: Icon(Icons.login, size: 100),
               ),
             ),
           ),
           Padding(
-            //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: TextField(
-              controller: idcontroller,
+              controller: idController,
               decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'id',
-                  hintText: 'Enter id'),
+                labelText: '학번',
+                hintText: '학번을 입력해주세요',
+                prefixIcon: Icon(Icons.school),
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.white,
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(
                 left: 15.0, right: 15.0, top: 15, bottom: 0),
-            //padding: EdgeInsets.symmetric(horizontal: 15),
             child: TextField(
+              controller: passwordController,
               obscureText: true,
-              controller: passwordcontroller,
               decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Password',
-                  hintText: 'Enter secure password'),
+                labelText: 'SAINT 비밀번호',
+                hintText: '비밀번호를 입력해주세요',
+                prefixIcon: Icon(Icons.lock_outline),
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onSubmitted: (value) => login(),
             ),
           ),
           SizedBox(
@@ -77,44 +106,8 @@ class _Login extends State<Login> {
             decoration: BoxDecoration(
                 color: Colors.blue, borderRadius: BorderRadius.circular(20)),
             child: TextButton(
-              onPressed: () async {
-                try {
-                  var request = Uri.parse(url);
-                  print(idcontroller.text); // 개발 과정에서만 사용하세요. 실제 앱에서는 제거해야 합니다.
-                  print(passwordcontroller
-                      .text); // 개발 과정에서만 사용하세요. 실제 앱에서는 제거해야 합니다.
-
-                  final response = await http.post(request, body: {
-                    "username": idcontroller.text,
-                    "password": passwordcontroller.text
-                  });
-
-                  if (response.statusCode == 200) {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => Home()),
-                        (route) => false);
-                  } else {
-                    Fluttertoast.showToast(
-                        msg: "로그인 실패",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                        fontSize: 16.0);
-                  }
-                } catch (e) {
-                  Fluttertoast.showToast(
-                      msg: "네트워크 오류",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.red,
-                      textColor: Colors.white,
-                      fontSize: 16.0);
-                }
+              onPressed: () {
+                login();
               },
               child: Text(
                 'Login',
