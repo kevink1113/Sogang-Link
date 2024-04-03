@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:soganglink/homepage.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+import 'package:soganglink/timetable.dart';
+
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
   @override
-  _HomePage createState() => _HomePage();
+  _Home createState() => _Home();
 }
 
-class _HomePage extends State<HomePage> {
+class _Home extends State<Home> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
+  Widget bodyPage = const HomePage();
   @override
   void initState() {
     super.initState();
@@ -16,13 +20,11 @@ class _HomePage extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var screenwidth = MediaQuery.of(context).size.width;
     // TODO: implement build
 
     return Scaffold(
         key: scaffoldKey,
-        backgroundColor: Colors.white,
-        //
+        backgroundColor: Colors.grey,
         appBar: AppBar(
           title: const Center(
             child: Text(
@@ -33,45 +35,52 @@ class _HomePage extends State<HomePage> {
               ),
             ),
           ),
-          backgroundColor: const Color(0xff9e2a2f),
+          backgroundColor: Colors.redAccent,
         ),
-        body: const SingleChildScrollView(
-          child: Column(
-            children: [
-              Text('asdfa'),
-            ],
-          ),
-        ),
-        bottomNavigationBar: const BottomAppBar(
-          height: 68,
+        body: bodyPage,
+        bottomNavigationBar: BottomAppBar(
+          height: 50,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Flexible(
-                flex: 1,
                 child: Column(
                   children: [
                     Icon(Icons.dehaze),
                     Text('기능'),
                   ],
                 ),
+                flex: 1,
               ),
               Flexible(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Icon(Icons.date_range),
-                    Text('시간표'),
-                  ],
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      bodyPage = const TimeTable();
+                    });
+                  },
+                  child: Column(
+                    children: [
+                      Icon(Icons.date_range),
+                      Text('시간표'),
+                    ],
+                  ),
                 ),
+                flex: 1,
               ),
               Flexible(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Icon(Icons.home),
-                    Text('홈'),
-                  ],
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      bodyPage = const HomePage();
+                    });
+                  },
+                  child: Column(
+                    children: [
+                      Icon(Icons.home),
+                      Text('홈'),
+                    ],
+                  ),
                 ),
               ),
               Flexible(
@@ -95,6 +104,5 @@ class _HomePage extends State<HomePage> {
             ],
           ),
         ));
-    throw UnimplementedError();
   }
 }
