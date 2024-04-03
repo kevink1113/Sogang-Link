@@ -78,33 +78,36 @@ class _Login extends State<Login> {
                 color: Colors.blue, borderRadius: BorderRadius.circular(20)),
             child: TextButton(
               onPressed: () async {
-                //id -> idcontroller.text
-                //password -> passwordcontroller.text
+                try {
+                  var request = Uri.parse(url);
+                  print(idcontroller.text); // 개발 과정에서만 사용하세요. 실제 앱에서는 제거해야 합니다.
+                  print(passwordcontroller
+                      .text); // 개발 과정에서만 사용하세요. 실제 앱에서는 제거해야 합니다.
 
-                var request = Uri.parse(url);
-                print(idcontroller.text);
-                print(passwordcontroller.text);
+                  final response = await http.post(request, body: {
+                    "username": idcontroller.text,
+                    "password": passwordcontroller.text
+                  });
 
-                final response = await http.post(request, headers: {
-                  "Access-Control-Allow-Origin":
-                      "*", // Required for CORS support to work
-                  "Access-Control-Allow-Headers":
-                      "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
-                  "Access-Control-Allow-Methods": "POST, OPTIONS"
-                }, body: {
-                  "username": idcontroller.text,
-                  "password": passwordcontroller.text
-                });
-
-                if (response.statusCode == 200) {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => Home()),
-                      (route) => false);
-                } else {
+                  if (response.statusCode == 200) {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => Home()),
+                        (route) => false);
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: "로그인 실패",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  }
+                } catch (e) {
                   Fluttertoast.showToast(
-                      msg: "검색결과가 없습니다",
+                      msg: "네트워크 오류",
                       toastLength: Toast.LENGTH_SHORT,
                       gravity: ToastGravity.CENTER,
                       timeInSecForIosWeb: 1,
