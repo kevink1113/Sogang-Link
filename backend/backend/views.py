@@ -57,7 +57,7 @@ class LoginView(APIView):
 
         # 토큰이 이미 존재하면 가져오고, 그렇지 않으면 생성합니다.
         token, created = Token.objects.get_or_create(user=user)
-
+        print("Token: ", token.key, "Created: ", created)
         # 'created' 변수는 토큰이 새로 생성되었는지 여부를 나타냅니다.
         # 여기서 추가적인 로직을 구현할 수 있습니다 (예: 로그 생성).
 
