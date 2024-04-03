@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:soganglink/home.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'data/login/User.dart';
 import 'homepage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-
-
-class Login extends StatefulWidget{
-  const Login({Key? key}) : super(key:key);
+class Login extends StatefulWidget {
+  const Login({Key? key}) : super(key: key);
   @override
   _Login createState() => _Login();
 }
 
-
-class _Login extends State<Login>{
+class _Login extends State<Login> {
   final idcontroller = TextEditingController();
   final passwordcontroller = TextEditingController();
 
+  final url = "http://127.0.0.1:8000/login/";
 
   @override
   void initState() {
@@ -34,12 +35,12 @@ class _Login extends State<Login>{
             padding: const EdgeInsets.only(top: 60.0),
             child: Center(
               child: Container(
-                  width: 200,
-                  height: 150,
-                  /*decoration: BoxDecoration(
+                width: 200,
+                height: 150,
+                /*decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(50.0)),*/
-                  child: Icon(Icons.logo_dev),
+                child: Icon(Icons.logo_dev),
               ),
             ),
           ),
@@ -65,7 +66,6 @@ class _Login extends State<Login>{
                   border: OutlineInputBorder(),
                   labelText: 'Password',
                   hintText: 'Enter secure password'),
-
             ),
           ),
           SizedBox(
@@ -77,11 +77,41 @@ class _Login extends State<Login>{
             decoration: BoxDecoration(
                 color: Colors.blue, borderRadius: BorderRadius.circular(20)),
             child: TextButton(
-              onPressed: () {
-
+              onPressed: () async {
                 //id -> idcontroller.text
                 //password -> passwordcontroller.text
-                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => Home()) , (route) => false);
+
+                var request = Uri.parse(url);
+                print(idcontroller.text);
+                print(passwordcontroller.text);
+
+                final response = await http.post(request, headers: {
+                  "Access-Control-Allow-Origin":
+                      "*", // Required for CORS support to work
+                  "Access-Control-Allow-Headers":
+                      "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+                  "Access-Control-Allow-Methods": "POST, OPTIONS"
+                }, body: {
+                  "username": idcontroller.text,
+                  "password": passwordcontroller.text
+                });
+
+                if (response.statusCode == 200) {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => Home()),
+                      (route) => false);
+                } else {
+                  Fluttertoast.showToast(
+                      msg: "검색결과가 없습니다",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.red,
+                      textColor: Colors.white,
+                      fontSize: 16.0);
+                }
               },
               child: Text(
                 'Login',
@@ -93,5 +123,4 @@ class _Login extends State<Login>{
       ),
     );
   }
-
 }
