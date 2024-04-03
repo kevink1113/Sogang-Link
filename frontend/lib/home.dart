@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
+import 'dart:math';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -33,12 +36,99 @@ class _HomePage extends State<HomePage> {
               ),
             ),
           ),
-          backgroundColor: const Color(0xff9e2a2f),
+          backgroundColor: Colors.redAccent,
         ),
-        body: const SingleChildScrollView(
+        body: SingleChildScrollView(
           child: Column(
             children: [
-              Text('asdfa'),
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white, // Container의 배경색
+                  borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                  border: Border.all(
+                    color: Colors.blue, // 테두리 색상
+                    width: 2, // 테두리 두께
+                  ),
+                ),
+                height: 500,
+                margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                child: Center(
+                  child: Text(
+                    '둥글고 테두리 색상',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white, // Container의 배경색
+                  borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                  border: Border.all(
+                    color: Colors.blue, // 테두리 색상
+                    width: 2, // 테두리 두께
+                  ),
+                ),
+                height: 500,
+                margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                child: Center(
+                  child: Text(
+                    '둥글고 테두리 색상',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white, // Container의 배경색
+                  borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                  border: Border.all(
+                    color: Colors.blue, // 테두리 색상
+                    width: 2, // 테두리 두께
+                  ),
+                ),
+                height: 500,
+                margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                child: Center(
+                  child: Text(
+                    '둥글고 테두리 색상',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white, // Container의 배경색
+                  borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                  border: Border.all(
+                    color: Colors.blue, // 테두리 색상
+                    width: 2, // 테두리 두께
+                  ),
+                ),
+                height: 500,
+                margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                child: Center(
+                  child: Text(
+                    '둥글고 테두리 색상',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -95,6 +185,5 @@ class _HomePage extends State<HomePage> {
             ],
           ),
         ));
-    throw UnimplementedError();
   }
 }
