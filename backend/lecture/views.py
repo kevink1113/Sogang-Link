@@ -1,4 +1,10 @@
-from django.shortcuts import render
+from drf_yasg import openapi
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Takes
+from .serializers import TakesSerializer
+
 from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
@@ -40,3 +46,19 @@ class CourseViewSet(viewsets.ModelViewSet):
         if course_id:
             queryset = queryset.filter(course_id=course_id)
         return queryset
+
+
+class StudentTakesListView(APIView):
+    """
+    get:
+    현재 로그인한 학생이 수강한 과목 목록을 조회합니다.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(operation_description="takes(수강목록) GET 요청을 위한 엔드포인트")
+    def get(self, request):
+        student = request.user
+        takes = Takes.objects.filter(student=student)
+        serializer = TakesSerializer(takes, many=True)
+        return Response(serializer.data)
