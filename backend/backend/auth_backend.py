@@ -71,6 +71,37 @@ class PasswordlessAuthBackend(ModelBackend):
                     new_take = Takes()
                     new_take.course = Course.get_course_by_id(value['course_number'] + '-' + value['course_class'],
                                                               semester_code)
+                    # 예외 처리: Course가 존재하지 않을 경우 어떻게든 정보를 넣는다.
+
+                    defaults = {
+                        'major': '대학',  # Default major if not set in conditions
+                        'credit': 0,  # Default credit
+                    }
+                    # 개설교과목 정보 목록에 없는 이수교과목이 있을 경우 예외 처리
+                    if new_take.course is None:
+                        # 성찰과성장의 경우
+                        if value['course_name'] == '성찰과성장':
+                            defaults.update({
+                                'major': '전인교육원',
+                                'course_number': 'COR1007',
+                                'credit': 1,
+                            })
+                        # 차후 다른 예시 추가 가능
+
+                        new_take.course = Course(course_id=value['course_number'] + '-' + value['course_class'],
+                                                 semester=semester_code,
+                                                 name=value['course_name'],
+                                                 major=defaults['major'],
+                                                 credit=defaults['credit'],
+                                                 # day=value['day'],
+                                                 # start_time=value['start_time'],
+                                                 # end_time=value['end_time'],
+                                                 # classroom=value['classroom'],
+                                                 # advisor=value['advisor'],
+                                                 # major=value['major']
+                                                 )
+                        new_take.course.save()
+
                     new_take.student = user
                     new_take.real = True
                     new_take.save()

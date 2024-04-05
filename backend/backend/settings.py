@@ -174,3 +174,5 @@ AUTHENTICATION_BACKENDS = (
 )
 
 AUTH_USER_MODEL = 'users.User'
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000000  # Adjust this number based on your needs

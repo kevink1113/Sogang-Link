@@ -11,6 +11,7 @@ from django.contrib.auth import login as auth_login
 
 from drf_yasg.utils import swagger_auto_schema
 
+
 class LoginView(APIView):
     """
     post:
@@ -30,6 +31,7 @@ class LoginView(APIView):
         "token": "1234567890abcdef"
     }
     """
+
     @swagger_auto_schema(request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
