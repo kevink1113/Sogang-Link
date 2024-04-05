@@ -62,3 +62,12 @@ class StudentTakesListView(APIView):
         takes = Takes.objects.filter(student=student)
         serializer = TakesSerializer(takes, many=True)
         return Response(serializer.data)
+
+
+class SemesterTakesListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, semester, format=None):
+        takes = Takes.objects.filter(course__semester=semester)
+        serializer = TakesSerializer(takes, many=True)
+        return Response(serializer.data)
