@@ -21,9 +21,11 @@ class _TimeTable extends State<TimeTable> {
   var kColumnLength = 22;
   double kFirstColumnHeight = 40;
   double kBoxSize = 90;
+  int semester = 2024010;
 
   var url = 'http://127.0.0.1:8000/lecture/takes';
   var takes;
+  List<List<Widget>> lecturesForTheDay = new List.generate(5, (index) => []);
 
   Future<Takes?> get_timetable() async {
     try {
@@ -67,12 +69,53 @@ class _TimeTable extends State<TimeTable> {
     super.initState();
     get_timetable().then((value) => setState(() {
           takes = value;
+          if (takes != null) {
+            for (Take lecture in takes.cousrses_takes) {
+              if (lecture.course.semester != semester) continue;
+              if (lecture.course.start_time == null) continue;
+              if (lecture.course.day == null) continue;
+              double top = kFirstColumnHeight +
+                  (lecture.course.start_time! / 60.0) * kBoxSize;
+              double height =
+                  ((lecture.course.end_time! - lecture.course.start_time!) /
+                          60.0) *
+                      kBoxSize;
+
+              for (int i = 0; i < lecture.course.day!.length; i++) {
+                var v = int.parse(lecture.course.day![i]) - 1;
+                if (v >= 0 && v < 5) {
+                  lecturesForTheDay[v].add(
+                    Positioned(
+                      top: top,
+                      left: 0,
+                      child: Stack(children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width / 5,
+                          height: height,
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.all(Radius.circular(2)),
+                          ),
+                          child: Text(
+                            "${lecture.course.name}\n${lecture.course.classroom}",
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                      ]),
+                    ),
+                  );
+                }
+              }
+            }
+          }
         }));
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+
     return SingleChildScrollView(
         child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -82,11 +125,11 @@ class _TimeTable extends State<TimeTable> {
           child: Row(
             children: [
               buildTimeColumn(),
-              ...buildDayColumn(0),
-              ...buildDayColumn(1),
-              ...buildDayColumn(2),
-              ...buildDayColumn(3),
-              ...buildDayColumn(4),
+              ...buildDayColumn(0, lecturesForTheDay[0]),
+              ...buildDayColumn(1, lecturesForTheDay[1]),
+              ...buildDayColumn(2, lecturesForTheDay[2]),
+              ...buildDayColumn(3, lecturesForTheDay[3]),
+              ...buildDayColumn(4, lecturesForTheDay[4]),
             ],
           ),
         ),
@@ -121,41 +164,7 @@ class _TimeTable extends State<TimeTable> {
     );
   }
 
-  List<Widget> buildDayColumn(int index) {
-    List<Widget> lecturesForTheDay = [];
-    if (takes != null) {
-      for (Take lecture in takes.cousrses_takes) {
-        double top =
-            kFirstColumnHeight + (lecture.course.start_time / 60.0) * kBoxSize;
-        double height =
-            ((lecture.course.end_time - lecture.course.start_time) / 60.0) *
-                kBoxSize;
-
-        if (lecture.course.day.contains((index + 1).toString())) {
-          lecturesForTheDay.add(
-            Positioned(
-              top: top,
-              left: 0,
-              child: Stack(children: [
-                Container(
-                  width: MediaQuery.of(context).size.width / 5,
-                  height: height,
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.all(Radius.circular(2)),
-                  ),
-                  child: Text(
-                    "${lecture.course.name}\n${lecture.course.classroom}",
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ]),
-            ),
-          );
-        }
-      }
-    }
-
+  List<Widget> buildDayColumn(int index, List<Widget> lecturesForTheDay) {
     return [
       const VerticalDivider(
         color: Colors.black,
