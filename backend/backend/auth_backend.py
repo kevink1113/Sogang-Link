@@ -1,30 +1,40 @@
 from django.contrib.auth.backends import ModelBackend
 from users.models import User
-# from pybo.models import *
-from lecture.models import *
-from .crawl_saint import get_saint_cookies, pretty_print_takes_info, get_takes_info, get_student_info, \
-    get_takes_info_by_semester
+from lecture.models import Course, Takes
+from .crawl_saint import get_saint_cookies, get_student_info, get_takes_info_by_semester, get_takes_info
 
 
 class PasswordlessAuthBackend(ModelBackend):
-    """Log in to Django without providing a password.
-
-    """
+    """Log in to Django without providing a password."""
 
     def authenticate(self, username=None, cookies=None):
+        """
+        사용자 인증 함수
+        :param username: 학번
+        :param cookies: 세인트 로그인 쿠키값
+        :return: 인증한 사용자 객체
+        """
         info = get_student_info(cookies)
         try:
             user = User.objects.get(username=username)
-            student = User.get_student_by_id(username)
             print("기존 사용자 로그인")
         except User.DoesNotExist:
             user = User(username=username)
-            user.set_unusable_password()  # 비밀번호를 설정하지 않습니다.
+            user.set_unusable_password()  # 비밀번호를 설정하지 않음. (비밀번호 방식 인증이 아니므로)
             user.save()
-            # student = User()
             print("새 사용자 만듦")
-        # print(info)
-        user.username = username
+
+        # 사용자 정보 업데이트
+        self.update_user_info(user, info, cookies)
+        # 수강 정보 처리
+        # self.manage_takes(user, cookies, '2024010')
+        self.manage_all_takes(user, cookies)
+        return user
+
+    def update_user_info(self, user, info, cookies):
+        """
+        사용자 정보 업데이트 함수
+        """
         user.name = info['성명']
         user.state = 1
         user.year = int(info['현학년/학기'][0])
@@ -34,33 +44,104 @@ class PasswordlessAuthBackend(ModelBackend):
         user.login_cookie = cookies
         user.save()
         print(f"{user.username} 정보 업데이트 함.")
-        # TODO: Uncomment this code after implementing the Course model,Dynamic semester, and Takes model
-        info = get_takes_info_by_semester(cookies, '2024010')
-        takes = User.get_takes(username=username)
-        for i in takes.all():
-            if i.real is True & i.course.semester == 241:
-                print(i)
-                Takes.delete_takes(i)
-        print(info)
 
-        # TODO: 로그인 할 때 중복 수강 정보는 추가하지 않기
-        for key, value in info.items():
-            take = Takes()
-            print(value)
-            # TODO: Dynamic semester
-            take.course = Course.get_course_by_id(value['course_number'] + '-' + value['course_class'], 241)
-            take.student = user
-            take.real = True
-            take.save()
-        # info = get_takes_info_by_semester(cookies, '2019010')
-        # takes = User.get_takes(username=username)
-        # for i in takes.all():
-        #     if i.real is True & i.course.semester == 191:
-        #         print(i)
-        #         Takes.delete_takes(i)
-        # print(info)
+    def manage_all_takes(self, user, cookies):
+        """
+        현재 유저의 전체 수강 정보를 업데이트하는 함수
+        :param user: 현재 로그인한 사용자
+        :param cookies: 모바일 세인트 로그인 쿠키값
+        :return: None
+        """
+        all_semester_info = get_takes_info(cookies)
 
-        return user
+        # Course ID를 유니크한 값으로 만들기 위해 course_id와 course_semester를 병합 (재수강 고려)
+        existing_takes = {
+            f"{take.course.course_id}-{take.course.semester}": take
+            for take in user.takes.all()
+        }
+        print("existing takes: ", existing_takes)
+
+        for (semester_code, semester_info) in all_semester_info.items():
+            for key, value in semester_info.items():
+                # Course ID를 유니크한 값으로 만들기 위해 course_number와 course_class(분반)를 병합 (재수강 고려)
+                course_id = f"{value['course_number']}-{value['course_class']}-{semester_code}"
+                if course_id not in existing_takes:
+                    # Create new Takes if not existing
+
+                    new_take = Takes()
+                    new_take.course = Course.get_course_by_id(value['course_number'] + '-' + value['course_class'],
+                                                              semester_code)
+                    # 예외 처리: Course가 존재하지 않을 경우 어떻게든 정보를 넣는다.
+
+                    defaults = {
+                        'major': '대학',  # Default major if not set in conditions
+                        'credit': 0,  # Default credit
+                    }
+                    # 개설교과목 정보 목록에 없는 이수교과목이 있을 경우 예외 처리
+                    if new_take.course is None:
+                        # 성찰과성장의 경우
+                        if value['course_name'] == '성찰과성장':
+                            defaults.update({
+                                'major': '전인교육원',
+                                'course_number': 'COR1007',
+                                'credit': 1,
+                            })
+                        # 차후 다른 예시 추가 가능
+
+                        new_take.course = Course(course_id=value['course_number'] + '-' + value['course_class'],
+                                                 semester=semester_code,
+                                                 name=value['course_name'],
+                                                 major=defaults['major'],
+                                                 credit=defaults['credit'],
+                                                 # day=value['day'],
+                                                 # start_time=value['start_time'],
+                                                 # end_time=value['end_time'],
+                                                 # classroom=value['classroom'],
+                                                 # advisor=value['advisor'],
+                                                 # major=value['major']
+                                                 )
+                        new_take.course.save()
+
+                    new_take.student = user
+                    new_take.real = True
+                    new_take.save()
+
+                    print(f"Added new take for {course_id}")
+                else:
+                    print(f"Takes for {course_id} already exists")
+
+    def manage_takes(self, user, cookies, semester_code):
+        """
+        현재 유저의 현학기 수강 정보를 업데이트하는 함수
+        :param user: 현재 로그인한 사용자
+        :param cookies: 모바일 세인트 로그인 쿠키값
+        :param semester_code: ex. 2024010
+        :return:
+        """
+        current_semester_info = get_takes_info_by_semester(cookies, semester_code)
+
+        # Course ID를 유니크한 값으로 만들기 위해 course_number와 course_class를 병합 (재수강 고려)
+        existing_takes = {
+            f"{take.course.course_id}": take
+            for take in user.takes.all()
+        }  # ex: {'CSE2010-01': Takes object (1), 'CSE2010-02': Takes object (2)}
+        print("existing takes: ", existing_takes)
+
+        for key, value in current_semester_info.items():
+            # Course ID를 유니크한 값으로 만들기 위해 course_number와 course_class(분반)를 병합 (재수강 고려)
+            course_id = f"{value['course_number']}-{value['course_class']}"
+            if course_id not in existing_takes:
+                # Create new Takes if not existing
+
+                new_take = Takes()
+                new_take.course = Course.get_course_by_id(value['course_number'] + '-' + value['course_class'], 241)
+                new_take.student = user
+                new_take.real = True
+                new_take.save()
+
+                print(f"Added new take for {course_id}")
+            else:
+                print(f"Takes for {course_id} already exists")
 
     def get_user(self, user_id):
         try:

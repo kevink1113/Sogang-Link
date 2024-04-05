@@ -7,11 +7,12 @@ class Course(models.Model):
     course_id = models.CharField(max_length=10, null=True)
     semester = models.IntegerField()
     name = models.CharField(max_length=30, null=True)
-    day = models.IntegerField()
+    credit = models.IntegerField(null=True)  # 학점
+    day = models.IntegerField(null=True)
     start_time = models.TimeField(null=True)
     end_time = models.TimeField(null=True)
-    classroom = models.CharField(max_length=15, default='')
-    advisor = models.CharField(max_length=30)
+    classroom = models.CharField(max_length=15, default='', null=True)
+    advisor = models.CharField(max_length=30, null=True)
     major = models.CharField(max_length=30, null=True)
     objects = models.Manager()
 
@@ -42,7 +43,7 @@ class Course(models.Model):
 
 class Takes(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='takes')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)  # TODO: 모든 학기를 크롤링 했다 가정할 때 null=False
     middle_grade = models.FloatField(null=True)
     final_grade = models.FloatField(null=True)
     real = models.BooleanField()
@@ -58,7 +59,7 @@ class Notice(models.Model):
     title = models.CharField(max_length=100, null=True)
     url = models.URLField(null=True)
     writer = models.CharField(max_length=100, null=True)
-    file = models.URLField(null=True)   # 링크 넣는곳
+    file = models.URLField(null=True)  # 링크 넣는곳
     date = models.DateField()
     view = models.IntegerField()
     objects = models.Manager()
