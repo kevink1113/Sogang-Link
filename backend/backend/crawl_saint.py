@@ -124,6 +124,8 @@ def get_takes_info(cookies):
                     continue
                 # print(f"<학기: {semester.text}, value: {semester['value']}>")
                 # 'value' 값(semesteridx)은 2023년도 1학기이면: 2023010과 같이 표현됨
+                # 2024년 여름학기이면: 2024011
+                # 2024년 겨울학기이면: 2024021
                 semester_value = semester['value']
                 takes_info[semester_value] = get_takes_info_by_semester(cookies, semester_value)
 

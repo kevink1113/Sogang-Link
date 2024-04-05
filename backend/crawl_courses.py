@@ -11,9 +11,11 @@ from selenium.webdriver.chrome.options import Options  # for suppressing the bro
 # 경고 비활성화
 from urllib3.exceptions import InsecureRequestWarning
 from datetime import datetime
+import argparse
 
 import os
 import django
+
 # Setup Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
@@ -24,6 +26,14 @@ from lecture.models import Course
 django.setup()
 
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
+
+def get_args():
+    parser = argparse.ArgumentParser(description="Crawl courses from a university website")
+    parser.add_argument('--year', type=str, default='24', help='크롤링할 연도, default는 24')
+    parser.add_argument('--semester', type=str, default='1', help='크롤링할 학기, default는 1이고 s, 2, w도 가능')
+    return parser.parse_args()
+
 
 years = {
     '30': 'WD27',
@@ -342,14 +352,25 @@ def preprocessor(df):
 daytoint = {'월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6, '일': 7}
 
 
-def get_current_courses():
+def semester_to_int(year, semester):
+    if semester == '1':
+        return int('20' + year + '010')
+    elif semester == 's':
+        return int('20' + year + '011')
+    elif semester == '2':
+        return int('20' + year + '020')
+    elif semester == 'w':
+        return int('20' + year + '021')
+
+
+def get_current_courses(year, semester):
     # 반복되는 함수 course를 받아와서 데이터베이스에 저장해줌
     crawls = None
-    crawls = crawl_courses('24', '1')   # TODO: Dynamic year and semester
+    crawls = crawl_courses(year, semester)  # TODO: Dynamic year and semester
     print(crawls)
     if crawls is not None:
         for i in range(len(crawls)):
-            course = Course.get_course_by_id(crawls['과목번호'][i] + '-' + crawls['분반'][i], 241)    # TODO: Dynamic semester
+            course = Course.get_course_by_id(crawls['과목번호'][i] + '-' + crawls['분반'][i], semester_to_int(year, semester))
             # print(crawls['subject_id'][i])
             if course is None:
                 course = Course()
@@ -372,7 +393,10 @@ def get_current_courses():
                 course.end_time = datetime.strptime(crawls['종료시간1'][i], '%H:%M').time()
                 course.start_time = datetime.strptime(crawls['시작시간1'][i], '%H:%M').time()
             course.name = crawls['과목명'][i]
-            course.semester = 241   # TODO: Dynamic semester
+
+            # course.semester = 241
+            course.semester = semester_to_int(year, semester)
+
             course.save()
 
     # 여기서부터 19년도 1학기
@@ -427,4 +451,19 @@ def get_current_courses():
     #         notice.save()
 
 
-get_current_courses()
+# get_current_courses()
+
+def main():
+    args = get_args()
+    print("======================== Crawler Notice ======================== \n")
+    print("기본은 24년도 1학기 크롤링합니다. \n")
+    print("옵션을 적용하려면 python crawl_courses.py --year=23 --semester=1\n")
+    print("학기는 1, s, 2, w 중 하나를 선택\n")
+    print("================================================================ \n")
+    # crawled_data = crawl_courses(args.year, args.semester)
+    # print("Crawled data:", crawled_data)
+    get_current_courses(args.year, args.semester)
+
+
+if __name__ == '__main__':
+    main()
