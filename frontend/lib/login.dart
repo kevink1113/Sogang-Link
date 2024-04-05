@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/home.dart';
 import 'homepage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+var storage = FlutterSecureStorage();
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -25,6 +31,8 @@ class _LoginState extends State<Login> {
         "password": passwordController.text
       });
 
+      UserToken token = UserToken.fromJson(jsonDecode(response.body));
+      await storage.write(key: 'token', value: '${token.token}');
       if (response.statusCode == 200) {
         // Assuming 'Home' is your home widget after login success
         Navigator.pushReplacement(
