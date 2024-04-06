@@ -22,6 +22,7 @@ class _TimeTable extends State<TimeTable> {
   double kFirstColumnHeight = 40;
   double kBoxSize = 90;
   int semester = 2024010;
+  Codec<String, String> stringToBase64 = utf8.fuse(base64);
 
   var url = 'http://127.0.0.1:8000/lecture/takes';
   var takes;
@@ -29,11 +30,12 @@ class _TimeTable extends State<TimeTable> {
 
   Future<Takes?> get_timetable() async {
     try {
-      var request = Uri.parse(url);
+      var request = Uri.parse("$url/$semester");
       var token = await storage.read(key: 'token');
       final response =
           await http.get(request, headers: {"Authorization": "Token $token"});
-      var tmp = jsonDecode(response.body);
+
+      var tmp = jsonDecode(utf8.decode(response.bodyBytes));
       Takes takes = Takes.fromJsonlist(tmp);
       if (response.statusCode == 200) {
         // Assuming 'Home' is your home widget after login success
