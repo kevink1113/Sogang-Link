@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:soganglink/homepage.dart';
+import 'package:soganglink/storage.dart';
 import 'package:soganglink/timetable.dart';
 import 'login.dart';
 
@@ -24,8 +25,14 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void printToken() async {
+    var token = await SecureStorage.getToken();
+    print(token);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // printToken();
     return Scaffold(
       backgroundColor: Colors.grey.shade200, // 밝은 회색으로 배경색 설정
       appBar: AppBar(

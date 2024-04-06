@@ -1,19 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/home.dart';
-import 'homepage.dart';
+import 'storage.dart'; // Import the secure storage class
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-var storage = FlutterSecureStorage();
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
-
   @override
   _LoginState createState() => _LoginState();
 }
@@ -23,44 +16,50 @@ class _LoginState extends State<Login> {
   final passwordController = TextEditingController();
   final String url = "http://127.0.0.1:8000/login";
 
+  // print saved token
+  void printToken() async {
+    var token = await SecureStorage.getToken();
+    print(token);
+  }
+
   Future<void> login() async {
+    var request = Uri.parse(url);
     try {
-      var request = Uri.parse(url);
       final response = await http.post(request, body: {
         "username": idController.text,
         "password": passwordController.text
       });
 
-      UserToken token = UserToken.fromJson(jsonDecode(response.body));
-      await storage.write(key: 'token', value: '${token.token}');
       if (response.statusCode == 200) {
-        // Assuming 'Home' is your home widget after login success
+        var data = jsonDecode(response.body);
+        String token = data['token'];
+        await SecureStorage.setToken(token); // Store token securely
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => Home()));
       } else {
-        Fluttertoast.showToast(
-            msg: "로그인 실패",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
+        showToast("로그인 실패");
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "네트워크 오류",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      showToast("네트워크 오류");
     }
+  }
+
+  void showToast(String msg) {
+    Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // print saved token
+    // printToken();
     return Scaffold(
       body: Column(
         children: [
