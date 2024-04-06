@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:soganglink/home.dart';
 import 'storage.dart'; // Import the secure storage class
@@ -74,8 +76,6 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    // print saved token
-    // printToken();
     return Scaffold(
       body: isLoading
           ? Center(
@@ -84,11 +84,11 @@ class _LoginState extends State<Login> {
                 children: [
                   Lottie.asset('assets/lotties/loading_doc.json',
                       width: 400, height: 200), // Loading animation
-                  Text(
+                  const Text(
                     '학사 정보를 불러오는 중입니다...',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  Text(
+                  const Text(
                     '잠시만 기다려주세요.',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -101,8 +101,8 @@ class _LoginState extends State<Login> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Lottie.asset('assets/lotties/check.json',
-                          width: 400, height: 200), // Loading animation
-                      Text(
+                          width: 400, height: 200), // Success animation
+                      const Text(
                         '로딩 완료!',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
@@ -110,72 +110,105 @@ class _LoginState extends State<Login> {
                     ],
                   ),
                 )
-              : AnimatedSwitcher(
-                  duration: Duration(milliseconds: 500),
-                  child: Column(
-                    key: ValueKey<bool>(isLoading),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 60.0),
-                        child: Center(
-                          child: Container(
-                            width: 200,
-                            height: 150,
-                            child: Icon(Icons.login, size: 100),
-                          ),
-                        ),
-                      ),
-                      Padding(
+              : SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 15),
-                        child: TextField(
-                          controller: idController,
-                          decoration: InputDecoration(
-                            labelText: '학번',
-                            hintText: '학번을 입력해주세요',
-                            prefixIcon: Icon(Icons.school),
-                            border: OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(top: 60),
+                              child: Icon(Icons.login, size: 100),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.only(
+                                  left: 15.0, right: 15.0, top: 50, bottom: 0),
+                              width: MediaQuery.of(context).size.width > 1200
+                                  ? 400
+                                  : MediaQuery.of(context).size.width,
+                              child: TextField(
+                                controller: idController,
+                                decoration: const InputDecoration(
+                                  labelText: '학번',
+                                  // hintText: '학번',
+                                  prefixIcon: Icon(Icons.school),
+                                  // border: OutlineInputBorder(),
+
+                                  filled: true,
+                                  // fill color is light grey
+                                  fillColor: Color.fromARGB(255, 232, 232, 232),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width > 1200
+                                  ? 400
+                                  : MediaQuery.of(context).size.width,
+                              padding: const EdgeInsets.only(
+                                  left: 15.0, right: 15.0, top: 15, bottom: 50),
+                              child: TextField(
+                                controller: passwordController,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'SAINT 비밀번호',
+                                  // hintText: 'SAINT 비밀번호',
+                                  prefixIcon: Icon(Icons.lock_outline),
+                                  // border: OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: Color.fromARGB(255, 232, 232, 232),
+                                ),
+                                onSubmitted: (value) => login(),
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            const Text(
+                              'SAINT 계정을 이용하여 로그인합니다.\n암호는 서버에 저장되지 않으며\n학사정보 연동에만 사용됩니다.',
+                              style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                            Spacer(), // Use Spacer to push the button towards the bottom
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 20,
+                                bottom: 20,
+                                left: 10,
+                                right: 10,
+                              ), // Reduced bottom padding
+                              child: Container(
+                                height: 60,
+                                width: MediaQuery.of(context).size.width > 1200
+                                    ? 400
+                                    : MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                    color: Color(0xFF9e2a2f),
+                                    borderRadius: BorderRadius.circular(15)),
+                                child: TextButton(
+                                  onPressed: () {
+                                    login();
+                                  },
+                                  child: const Text(
+                                    '로그인',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 15.0, right: 15.0, top: 15, bottom: 0),
-                        child: TextField(
-                          controller: passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: 'SAINT 비밀번호',
-                            hintText: '비밀번호를 입력해주세요',
-                            prefixIcon: Icon(Icons.lock_outline),
-                            border: OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                          onSubmitted: (value) => login(),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 200,
-                      ),
-                      Container(
-                        height: 50,
-                        width: 250,
-                        decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: TextButton(
-                          onPressed: () {
-                            login();
-                          },
-                          child: Text(
-                            'Login',
-                            style: TextStyle(color: Colors.white, fontSize: 25),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
     );

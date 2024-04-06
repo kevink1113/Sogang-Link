@@ -36,11 +36,13 @@ class _HomeState extends State<Home> {
     return Scaffold(
       backgroundColor: Colors.grey.shade200, // 밝은 회색으로 배경색 설정
       appBar: AppBar(
+        scrolledUnderElevation: 1.0,
+        shadowColor: Colors.black, // AppBar 그림자 색상 변경
         title: const Text(
           'Sogang Link',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.redAccent, // AppBar 색상 변경
+        backgroundColor: Color(0xFF9e2a2f), // AppBar 색상 변경
         elevation: 0, // AppBar 그림자 제거
         centerTitle: true, // 제목 중앙 정렬
       ),
