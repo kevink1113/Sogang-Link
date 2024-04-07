@@ -1,4 +1,7 @@
+import json
 from django.contrib.auth.backends import ModelBackend
+import requests
+import requests.utils
 from users.models import User
 from lecture.models import Course, Takes
 from .crawl_saint import get_saint_cookies, get_student_info, get_takes_info_by_semester, get_takes_info, get_grade_info
@@ -39,6 +42,13 @@ class PasswordlessAuthBackend(ModelBackend):
         import pickle
         import base64
         return base64.b64encode(pickle.dumps(cookies)).decode('utf-8')
+    
+    def cookies_to_string(cookie_jar):
+        cookie_dict = requests.utils.dict_from_cookiejar(cookie_jar)
+        cookies_str = '; '.join([f"{key}={value}" for key, value in cookie_dict.items()])
+        return cookies_str
+
+
 
     def update_user_info(self, user, info, cookies):
         """
@@ -53,7 +63,11 @@ class PasswordlessAuthBackend(ModelBackend):
         user.login_cookie = cookies
         print("COOKIES: ", cookies)
         if cookies is not None:
-            user.login_cookie = self.serialize_cookies(cookies)
+            cookies = requests.utils.dict_from_cookiejar(cookies)
+            cookie_string = json.dumps(cookies)
+            user.login_cookie = cookie_string
+            print("COOKIE STRING: ", cookie_string)
+            # user.login_cookie = self.cookies_to_string(cookies) # cookies를 string으로 변환
         user.save()
         print(f"{user.username} 정보 업데이트 함.")
 

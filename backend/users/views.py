@@ -1,5 +1,8 @@
 # views.py in your users app
 
+import json
+
+import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -18,10 +21,11 @@ class UpdateUserInfoView(APIView):
         user = request.user
         try:
             backend = PasswordlessAuthBackend()
-            
-            info = get_student_info(user.login_cookie)
-            print("User info updated")
-            backend.update_user_info(user, info, user.login_cookie) 
+
+            cookies = json.loads(user.login_cookie)
+            cookie_jar = requests.utils.cookiejar_from_dict(cookies)
+            info = get_student_info(cookie_jar)
+            backend.update_user_info(user, info, cookie_jar) 
             
             serializer = UserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -36,7 +40,9 @@ class UpdateTakesView(APIView):
         try:
             backend = PasswordlessAuthBackend()
             print("Updating takes")
-            backend.manage_all_takes(user, user.login_cookie)
+            cookies = json.loads(user.login_cookie)
+            cookie_jar = requests.utils.cookiejar_from_dict(cookies)
+            backend.manage_all_takes(user, cookie_jar)
             return Response({"message": "Takes updated successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -48,7 +54,9 @@ class UpdateGradesView(APIView):
         user = request.user
         try:
             backend = PasswordlessAuthBackend()
-            backend.manage_all_grades(user, user.login_cookie)
+            cookies = json.loads(user.login_cookie)
+            cookie_jar = requests.utils.cookiejar_from_dict(cookies)
+            backend.manage_all_grades(user, cookie_jar)
             return Response({"message": "Grades updated successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
