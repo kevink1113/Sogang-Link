@@ -26,13 +26,13 @@ class _HomePage extends State<HomePage> {
               decoration: BoxDecoration(
                 color: Colors.white, // Container의 배경색
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-                border: Border.all(
-                  color: Colors.blue, // 테두리 색상
-                  width: 2, // 테두리 두께
-                ),
+                // border: Border.all(
+                //   color: Colors.blue, // 테두리 색상
+                //   width: 2, // 테두리 두께
+                // ),
               ),
               height: 300,
-              margin: EdgeInsets.fromLTRB(40, 30, 40, 10),
+              margin: EdgeInsets.fromLTRB(20, 30, 20, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -73,12 +73,12 @@ class _HomePage extends State<HomePage> {
               decoration: BoxDecoration(
                 color: Colors.white, // Container의 배경색
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-                border: Border.all(
-                  color: Colors.blue, // 테두리 색상
-                  width: 2, // 테두리 두께
-                ),
+                // border: Border.all(
+                //   color: Colors.blue, // 테두리 색상
+                //   width: 2, // 테두리 두께
+                // ),
               ),
-              margin: EdgeInsets.fromLTRB(40, 20, 40, 30),
+              margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child: Column(
@@ -104,13 +104,13 @@ class _HomePage extends State<HomePage> {
             decoration: BoxDecoration(
               color: Colors.white, // Container의 배경색
               borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-              border: Border.all(
-                color: Colors.blue, // 테두리 색상
-                width: 2, // 테두리 두께
-              ),
+              // border: Border.all(
+              //   color: Colors.blue, // 테두리 색상
+              //   width: 2, // 테두리 두께
+              // ),
             ),
             height: 500,
-            margin: EdgeInsets.fromLTRB(40, 30, 40, 30),
+            margin: EdgeInsets.fromLTRB(20, 30, 20, 30),
             child: Center(
               child: Text(
                 '둥글고 테두리 색상',
@@ -126,10 +126,10 @@ class _HomePage extends State<HomePage> {
             decoration: BoxDecoration(
               color: Colors.white, // Container의 배경색
               borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-              border: Border.all(
-                color: Colors.blue, // 테두리 색상
-                width: 2, // 테두리 두께
-              ),
+              // border: Border.all(
+              //   color: Colors.blue, // 테두리 색상
+              //   width: 2, // 테두리 두께
+              // ),
             ),
             height: 500,
             margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
