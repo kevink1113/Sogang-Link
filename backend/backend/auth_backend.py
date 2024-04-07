@@ -1,7 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
 from users.models import User
 from lecture.models import Course, Takes
-from .crawl_saint import get_saint_cookies, get_student_info, get_takes_info_by_semester, get_takes_info
+from .crawl_saint import get_saint_cookies, get_student_info, get_takes_info_by_semester, get_takes_info, get_grade_info
 
 
 class PasswordlessAuthBackend(ModelBackend):
@@ -53,12 +53,18 @@ class PasswordlessAuthBackend(ModelBackend):
         :return: None
         """
         all_semester_info = get_takes_info(cookies)
+        all_grade_info = get_grade_info(cookies)
+        # print("================ All Grade Info =====================")
+        # print(all_grade_info)
+        # print("=====================================================")
+
 
         # Course ID를 유니크한 값으로 만들기 위해 course_id와 course_semester를 병합 (재수강 고려)
         existing_takes = {
             f"{take.course.course_id}-{take.course.semester}": take
             for take in user.takes.all()
         }
+
         print("existing takes: ", existing_takes)
 
         for (semester_code, semester_info) in all_semester_info.items():
@@ -110,6 +116,56 @@ class PasswordlessAuthBackend(ModelBackend):
                 else:
                     print(f"Takes for {course_id} already exists")
 
+        for semester_code, courses in all_grade_info.items():
+            for course_code, course_details in courses.items():
+                # Create an ID that matches the provided grade information (without class division)
+                partial_course_id = f"{course_code}-{semester_code}"
+                # Find any existing take that starts with the partial_course_id
+                matched_takes = {
+                    key: val for key, val in existing_takes.items()
+                    if key.split('-')[0] == course_code and key.split('-')[-1] == semester_code
+                }
+                # print("======== matched takes =========")
+                # print(matched_takes)
+                # print("======== matched takes =========")
+                if matched_takes:
+                    for full_course_id, take in matched_takes.items():
+                        # Update the middle and final grades if data is available
+
+                        take.middle_grade = course_details.get('midterm_grade', '')
+                        take.final_grade = course_details.get('final_grade', '')
+                        take.save()
+                        print(
+                            f"Updated grades for {full_course_id} - Midterm: {take.middle_grade}, Final: {take.final_grade}")
+                else:
+                    print(f"No matching takes found for {partial_course_id}")
+
+    # def update_grades_by_course(self, user, cookies):
+    #     """
+    #     각 과목에 대한 성적을 과목코드(분반없음)과 학기로 구분하여 업데이트하는 함수
+    #     :param user: 현재 로그인한 사용자
+    #     :param cookies: 모바일 세인트 로그인 쿠키값
+    #     :return:
+    #     """
+    #     all_semester_info = get_grade_info(cookies)
+    #     for semester, courses in all_semester_info.items():
+    #         for course_code, grades in courses.items():
+    #             # 과목코드와 학기가 일치하는 Takes 객체를 찾아서 성적을 업데이트
+    #             try:
+    #                 course = Course.objects.get(course_number=course_code, semester=semester)
+    #                 take = user.takes.get(course=course)
+    #                 # Update the grades
+    #                 take.middle_grade = grades.get('midterm_grade', '')
+    #                 take.final_grade = grades.get('final_grade', '')
+    #                 take.save()
+    #                 print(
+    #                     f"Updated {course_code} for semester {semester} with Midterm: {take.middle_grade}, Final: {take.final_grade}")
+    #             except Course.DoesNotExist:
+    #                 print(f"No course found for {course_code} in semester {semester}")
+    #             except user.takes.model.DoesNotExist:
+    #                 print(f"User is not enrolled in {course_code} for semester {semester}")
+
+
     def manage_takes(self, user, cookies, semester_code):
         """
         현재 유저의 현학기 수강 정보를 업데이트하는 함수
@@ -142,6 +198,8 @@ class PasswordlessAuthBackend(ModelBackend):
                 print(f"Added new take for {course_id}")
             else:
                 print(f"Takes for {course_id} already exists")
+
+
 
     def get_user(self, user_id):
         try:

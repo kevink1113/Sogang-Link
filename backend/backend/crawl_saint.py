@@ -72,7 +72,7 @@ def get_takes_info_by_semester(cookies, semester):
     """
     semester_dict = {}
     semester_url = f"https://msaint.sogang.ac.kr/grade/g2.aspx?isposted=1&semesteridx={semester}"  # 수강신청 정보 주소
-    try:    
+    try:
         response: Response = requests.get(semester_url, cookies=cookies, verify=False)
         if response.status_code == 200:
             # BeautifulSoup 객체 생성
@@ -146,3 +146,59 @@ def pretty_print_takes_info(takes_info):
             print(f"과목 번호: {course['course_number']}, 분반: {course['course_class']}, "
                   f"교과목명: {course['course_name']}, tr_id: {tr_id}")
         print("=" * 40)
+
+
+def get_grade_info(cookies):
+    grade_info = {}
+    grade_url = "https://msaint.sogang.ac.kr/grade/g5.aspx?isposted=1"  # 성적 정보 주소
+    try:
+        response: Response = requests.get(grade_url, cookies=cookies, verify=False)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            semesters = soup.select('select[name=semesteridx] > option')
+            for index, semester in enumerate(semesters):
+                if index == 0:
+                    continue
+                semester_value = semester['value']
+                grade_info[semester_value] = get_grade_info_by_semester(cookies, semester_value)
+
+            return grade_info
+        else:
+            print(f"Request failed with status code {response.status_code}")
+            return None
+    except:
+        print("Connection refused by the server..")
+        return None
+
+
+def get_grade_info_by_semester(cookies, semester):
+    semester_dict = {}
+    semester_url = 'https://msaint.sogang.ac.kr/grade/g5.aspx?isposted=1&semesteridx={}'.format(semester)
+    try:
+        response = requests.get(semester_url, cookies=cookies, verify=False)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            courses = soup.select('tr')[1:]
+            for course in courses:
+                if '학년도 / 학기' in course.text:
+                    break
+                course_dict = {}
+                tds = course.find_all('td')
+                course_number = tds[0].text.strip() if len(tds) > 0 else ''
+                course_name = tds[1].text.strip() if len(tds) > 1 else ''
+                course_credits = tds[2].text.strip() if len(tds) > 2 else ''
+                midterm_grade = tds[3].text.strip() if len(tds) > 3 else ''
+                final_grade = tds[4].text.strip() if len(tds) > 4 else ''
+                course_dict['course_number'] = course_number
+                course_dict['course_name'] = course_name
+                course_dict['course_credits'] = course_credits
+                course_dict['midterm_grade'] = midterm_grade
+                course_dict['final_grade'] = final_grade
+                semester_dict[course_number] = course_dict
+            return semester_dict
+        else:
+            print('Request failed with status code {}'.format(response.status_code))
+            return None
+    except requests.exceptions.RequestException as e:
+        print('Connection refused by the server: {}'.format(e))
+        return None
