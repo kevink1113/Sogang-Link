@@ -1,5 +1,14 @@
+import pickle
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+# Serializing
+def serialize_cookies(cookies):
+    return base64.b64encode(pickle.dumps(cookies)).decode('utf-8')
+
+# Deserializing
+def deserialize_cookies(cookies_str):
+    return pickle.loads(base64.b64decode(cookies_str.encode('utf-8')))
 
 
 class User(AbstractUser):
@@ -29,9 +38,15 @@ class User(AbstractUser):
     def get_student_by_id(cls, username):
         return cls.objects.get(username=username)
 
-    @classmethod
-    def get_login_cookie(cls, username):
-        return cls.objects.get(username=username).login_cookie
+    # @classmethod
+    # def get_login_cookie(cls, username):
+    #     return cls.objects.get(username=username).login_cookie
+    def set_login_cookie(self, cookies):
+        self.login_cookie = serialize_cookies(cookies)
+        self.save()
+
+    def get_login_cookie(self):
+        return deserialize_cookies(self.login_cookie) if self.login_cookie else None
 
     def update_student_major(self, new_major):
         self.major = new_major
