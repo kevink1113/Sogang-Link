@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         //   displaySmall: GoogleFonts.pacifico(),
         // ),
       ),
-      home: Home(),
+      home: Login(),
     );
   }
 }
