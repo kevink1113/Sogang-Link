@@ -26,8 +26,8 @@ class PasswordlessAuthBackend(ModelBackend):
             user.save()
             print("새 사용자 만듦")
 
-            grade_checked = True    # 성적 정보 확인 동의 여부
-            takes_checked = True    # 수강 정보 확인 동의 여부 TODO: 이 부분을 프론트에서 처리해야 함
+        grade_checked = True    # 성적 정보 확인 동의 여부
+        takes_checked = True    # 수강 정보 확인 동의 여부 TODO: 이 부분을 프론트에서 처리해야 함
 
         # 사용자 정보 업데이트
         self.update_user_info(user, info, cookies)
