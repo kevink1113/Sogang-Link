@@ -26,14 +26,19 @@ class PasswordlessAuthBackend(ModelBackend):
             user.save()
             print("새 사용자 만듦")
 
-            # 사용자 정보 업데이트
-            self.update_user_info(user, info, cookies)
-            # 수강 정보 처리
-            self.manage_all_takes(user, cookies)
-            # 성적 정보 처리
-            self.manage_all_grades(user, cookies)
+            grade_checked = True    # 성적 정보 확인 동의 여부
+            takes_checked = True    # 수강 정보 확인 동의 여부 TODO: 이 부분을 프론트에서 처리해야 함
 
-            print("새 사용자 정보 업데이트 및 수강/성적 정보 처리 완료")
+        # 사용자 정보 업데이트
+        self.update_user_info(user, info, cookies)
+        # 수강 정보 처리
+        if takes_checked:
+            self.manage_all_takes(user, cookies)
+        # 성적 정보 처리
+        if grade_checked:
+            self.manage_all_grades(user, cookies)
+        print("사용자 정보 업데이트 및 수강/성적 정보 처리 완료")
+            
 
         return user
 
