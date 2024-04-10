@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:soganglink/homepage.dart';
 import 'package:soganglink/storage.dart';
 import 'package:soganglink/timetable.dart';
+import 'gptchat.dart';
 import 'login.dart';
 
 class Home extends StatefulWidget {
@@ -15,7 +16,9 @@ class _HomeState extends State<Home> {
   final List<Widget> _pages = [
     const HomePage(),
     const TimeTable(),
+    const HomePage(),
     const HomePage(), // 게시판 페이지 예시로 임시로 HomePage 사용
+    const GptChat(),
     const HomePage(), // 설정 페이지 예시로 임시로 HomePage 사용
   ];
 
@@ -92,8 +95,12 @@ class _HomeState extends State<Home> {
             label: '홈',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.mode_comment),
+            icon: Icon(Icons.screen_search_desktop_outlined),
             label: '게시판',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.mode_comment),
+            label: 'SogangGPT',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
