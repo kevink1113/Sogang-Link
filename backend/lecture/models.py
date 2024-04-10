@@ -44,8 +44,8 @@ class Course(models.Model):
 class Takes(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='takes')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)  # TODO: 모든 학기를 크롤링 했다 가정할 때 null=False
-    middle_grade = models.FloatField(null=True)
-    final_grade = models.FloatField(null=True)
+    middle_grade = models.CharField(null=True, max_length=4)
+    final_grade = models.CharField(null=True, max_length=4)
     real = models.BooleanField()
     objects = models.Manager()
 

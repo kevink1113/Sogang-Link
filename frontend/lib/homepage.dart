@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-
-
-class HomePage extends StatefulWidget{
-  const HomePage({Key? key}) : super(key:key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
   @override
   _HomePage createState() => _HomePage();
 }
 
-
-class _HomePage extends State<HomePage>{
+class _HomePage extends State<HomePage> {
   @override
   void initState() {
     // TODO: implement initState
@@ -23,18 +20,19 @@ class _HomePage extends State<HomePage>{
     return SingleChildScrollView(
       child: Column(
         children: [
-          Container( //모바일 학생증
+          Container(
+              //모바일 학생증
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: Colors.white, // Container의 배경색
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-                border: Border.all(
-                  color: Colors.blue, // 테두리 색상
-                  width: 2, // 테두리 두께
-                ),
+                // border: Border.all(
+                //   color: Colors.blue, // 테두리 색상
+                //   width: 2, // 테두리 두께
+                // ),
               ),
               height: 300,
-              margin: EdgeInsets.fromLTRB(40, 30, 40, 10),
+              margin: EdgeInsets.fromLTRB(20, 30, 20, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -47,9 +45,7 @@ class _HomePage extends State<HomePage>{
                             height: 200,
                             width: 200,
                             fit: BoxFit.contain,
-                          )
-                      )
-                  ),
+                          ))),
                   Flexible(
                       flex: 2,
                       child: Column(
@@ -69,22 +65,20 @@ class _HomePage extends State<HomePage>{
                           Text("소속: "),
                           Text("학번: "),
                         ],
-                      )
-                  )
+                      ))
                 ],
-              )
-          ),
+              )),
           Container(
-              alignment: Alignment(-0.95,-1.0),
+              alignment: Alignment(-0.95, -1.0),
               decoration: BoxDecoration(
                 color: Colors.white, // Container의 배경색
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-                border: Border.all(
-                  color: Colors.blue, // 테두리 색상
-                  width: 2, // 테두리 두께
-                ),
+                // border: Border.all(
+                //   color: Colors.blue, // 테두리 색상
+                //   width: 2, // 테두리 두께
+                // ),
               ),
-              margin: EdgeInsets.fromLTRB(40, 20, 40, 30),
+              margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child: Column(
@@ -104,20 +98,19 @@ class _HomePage extends State<HomePage>{
                     Text("C"),
                   ],
                 ),
-              )
-          ),
+              )),
           Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Colors.white, // Container의 배경색
               borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-              border: Border.all(
-                color: Colors.blue, // 테두리 색상
-                width: 2, // 테두리 두께
-              ),
+              // border: Border.all(
+              //   color: Colors.blue, // 테두리 색상
+              //   width: 2, // 테두리 두께
+              // ),
             ),
             height: 500,
-            margin: EdgeInsets.fromLTRB(40, 30, 40, 30),
+            margin: EdgeInsets.fromLTRB(20, 30, 20, 30),
             child: Center(
               child: Text(
                 '둥글고 테두리 색상',
@@ -133,10 +126,10 @@ class _HomePage extends State<HomePage>{
             decoration: BoxDecoration(
               color: Colors.white, // Container의 배경색
               borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-              border: Border.all(
-                color: Colors.blue, // 테두리 색상
-                width: 2, // 테두리 두께
-              ),
+              // border: Border.all(
+              //   color: Colors.blue, // 테두리 색상
+              //   width: 2, // 테두리 두께
+              // ),
             ),
             height: 500,
             margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
@@ -154,5 +147,4 @@ class _HomePage extends State<HomePage>{
       ),
     );
   }
-
 }

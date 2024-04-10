@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:soganglink/homepage.dart';
+import 'package:soganglink/storage.dart';
 import 'package:soganglink/timetable.dart';
 import 'login.dart';
 
@@ -24,18 +25,53 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void printToken() async {
+    var token = await SecureStorage.getToken();
+    print(token);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // printToken();
     return Scaffold(
       backgroundColor: Colors.grey.shade200, // 밝은 회색으로 배경색 설정
       appBar: AppBar(
-        title: const Text(
-          'Sogang Link',
-          style: TextStyle(color: Colors.white),
+        scrolledUnderElevation: 1.0,
+        // leading: IconButton(
+        //   icon: Icon(Icons.logout),
+        //   onPressed: () {
+        //     // Add logout functionality here
+        //   },
+        // ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => Login()));
+            },
+          ),
+        ],
+
+        shadowColor: Colors.black, // AppBar 그림자 색상 변경
+        title: Padding(
+          padding: const EdgeInsets.only(left: 5.0),
+          child: const Text(
+            'Sogang Link',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              // letterSpacing: 5.0,
+            ),
+          ),
         ),
-        backgroundColor: Colors.redAccent, // AppBar 색상 변경
+        backgroundColor: Color(0xFF9e2a2f), // AppBar 색상 변경
         elevation: 0, // AppBar 그림자 제거
-        centerTitle: true, // 제목 중앙 정렬
+        centerTitle: false, // 제목 중앙 정렬
       ),
       body: IndexedStack(
         index: _selectedIndex,
@@ -65,7 +101,7 @@ class _HomeState extends State<Home> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.red[300], // 선택된 아이템 색상 변경
+        selectedItemColor: Color(0xFF9e2a2f), // 선택된 아이템 색상 변경
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed, // 4개 이상의 아이템에도 배경색 유지
         backgroundColor: Colors.white, // BottomNavigationBar 배경색 변경

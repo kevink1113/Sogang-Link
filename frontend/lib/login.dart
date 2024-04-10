@@ -1,19 +1,16 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
-import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/home.dart';
-import 'homepage.dart';
+import 'storage.dart'; // Import the secure storage class
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-var storage = FlutterSecureStorage();
+import 'package:lottie/lottie.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
-
   @override
   _LoginState createState() => _LoginState();
 }
@@ -22,109 +19,219 @@ class _LoginState extends State<Login> {
   final idController = TextEditingController();
   final passwordController = TextEditingController();
   final String url = "http://127.0.0.1:8000/login";
+  bool isLoading = false;
+  bool isVerified = false;
+
+  // print saved token
+  void printToken() async {
+    var token = await SecureStorage.getToken();
+    print(token);
+  }
 
   Future<void> login() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    var request = Uri.parse(url);
     try {
-      var request = Uri.parse(url);
       final response = await http.post(request, body: {
         "username": idController.text,
         "password": passwordController.text
       });
 
-      UserToken token = UserToken.fromJson(jsonDecode(response.body));
-      await storage.write(key: 'token', value: '${token.token}');
       if (response.statusCode == 200) {
-        // Assuming 'Home' is your home widget after login success
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => Home()));
+        var data = jsonDecode(response.body);
+        String token = data['token'];
+        await SecureStorage.setToken(token); // Store token securely
+        setState(() {
+          isVerified = true;
+        });
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => Home()));
+        });
       } else {
-        Fluttertoast.showToast(
-            msg: "로그인 실패",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
+        showToast("로그인 실패");
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "네트워크 오류",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      showToast("네트워크 오류");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
+
+  void showToast(String msg) {
+    Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 60.0),
-            child: Center(
-              child: Container(
-                width: 200,
-                height: 150,
-                child: Icon(Icons.login, size: 100),
+      backgroundColor: Colors.white,
+      body: isLoading
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Lottie.asset('assets/lotties/loading_doc.json',
+                      width: 400, height: 200), // Loading animation
+                  const Text(
+                    '학사 정보를 불러오는 중입니다...',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const Text(
+                    '잠시만 기다려주세요.',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: TextField(
-              controller: idController,
-              decoration: InputDecoration(
-                labelText: '학번',
-                hintText: '학번을 입력해주세요',
-                prefixIcon: Icon(Icons.school),
-                border: OutlineInputBorder(),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 15.0, right: 15.0, top: 15, bottom: 0),
-            child: TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'SAINT 비밀번호',
-                hintText: '비밀번호를 입력해주세요',
-                prefixIcon: Icon(Icons.lock_outline),
-                border: OutlineInputBorder(),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-              onSubmitted: (value) => login(),
-            ),
-          ),
-          SizedBox(
-            height: 200,
-          ),
-          Container(
-            height: 50,
-            width: 250,
-            decoration: BoxDecoration(
-                color: Colors.blue, borderRadius: BorderRadius.circular(20)),
-            child: TextButton(
-              onPressed: () {
-                login();
-              },
-              child: Text(
-                'Login',
-                style: TextStyle(color: Colors.white, fontSize: 25),
-              ),
-            ),
-          ),
-        ],
-      ),
+            )
+          : isVerified
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Lottie.asset('assets/lotties/check.json',
+                          width: 400, height: 200), // Success animation
+                      const Text(
+                        '로딩 완료!',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                )
+              : Center(
+                  child: SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // const Padding(
+                              //   padding: EdgeInsets.only(top: 60),
+                              //   child: Icon(Icons.login, size: 100),
+                              // ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 60, bottom: 0),
+                                child: Lottie.asset(
+                                    'assets/lotties/school_stuffs.json',
+                                    width: 400,
+                                    height: 200), // Loading animation
+                              ),
+                              Container(
+                                padding: const EdgeInsets.only(
+                                    left: 15.0,
+                                    right: 15.0,
+                                    top: 50,
+                                    bottom: 0),
+                                width: MediaQuery.of(context).size.width > 1200
+                                    ? 400
+                                    : MediaQuery.of(context).size.width,
+                                child: TextField(
+                                  controller: idController,
+                                  decoration: const InputDecoration(
+                                    labelText: '학번',
+                                    // hintText: '학번',
+                                    prefixIcon: Icon(Icons.school),
+                                    // border: OutlineInputBorder(),
+
+                                    filled: true,
+                                    // fill color is light grey
+                                    fillColor:
+                                        Color.fromARGB(255, 232, 232, 232),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: MediaQuery.of(context).size.width > 1200
+                                    ? 400
+                                    : MediaQuery.of(context).size.width,
+                                padding: const EdgeInsets.only(
+                                    left: 15.0,
+                                    right: 15.0,
+                                    top: 15,
+                                    bottom: 50),
+                                child: TextField(
+                                  controller: passwordController,
+                                  obscureText: true,
+                                  decoration: const InputDecoration(
+                                    labelText: 'SAINT 비밀번호',
+                                    // hintText: 'SAINT 비밀번호',
+                                    prefixIcon: Icon(Icons.lock_outline),
+                                    // border: OutlineInputBorder(),
+                                    filled: true,
+                                    fillColor:
+                                        Color.fromARGB(255, 232, 232, 232),
+                                  ),
+                                  onSubmitted: (value) => login(),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              const Text(
+                                'SAINT 계정을 이용하여 로그인합니다.\n암호는 서버에 저장되지 않으며\n학사정보 연동에만 사용됩니다.',
+                                style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                              Spacer(), // Use Spacer to push the button towards the bottom
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 20,
+                                  bottom: 20,
+                                  left: 10,
+                                  right: 10,
+                                ), // Reduced bottom padding
+                                child: Container(
+                                  height: 60,
+                                  width:
+                                      MediaQuery.of(context).size.width > 1200
+                                          ? 400
+                                          : MediaQuery.of(context).size.width,
+                                  decoration: BoxDecoration(
+                                      color: Color(0xFF9e2a2f),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: TextButton(
+                                    onPressed: () {
+                                      login();
+                                    },
+                                    child: const Text(
+                                      'SAINT 계정으로 로그인',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
     );
   }
 }

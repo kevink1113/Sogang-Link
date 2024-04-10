@@ -9,10 +9,17 @@ import 'package:soganglink/data/courses/takes.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'login.dart';
 
+import 'storage.dart'; // Import the secure storage class
+
 class TimeTable extends StatefulWidget {
   const TimeTable({Key? key}) : super(key: key);
   @override
   _TimeTable createState() => _TimeTable();
+}
+
+void printToken() async {
+  var token = await SecureStorage.getToken();
+  print(token);
 }
 
 class _TimeTable extends State<TimeTable> {
@@ -23,6 +30,7 @@ class _TimeTable extends State<TimeTable> {
   double kBoxSize = 90;
   int semester = 2024010;
   Codec<String, String> stringToBase64 = utf8.fuse(base64);
+  // final storage = FlutterSecureStorage();
 
   var url = 'http://127.0.0.1:8000/lecture/takes';
   var takes;
@@ -31,7 +39,11 @@ class _TimeTable extends State<TimeTable> {
   Future<Takes?> get_timetable() async {
     try {
       var request = Uri.parse("$url/$semester");
-      var token = await storage.read(key: 'token');
+      // var token = await storage.read(key: 'token');
+      var token = await SecureStorage.getToken();
+      // convert token to base64
+      // printToken();
+
       final response =
           await http.get(request, headers: {"Authorization": "Token $token"});
 
