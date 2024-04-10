@@ -62,8 +62,21 @@ class LoginView(APIView):
         print("Token: ", token.key, "Created: ", created)
         # 'created' 변수는 토큰이 새로 생성되었는지 여부를 나타냅니다.
         # 여기서 추가적인 로직을 구현할 수 있습니다 (예: 로그 생성).
+        
+        print(user.username, user.name, user.state, user.year, user.semester, user.major, user.advisor, user.nickname)
 
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+
+        return Response({'token': token.key,        # 토큰
+                        'username': user.username,  # 학번
+                        'name': user.name,          # 이름
+                        'state': user.state,        # 0: 재학, 1: 휴학, 2: 졸업
+                        'year': user.year,          # 학년
+                        'semester': user.semester,  # 학기
+                        'major': user.major,        # 전공
+                        'advisor': user.advisor,    # 지도교수
+                        'nickname': user.nickname,  # 닉네임
+                        }, 
+                          status=status.HTTP_200_OK)
 
 
 def my_login_view(request):
