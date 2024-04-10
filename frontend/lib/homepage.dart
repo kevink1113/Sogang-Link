@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:soganglink/data/courses/takes.dart';
 import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/login.dart';
 
@@ -11,10 +12,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePage extends State<HomePage> {
+  List<Widget> courses = [];
+  int semester = 2024010;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    if (takes != null) {
+      for (Take lecture in takes.cousrses_takes) {
+        if (lecture.course.semester != semester) continue;
+        courses.add(Text(lecture.course.name));
+      }
+    }
   }
 
   @override
@@ -111,7 +121,7 @@ class _HomePage extends State<HomePage> {
                 padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Text(
                       "이수교과목",
                       style: TextStyle(
@@ -121,9 +131,10 @@ class _HomePage extends State<HomePage> {
                         letterSpacing: 2.0,
                       ),
                     ),
-                    Text("A"),
-                    Text("B"),
-                    Text("C"),
+                    Column(
+                      children: courses,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                    )
                   ],
                 ),
               )),
