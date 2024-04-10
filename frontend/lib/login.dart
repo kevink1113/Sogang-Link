@@ -5,10 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:soganglink/data/courses/takes.dart';
+import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/home.dart';
 import 'storage.dart'; // Import the secure storage class
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
+
+late User user;
+late Takes takes;
 
 class Login extends StatefulWidget {
   @override
@@ -18,9 +23,10 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final idController = TextEditingController();
   final passwordController = TextEditingController();
-  final String url = "http://127.0.0.1:8000/login";
+  final String url = "http://127.0.0.1:8000";
   bool isLoading = false;
   bool isVerified = false;
+  int semester = 2024010;
 
   // print saved token
   void printToken() async {
@@ -33,7 +39,7 @@ class _LoginState extends State<Login> {
       isLoading = true;
     });
 
-    var request = Uri.parse(url);
+    var request = Uri.parse("$url/login");
     try {
       final response = await http.post(request, body: {
         "username": idController.text,
@@ -41,9 +47,12 @@ class _LoginState extends State<Login> {
       });
 
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
+        var data =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         String token = data['token'];
+        user = User.fromJson(data);
         await SecureStorage.setToken(token); // Store token securely
+        takes = (await get_timetable(token))!;
         setState(() {
           isVerified = true;
         });
@@ -60,6 +69,46 @@ class _LoginState extends State<Login> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<Takes?> get_timetable(String token) async {
+    try {
+      var request = Uri.parse("$url/lecture/takes/$semester");
+      // var token = await storage.read(key: 'token');
+      // convert token to base64
+      // printToken();
+
+      final response =
+          await http.get(request, headers: {"Authorization": "Token $token"});
+
+      var tmp = jsonDecode(utf8.decode(response.bodyBytes));
+      Takes takes = Takes.fromJsonlist(tmp);
+      if (response.statusCode == 200) {
+        // Assuming 'Home' is your home widget after login success
+        return takes;
+      } else {
+        Fluttertoast.showToast(
+            msg: "로그인 실패",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(
+          msg: "네트워크 오류",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return null;
     }
   }
 
