@@ -4,6 +4,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:soganglink/data/courses/takes.dart';
 import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/login.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -45,7 +47,7 @@ class _HomePage extends State<HomePage> {
                   //   width: 2, // 테두리 두께
                   // ),
                 ),
-                height: 300,
+                height: 200,
                 margin: EdgeInsets.fromLTRB(20, 30, 20, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -53,11 +55,11 @@ class _HomePage extends State<HomePage> {
                     Flexible(
                         flex: 1,
                         child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0),
+                            borderRadius: BorderRadius.circular(30.0),
                             child: Image.asset(
                               "assets/images/sample.jpg",
-                              height: 200,
-                              width: 200,
+                              height: 100,
+                              width: 100,
                               fit: BoxFit.contain,
                             ))),
                     Flexible(
@@ -84,21 +86,56 @@ class _HomePage extends State<HomePage> {
                 )),
             onTap: () {
               showModalBottomSheet<void>(
+                  showDragHandle: true,
+                  backgroundColor: Colors.white,
                   context: context,
                   builder: (BuildContext context) {
                     return Container(
                       height: 500,
-                      color: Colors.white,
+                      // decoration: BoxDecoration(
+                      //   color: Colors.transparent,
+                      //   borderRadius: BorderRadius.only(
+                      //     topLeft: Radius.circular(20.0),
+                      //     topRight: Radius.circular(20.0),
+                      //   ),
+                      // ),
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
+                            Flexible(
+                                flex: 1,
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(30.0),
+                                    child: Image.asset(
+                                      "assets/images/sample.jpg",
+                                      height: 100,
+                                      width: 100,
+                                      fit: BoxFit.contain,
+                                    ))),
+                            SizedBox(height: 40), // Space between lines of text
                             QrImageView(
                               data: user.username,
                               version: QrVersions.auto,
-                              size: 300.0,
+                              size: 200.0,
                             ),
+                            SizedBox(height: 20), // Space between lines of text
+                            Text("이름: ${user.name}"),
+                            Text("소속: ${user.major}"),
+                            Text("학번: ${user.username}"),
+                            // Padding(
+                            //   padding: const EdgeInsets.all(8.0),
+                            //   child: Text(
+                            //     "학생증을 스캔해주세요",
+                            //     style: TextStyle(
+                            //       color: Colors.black,
+                            //       fontSize: 20,
+                            //       fontWeight: FontWeight.bold,
+                            //       letterSpacing: 2.0,
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
