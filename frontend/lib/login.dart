@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/home.dart';
 import 'storage.dart'; // Import the secure storage class
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
+
+late User user;
 
 class Login extends StatefulWidget {
   @override
@@ -41,8 +44,10 @@ class _LoginState extends State<Login> {
       });
 
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
+        var data =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         String token = data['token'];
+        user = User.fromJson(data);
         await SecureStorage.setToken(token); // Store token securely
         setState(() {
           isVerified = true;

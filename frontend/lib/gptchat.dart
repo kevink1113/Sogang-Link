@@ -40,8 +40,6 @@ class _GptChat extends State<GptChat> {
   }
 
   void _handleSendPressed(types.PartialText message) {
-    print(_messages);
-
     _addMessage(types.TextMessage(
       author: const types.User(id: 'abcd'),
       createdAt: DateTime.now().millisecondsSinceEpoch,

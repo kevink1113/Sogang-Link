@@ -33,7 +33,7 @@ class _TimeTable extends State<TimeTable> {
   // final storage = FlutterSecureStorage();
 
   var url = 'http://127.0.0.1:8000/lecture/takes';
-  var takes;
+  late Takes takes;
   List<List<Widget>> lecturesForTheDay = new List.generate(5, (index) => []);
 
   Future<Takes?> get_timetable() async {
@@ -82,7 +82,7 @@ class _TimeTable extends State<TimeTable> {
     // TODO: implement initState
     super.initState();
     get_timetable().then((value) => setState(() {
-          takes = value;
+          takes = value!;
           if (takes != null) {
             for (Take lecture in takes.cousrses_takes) {
               if (lecture.course.semester != semester) continue;

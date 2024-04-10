@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/homepage.dart';
 import 'package:soganglink/storage.dart';
 import 'package:soganglink/timetable.dart';
@@ -6,7 +7,7 @@ import 'gptchat.dart';
 import 'login.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  Home({Key? key}) : super(key: key);
   @override
   _HomeState createState() => _HomeState();
 }
