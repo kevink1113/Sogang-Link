@@ -1,8 +1,8 @@
 import os
 import openai
+from secret import get_secret
 
-os.environ["OPENAI_API_KEY"] = "채웡"
-client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+client = openai.OpenAI(api_key=get_secret())
 #######################################################################################
 
 
