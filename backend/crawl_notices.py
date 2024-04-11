@@ -1,69 +1,67 @@
-User
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-from bs4 import BeautifulSoup
+import pyperclip  # 클립보드 사용을 위해
 
-def fetch_table_and_links(driver, url):
-    driver.get(url)
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "table")))
+def scrape_links():
+    driver = webdriver.Chrome()
+    driver.get("https://sogang.ac.kr/ko/story/notification-general")
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "table")))
 
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    table = soup.find('table')
-    data = []
-    
-    if table:
-        rows = table.find_all('tr')[1:]
-        for index, row_html in enumerate(rows):
-            if index == 0:
-                continue  # Skip header row
-            
-            # Extract text from each cell
-            cols = [ele.text.strip() for ele in row_html.find_all('td')]
-            if not cols:
-                continue  # Skip empty rows
-            
-            # Selenium to handle clicks and dynamic URLs
-            row = driver.find_elements(By.CSS_SELECTOR, "table tr")[index]  # +1 to adjust for header
-            ActionChains(driver).move_to_element(row).click().perform()
-            
-            # Handle new tabs/windows if they open
-            if len(driver.window_handles) > 1:
-                original_window = driver.current_window_handle
-                driver.switch_to.window(driver.window_handles[-1])
-                cols.append(driver.current_url)
-                driver.close()
-                driver.switch_to.window(original_window)
-            else:
-                cols.append(driver.current_url)  # Assume current URL is the result
-            
-            data.append(cols)
-            driver.get(url)  # Reload to reset the state for next row
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "table")))
-    
-    return data
+    # 첫 번째 행을 찾아 클릭
+    first_row = driver.find_element(By.CSS_SELECTOR, "table tr:nth-child(2) td:nth-child(1)")
+    driver.execute_script("arguments[0].click();", first_row)
 
-def scrape_pages(base_url, start_page, end_page):
-    all_data = []
-    driver = webdriver.Chrome()  # Initialize the WebDriver
-    
-    for page in range(start_page, end_page + 1):
-        url = f"{base_url}?page={page}"
-        print(f"Scraping data from {url}")
-        page_data = fetch_table_and_links(driver, url)
-        all_data.extend(page_data)
-        print(f"Scraped data from {url}")
-    
-    driver.quit()  # Close the WebDriver after scraping
-    return all_data
+    links = []
+    for _ in range(10):  # 10번 반복
+        # 새 페이지 로딩 대기
+        # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.cursor-pointer")))
+        
+        # 링크 아이콘 클릭
+        WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, 'set-alt-image')))
+        # find element by id
+        time.sleep(1)  # 클립보드 복사를 위한 충분한 시간 확보
+        title = driver.find_element(By.ID, 'set-alt-image').text
+        # title = driver.find_element(By.XPATH, '//*[@id="set-alt-image"]').text
+        print("title: ", title)
 
-# Base URL and page range
-base_url = "http://sogang.ac.kr/ko/story/notification-general"
-data = scrape_pages(base_url, 1, 1)
+        link_icon = driver.find_element(By.CSS_SELECTOR, "img[alt='link']")
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable(link_icon))
+        # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "img[alt='link']")))
+        driver.execute_script("arguments[0].scrollIntoView(true);", link_icon)
+        # print(link_icon)
+        # driver.execute_script("arguments[0].click();", link_icon)
+        # link_icon.click()
+        driver.execute_script("arguments[0].click();", link_icon)
+        
+        # 클립보드에서 링크 가져오기
+        # time.sleep(1)  # 클립보드 복사를 위한 충분한 시간 확보
+        s = pyperclip.paste()
+        print("Pasted: ", s)
+        links.append(s)
+        # time.sleep(10)
 
-# Output the data, including dynamic links
-for entry in data:
-    print(entry)
+        # 이전 페이지 버튼 클릭
+        # select by XPATJ
+        # prev_page = driver.find_element(By.XPATH, "//*[@id=\"__nuxt\"]/html/div/main/div/div[2]/div[7]/div[1]/div")
+        span = driver.find_element(By.XPATH, "//span[text()='이전 페이지']")
+        # print(prev_page)
+        span.click()
+        # driver.execute_script("arguments[1].click();", prev_page)
+        
+        # 페이지 이동 대기
+        # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "table")))
+
+    driver.quit()
+    return links
+
+# 결과 출력
+if __name__ == "__main__":
+    extracted_links = scrape_links()
+    print("========== Extracted Links ==========")
+    for link in extracted_links:
+        print(link)
