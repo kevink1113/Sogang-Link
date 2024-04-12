@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'users.apps.UsersConfig',
     'lecture.apps.LectureConfig',
+    'notices.apps.NoticesConfig',
 ]
 
 MIDDLEWARE = [
