@@ -11,6 +11,7 @@ from django.contrib.auth import login as auth_login
 
 from drf_yasg.utils import swagger_auto_schema
 
+from chatbot.chatbot import query
 
 class LoginView(APIView):
     """
@@ -62,8 +63,21 @@ class LoginView(APIView):
         print("Token: ", token.key, "Created: ", created)
         # 'created' 변수는 토큰이 새로 생성되었는지 여부를 나타냅니다.
         # 여기서 추가적인 로직을 구현할 수 있습니다 (예: 로그 생성).
+        
+        print(user.username, user.name, user.state, user.year, user.semester, user.major, user.advisor, user.nickname)
 
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+
+        return Response({'token': token.key,        # 토큰
+                        'username': user.username,  # 학번
+                        'name': user.name,          # 이름
+                        'state': user.state,        # 0: 재학, 1: 휴학, 2: 졸업
+                        'year': user.year,          # 학년
+                        'semester': user.semester,  # 학기
+                        'major': user.major,        # 전공
+                        'advisor': user.advisor,    # 지도교수
+                        'nickname': user.nickname,  # 닉네임
+                        }, 
+                          status=status.HTTP_200_OK)
 
 
 def my_login_view(request):
@@ -85,3 +99,44 @@ def my_login_view(request):
 
 def offline(request):
     return render(request, 'offline.html')
+
+
+class ChatView(APIView):
+    """
+    post:
+    챗봇 구현 예시
+    요청 예시:
+    {
+        "question": "아메리카노와 에스프레소의 차이에 대해 알려줘"
+    }
+    """
+    @swagger_auto_schema(request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'question': openapi.Schema(type=openapi.TYPE_STRING, description='질문')
+        }
+        # response 정의
+    ))
+    # @swagger_auto_schema(operation_description="POST 요청을 위한 엔드포인트입니다.")
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        print(user)
+
+        question = request.data.get('question')
+        assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+        thread_id = "thread_kh4a6S64esnKDfue5DqGvFGM"
+        messages = query(assistant_id, user, thread_id, question)
+
+        total_message = "대화:\n"
+        for i, message in enumerate(reversed(messages.data), start=1):
+            total_message+="서강gpt>" if message.role == "assistant" else "당신>"
+            for content in message.content:
+                total_message+=content.text.value + "\n"
+
+        recent_question = messages.data[1].content[0].text.value
+        recent_answer = messages.data[0].content[0].text.value
+
+        print(recent_question)
+        print(recent_answer)
+        return Response({'answer' : recent_answer},
+                        status=status.HTTP_200_OK)

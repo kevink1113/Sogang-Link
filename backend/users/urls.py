@@ -1,10 +1,10 @@
-from django.contrib import admin
-from django.urls import path, include
+# urls.py in your users app
 
-# from .views import RegisterView
-
-# from .views import hello_world
+from django.urls import path
+from .views import UpdateUserInfoView, UpdateTakesView, UpdateGradesView
 
 urlpatterns = [
-    # path('hello_world/', hello_world),
+    path('update_user_info', UpdateUserInfoView.as_view(), name='update_user_info'),
+    path('update_takes', UpdateTakesView.as_view(), name='manage_takes'),
+    path('update_grades', UpdateGradesView.as_view(), name='manage_grades'),
 ]

@@ -1,12 +1,13 @@
+import json
 from django.contrib.auth.backends import ModelBackend
+import requests
+import requests.utils
 from users.models import User
 from lecture.models import Course, Takes
 from .crawl_saint import get_saint_cookies, get_student_info, get_takes_info_by_semester, get_takes_info, get_grade_info
 
-
 class PasswordlessAuthBackend(ModelBackend):
     """Log in to Django without providing a password."""
-
     def authenticate(self, username=None, cookies=None):
         """
         사용자 인증 함수
@@ -14,6 +15,7 @@ class PasswordlessAuthBackend(ModelBackend):
         :param cookies: 세인트 로그인 쿠키값
         :return: 인증한 사용자 객체
         """
+
         info = get_student_info(cookies)
         try:
             user = User.objects.get(username=username)
@@ -24,12 +26,34 @@ class PasswordlessAuthBackend(ModelBackend):
             user.save()
             print("새 사용자 만듦")
 
+        grade_checked = True    # 성적 정보 확인 동의 여부
+        takes_checked = True    # 수강 정보 확인 동의 여부 TODO: 이 부분을 프론트에서 처리해야 함
+
         # 사용자 정보 업데이트
         self.update_user_info(user, info, cookies)
         # 수강 정보 처리
-        # self.manage_takes(user, cookies, '2024010')
-        self.manage_all_takes(user, cookies)
+        if takes_checked:
+            self.manage_all_takes(user, cookies)
+        # 성적 정보 처리
+        if grade_checked:
+            self.manage_all_grades(user, cookies)
+        print("사용자 정보 업데이트 및 수강/성적 정보 처리 완료")
+            
+
         return user
+
+    @staticmethod
+    def serialize_cookies(cookies):
+        import pickle
+        import base64
+        return base64.b64encode(pickle.dumps(cookies)).decode('utf-8')
+    
+    def cookies_to_string(cookie_jar):
+        cookie_dict = requests.utils.dict_from_cookiejar(cookie_jar)
+        cookies_str = '; '.join([f"{key}={value}" for key, value in cookie_dict.items()])
+        return cookies_str
+
+
 
     def update_user_info(self, user, info, cookies):
         """
@@ -42,8 +66,16 @@ class PasswordlessAuthBackend(ModelBackend):
         user.advisor = info['지도교수']
         user.major = info['전공']
         user.login_cookie = cookies
+        print("COOKIES: ", cookies)
+        if cookies is not None:
+            cookies = requests.utils.dict_from_cookiejar(cookies)
+            cookie_string = json.dumps(cookies)
+            user.login_cookie = cookie_string
+            print("COOKIE STRING: ", cookie_string)
+            # user.login_cookie = self.cookies_to_string(cookies) # cookies를 string으로 변환
         user.save()
         print(f"{user.username} 정보 업데이트 함.")
+
 
     def manage_all_takes(self, user, cookies):
         """
@@ -53,7 +85,7 @@ class PasswordlessAuthBackend(ModelBackend):
         :return: None
         """
         all_semester_info = get_takes_info(cookies)
-        all_grade_info = get_grade_info(cookies)
+        # all_grade_info = get_grade_info(cookies)
         # print("================ All Grade Info =====================")
         # print(all_grade_info)
         # print("=====================================================")
@@ -65,7 +97,7 @@ class PasswordlessAuthBackend(ModelBackend):
             for take in user.takes.all()
         }
 
-        print("existing takes: ", existing_takes)
+        # print("existing takes: ", existing_takes)
 
         for (semester_code, semester_info) in all_semester_info.items():
             for key, value in semester_info.items():
@@ -116,22 +148,31 @@ class PasswordlessAuthBackend(ModelBackend):
                 else:
                     print(f"Takes for {course_id} already exists")
 
+
+    def manage_all_grades(self, user, cookies):
+        """
+        현재 유저의 전체 성적 정보를 업데이트하는 함수
+        """
+
+        all_grade_info = get_grade_info(cookies)
+        existing_takes = {
+            f"{take.course.course_id}-{take.course.semester}": take
+            for take in user.takes.all()
+        }
+
         for semester_code, courses in all_grade_info.items():
             for course_code, course_details in courses.items():
-                # Create an ID that matches the provided grade information (without class division)
+                # "과목코드-학기코드" 형태로 partial_course_id를 만들어 일치 여부를 확인
                 partial_course_id = f"{course_code}-{semester_code}"
-                # Find any existing take that starts with the partial_course_id
+                # '-' 기준으로 course_code와 semester_code를 분리, 
+                # course_code가 일치하고 semester_code가 일치하는 Takes를 찾음
                 matched_takes = {
                     key: val for key, val in existing_takes.items()
                     if key.split('-')[0] == course_code and key.split('-')[-1] == semester_code
                 }
-                # print("======== matched takes =========")
-                # print(matched_takes)
-                # print("======== matched takes =========")
                 if matched_takes:
                     for full_course_id, take in matched_takes.items():
-                        # Update the middle and final grades if data is available
-
+                        # 만약 중간/기말 성적이 존재하면 업데이트
                         take.middle_grade = course_details.get('midterm_grade', '')
                         take.final_grade = course_details.get('final_grade', '')
                         take.save()
@@ -139,31 +180,6 @@ class PasswordlessAuthBackend(ModelBackend):
                             f"Updated grades for {full_course_id} - Midterm: {take.middle_grade}, Final: {take.final_grade}")
                 else:
                     print(f"No matching takes found for {partial_course_id}")
-
-    # def update_grades_by_course(self, user, cookies):
-    #     """
-    #     각 과목에 대한 성적을 과목코드(분반없음)과 학기로 구분하여 업데이트하는 함수
-    #     :param user: 현재 로그인한 사용자
-    #     :param cookies: 모바일 세인트 로그인 쿠키값
-    #     :return:
-    #     """
-    #     all_semester_info = get_grade_info(cookies)
-    #     for semester, courses in all_semester_info.items():
-    #         for course_code, grades in courses.items():
-    #             # 과목코드와 학기가 일치하는 Takes 객체를 찾아서 성적을 업데이트
-    #             try:
-    #                 course = Course.objects.get(course_number=course_code, semester=semester)
-    #                 take = user.takes.get(course=course)
-    #                 # Update the grades
-    #                 take.middle_grade = grades.get('midterm_grade', '')
-    #                 take.final_grade = grades.get('final_grade', '')
-    #                 take.save()
-    #                 print(
-    #                     f"Updated {course_code} for semester {semester} with Midterm: {take.middle_grade}, Final: {take.final_grade}")
-    #             except Course.DoesNotExist:
-    #                 print(f"No course found for {course_code} in semester {semester}")
-    #             except user.takes.model.DoesNotExist:
-    #                 print(f"User is not enrolled in {course_code} for semester {semester}")
 
 
     def manage_takes(self, user, cookies, semester_code):
@@ -181,7 +197,7 @@ class PasswordlessAuthBackend(ModelBackend):
             f"{take.course.course_id}": take
             for take in user.takes.all()
         }  # ex: {'CSE2010-01': Takes object (1), 'CSE2010-02': Takes object (2)}
-        print("existing takes: ", existing_takes)
+        # print("existing takes: ", existing_takes)
 
         for key, value in current_semester_info.items():
             # Course ID를 유니크한 값으로 만들기 위해 course_number와 course_class(분반)를 병합 (재수강 고려)
@@ -198,7 +214,6 @@ class PasswordlessAuthBackend(ModelBackend):
                 print(f"Added new take for {course_id}")
             else:
                 print(f"Takes for {course_id} already exists")
-
 
 
     def get_user(self, user_id):

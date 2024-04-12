@@ -1,5 +1,14 @@
+import pickle
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+# Serializing
+def serialize_cookies(cookies):
+    return base64.b64encode(pickle.dumps(cookies)).decode('utf-8')
+
+# Deserializing
+def deserialize_cookies(cookies_str):
+    return pickle.loads(base64.b64decode(cookies_str.encode('utf-8')))
 
 
 class User(AbstractUser):
@@ -13,6 +22,7 @@ class User(AbstractUser):
     login_cookie = models.CharField(max_length=500, null=True)                              # 로그인 쿠키
     nickname = models.CharField(max_length=30, default='', null=True, blank=True)           # 닉네임
     avatar = models.ImageField(upload_to="avatars", blank=True)                             # 프로필 사진
+    thread = models.CharField(max_length=100, default='', null=True)                        # 챗봇 스레드
 
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
@@ -29,9 +39,15 @@ class User(AbstractUser):
     def get_student_by_id(cls, username):
         return cls.objects.get(username=username)
 
-    @classmethod
-    def get_login_cookie(cls, username):
-        return cls.objects.get(username=username).login_cookie
+    # @classmethod
+    # def get_login_cookie(cls, username):
+    #     return cls.objects.get(username=username).login_cookie
+    def set_login_cookie(self, cookies):
+        self.login_cookie = serialize_cookies(cookies)
+        self.save()
+
+    def get_login_cookie(self):
+        return deserialize_cookies(self.login_cookie) if self.login_cookie else None
 
     def update_student_major(self, new_major):
         self.major = new_major
