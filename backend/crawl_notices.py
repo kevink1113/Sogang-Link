@@ -15,8 +15,8 @@ def scrape_links():
     # 첫 번째 행을 찾아 클릭
     first_row = driver.find_element(By.CSS_SELECTOR, "table tr:nth-child(2) td:nth-child(1)")
     driver.execute_script("arguments[0].click();", first_row)
+    collected_data = []  # 제목과 링크를 저장할 리스트
 
-    links = []
     for _ in range(10):  # 10번 반복
         # 새 페이지 로딩 대기
         # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.cursor-pointer")))
@@ -26,38 +26,28 @@ def scrape_links():
         # find element by id
         time.sleep(1)  # 클립보드 복사를 위한 충분한 시간 확보
         title = driver.find_element(By.ID, 'set-alt-image').text
-        # title = driver.find_element(By.XPATH, '//*[@id="set-alt-image"]').text
-        print("title: ", title)
 
         link_icon = driver.find_element(By.CSS_SELECTOR, "img[alt='link']")
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable(link_icon))
         # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "img[alt='link']")))
-        driver.execute_script("arguments[0].scrollIntoView(true);", link_icon)
-        # print(link_icon)
-        # driver.execute_script("arguments[0].click();", link_icon)
-        # link_icon.click()
+        ActionChains(driver).move_to_element(link_icon).click().perform()
+
+        # driver.execute_script("arguments[0].scrollIntoView(true);", link_icon)
         driver.execute_script("arguments[0].click();", link_icon)
         
         # 클립보드에서 링크 가져오기
         # time.sleep(1)  # 클립보드 복사를 위한 충분한 시간 확보
-        s = pyperclip.paste()
-        print("Pasted: ", s)
-        links.append(s)
-        # time.sleep(10)
+        link_url = pyperclip.paste()
+
+
+        print("title: ", title, " link: ", link_url)
+        collected_data.append({'title': title, 'link': link_url})
 
         # 이전 페이지 버튼 클릭
-        # select by XPATJ
-        # prev_page = driver.find_element(By.XPATH, "//*[@id=\"__nuxt\"]/html/div/main/div/div[2]/div[7]/div[1]/div")
         span = driver.find_element(By.XPATH, "//span[text()='이전 페이지']")
-        # print(prev_page)
         span.click()
-        # driver.execute_script("arguments[1].click();", prev_page)
-        
-        # 페이지 이동 대기
-        # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "table")))
-
     driver.quit()
-    return links
+    return collected_data
 
 # 결과 출력
 if __name__ == "__main__":
