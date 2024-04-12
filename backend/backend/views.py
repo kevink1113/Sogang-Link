@@ -11,7 +11,7 @@ from django.contrib.auth import login as auth_login
 
 from drf_yasg.utils import swagger_auto_schema
 
-from chatbot.main import query
+from chatbot.chatbot import query
 
 class LoginView(APIView):
     """
