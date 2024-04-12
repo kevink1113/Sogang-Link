@@ -2,7 +2,7 @@ import os
 import openai
 from typing_extensions import override
 from openai import AssistantEventHandler
-from secret import get_secret
+from chatbot.secret import get_secret
 
 client = openai.OpenAI(api_key=get_secret())
 #######################################################################################
@@ -36,8 +36,8 @@ def loop(a_id, t_id):
 
 
 def main():
-    assistant_id = "asst_iU8eJSpSVD9xQ3GoH9a46SsB"
-    thread_id = "thread_B0heHPmZQ4N1SxzgGF692HKx"
+    assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+    thread_id = "thread_4reMLnevRyGmeMxf7WnGfJ6W"
     messages = client.beta.threads.messages.list(thread_id=thread_id)
     os.system("cls")
     for i, message in enumerate(reversed(messages.data), start=1):
