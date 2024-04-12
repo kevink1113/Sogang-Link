@@ -11,6 +11,7 @@ from django.contrib.auth import login as auth_login
 
 from drf_yasg.utils import swagger_auto_schema
 
+from chatbot.main import query
 
 class LoginView(APIView):
     """
@@ -98,3 +99,44 @@ def my_login_view(request):
 
 def offline(request):
     return render(request, 'offline.html')
+
+
+class ChatView(APIView):
+    """
+    post:
+    챗봇 구현 예시
+    요청 예시:
+    {
+        "question": "아메리카노와 에스프레소의 차이에 대해 알려줘"
+    }
+    """
+    @swagger_auto_schema(request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'question': openapi.Schema(type=openapi.TYPE_STRING, description='질문')
+        }
+        # response 정의
+    ))
+    # @swagger_auto_schema(operation_description="POST 요청을 위한 엔드포인트입니다.")
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        print(user)
+
+        question = request.data.get('question')
+        assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+        thread_id = "thread_kh4a6S64esnKDfue5DqGvFGM"
+        messages = query(assistant_id, user, thread_id, question)
+
+        total_message = "대화:\n"
+        for i, message in enumerate(reversed(messages.data), start=1):
+            total_message+="서강gpt>" if message.role == "assistant" else "당신>"
+            for content in message.content:
+                total_message+=content.text.value + "\n"
+
+        recent_question = messages.data[1].content[0].text.value
+        recent_answer = messages.data[0].content[0].text.value
+
+        print(recent_question)
+        print(recent_answer)
+        return Response({'answer' : recent_answer},
+                        status=status.HTTP_200_OK)
