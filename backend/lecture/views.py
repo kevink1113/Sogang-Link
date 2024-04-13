@@ -35,16 +35,35 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
     """
-
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-
     @swagger_auto_schema(operation_description="courses(개설교과목) GET 요청을 위한 엔드포인트")
     def get_queryset(self):
         queryset = Course.objects.all()
-        course_id = self.request.query_params.get('course_name')
-        if course_id:
-            queryset = queryset.filter(course_id=course_id)
+    
+        semester = self.request.query_params.get('semester')
+        name = self.request.query_params.get('name')
+        credit= self.request.query_params.get('credit')
+        day = self.request.query_params.get('day')
+        classroom = self.request.query_params.get('classroom')
+        advisor = self.request.query_params.get('advisor')
+        major = self.request.query_params.get('major')
+
+        if semester:
+            queryset = queryset.filter(semester=semester)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        if credit:
+            queryset = queryset.filter(credit=credit)
+        if day:
+            queryset = queryset.filter(day__icontains=day)
+        if classroom:
+            queryset = queryset.filter(classroom__icontains=classroom)
+        if advisor:
+            queryset = queryset.filter(advisor__icontains=advisor)
+        if major:
+            queryset = queryset.filter(major__icontains=major)
+
         return queryset
 
 

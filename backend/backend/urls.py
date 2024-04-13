@@ -23,7 +23,7 @@ from rest_framework import permissions
 from backend import settings
 from backend.views import offline, my_login_view
 from .views import LoginView
-
+from notices.views import NoticeViewSet
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -43,7 +43,8 @@ urlpatterns = [
     # path('login/', my_login_view, name='my_login_view'),
     path('offline/', offline, name='offline'),
     path('users/', include('users.urls')),
-    path('lecture/', include('lecture.urls'))
+    path('lecture/', include('lecture.urls')),
+    path('notice', NoticeViewSet.as_view(), name='notice'),
 ]
 
 if settings.DEBUG:
