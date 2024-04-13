@@ -77,11 +77,43 @@ class StudentTakesListView(APIView):
 
     @swagger_auto_schema(operation_description="takes(수강목록) GET 요청을 위한 엔드포인트")
     def get(self, request):
-        student = request.user
-        takes = Takes.objects.filter(student=student)
+        takes = Takes.objects.filter(student=request.user)
+        
+        semester = request.query_params.get('semester')
+        day = request.query_params.get('day')
+        credit = request.query_params.get('credit')
+        name = request.query_params.get('name')
+        major = request.query_params.get('major')
+        real = request.query_params.get('real')
+        
+        if semester:
+            takes = takes.filter(student=request.user, course__semester=semester)
+        if day:
+            takes = takes.filter(student=request.user, course__day__icontains=day)
+        if credit:
+            takes = takes.filter(student=request.user, course__credit=credit)
+        if name:
+            takes = takes.filter(student=request.user, course__name__icontains=name)
+        if major:
+            takes = takes.filter(student=request.user, course__major__icontains=major)
+        if real:
+            takes = takes.filter(student=request.user, real=real)
+        # student = request.user
+        # takes = Takes.objects.filter(student=student)
         serializer = TakesSerializer(takes, many=True)
         return Response(serializer.data)
 
+
+
+    # def get(self, request):
+    #     board = request.query_params.get('board')
+    #     if board:
+    #         notices = Notice.objects.filter(board=board)
+    #     else:
+    #         notices = Notice.objects.all()
+        
+    #     serializer = NoticeSerializer(notices, many=True)
+    #     return Response(serializer.data)
 
 class SemesterTakesListView(APIView):
     permission_classes = [IsAuthenticated]
