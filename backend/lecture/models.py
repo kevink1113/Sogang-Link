@@ -53,16 +53,5 @@ class Takes(models.Model):
         self.delete()
 
 
-class Notice(models.Model):
-    mod = models.IntegerField()
-    num = models.IntegerField()
-    title = models.CharField(max_length=100, null=True)
-    url = models.URLField(null=True)
-    writer = models.CharField(max_length=100, null=True)
-    file = models.URLField(null=True)  # 링크 넣는곳
-    date = models.DateField()
-    view = models.IntegerField()
-    objects = models.Manager()
 
-
-__all__ = ['Course', 'Takes', "Notice"]
+__all__ = ['Course', 'Takes']

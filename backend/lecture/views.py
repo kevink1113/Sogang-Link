@@ -35,16 +35,35 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
     """
-
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-
     @swagger_auto_schema(operation_description="courses(개설교과목) GET 요청을 위한 엔드포인트")
     def get_queryset(self):
         queryset = Course.objects.all()
-        course_id = self.request.query_params.get('course_name')
-        if course_id:
-            queryset = queryset.filter(course_id=course_id)
+    
+        semester = self.request.query_params.get('semester')
+        name = self.request.query_params.get('name')
+        credit= self.request.query_params.get('credit')
+        day = self.request.query_params.get('day')
+        classroom = self.request.query_params.get('classroom')
+        advisor = self.request.query_params.get('advisor')
+        major = self.request.query_params.get('major')
+
+        if semester:
+            queryset = queryset.filter(semester=semester)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        if credit:
+            queryset = queryset.filter(credit=credit)
+        if day:
+            queryset = queryset.filter(day__icontains=day)
+        if classroom:
+            queryset = queryset.filter(classroom__icontains=classroom)
+        if advisor:
+            queryset = queryset.filter(advisor__icontains=advisor)
+        if major:
+            queryset = queryset.filter(major__icontains=major)
+
         return queryset
 
 
@@ -58,11 +77,43 @@ class StudentTakesListView(APIView):
 
     @swagger_auto_schema(operation_description="takes(수강목록) GET 요청을 위한 엔드포인트")
     def get(self, request):
-        student = request.user
-        takes = Takes.objects.filter(student=student)
+        takes = Takes.objects.filter(student=request.user)
+        
+        semester = request.query_params.get('semester')
+        day = request.query_params.get('day')
+        credit = request.query_params.get('credit')
+        name = request.query_params.get('name')
+        major = request.query_params.get('major')
+        real = request.query_params.get('real')
+        
+        if semester:
+            takes = takes.filter(student=request.user, course__semester=semester)
+        if day:
+            takes = takes.filter(student=request.user, course__day__icontains=day)
+        if credit:
+            takes = takes.filter(student=request.user, course__credit=credit)
+        if name:
+            takes = takes.filter(student=request.user, course__name__icontains=name)
+        if major:
+            takes = takes.filter(student=request.user, course__major__icontains=major)
+        if real:
+            takes = takes.filter(student=request.user, real=real)
+        # student = request.user
+        # takes = Takes.objects.filter(student=student)
         serializer = TakesSerializer(takes, many=True)
         return Response(serializer.data)
 
+
+
+    # def get(self, request):
+    #     board = request.query_params.get('board')
+    #     if board:
+    #         notices = Notice.objects.filter(board=board)
+    #     else:
+    #         notices = Notice.objects.all()
+        
+    #     serializer = NoticeSerializer(notices, many=True)
+    #     return Response(serializer.data)
 
 class SemesterTakesListView(APIView):
     permission_classes = [IsAuthenticated]
