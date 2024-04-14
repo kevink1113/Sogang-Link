@@ -97,13 +97,13 @@ class _LoginState extends State<Login> {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         user = User.fromJson(data);
         takes = (await get_timetable(token))!;
-        setState(() {
-          isVerified = true;
-        });
-        Future.delayed(Duration(seconds: 2), () {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => Home()));
-        });
+        // setState(() {
+        //   isVerified = true;
+        // });
+        // Future.delayed(Duration(seconds: 0), () {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Home()));
+        // });
       } else {
         showToast("로그인 실패");
       }
