@@ -22,8 +22,10 @@ from rest_framework import permissions
 
 from backend import settings
 from backend.views import offline, my_login_view
-from .views import LoginView
+
+from .views import LoginView, ChatView
 from notices.views import NoticeViewSet
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -40,6 +42,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', LoginView.as_view(), name='login'),
+    path('chat', ChatView.as_view(), name='chat'),
     # path('login/', my_login_view, name='my_login_view'),
     path('offline/', offline, name='offline'),
     path('users/', include('users.urls')),
