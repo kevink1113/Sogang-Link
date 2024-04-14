@@ -121,6 +121,7 @@ class ChatView(APIView):
     def post(self, request, *args, **kwargs):
         user = request.user
         print(user)
+        print("Question: ", request.data.get('question'))
 
         question = request.data.get('question')
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"

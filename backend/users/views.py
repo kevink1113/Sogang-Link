@@ -12,6 +12,8 @@ from backend.auth_backend import PasswordlessAuthBackend
 from .serializers import UserSerializer
 from backend.crawl_saint import get_student_info
 
+from drf_yasg.utils import swagger_auto_schema
+
 User = get_user_model()
 
 class UpdateUserInfoView(APIView):
@@ -58,5 +60,33 @@ class UpdateGradesView(APIView):
             cookie_jar = requests.utils.cookiejar_from_dict(cookies)
             backend.manage_all_grades(user, cookie_jar)
             return Response({"message": "Grades updated successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserInfoView(APIView):
+    """
+    get:
+    현재 로그인한 사용자의 정보를 조회합니다.
+
+    """
+
+    @swagger_auto_schema(operation_description="GET 요청을 위한 엔드포인트")
+    def get(self, request):
+        user = request.user
+        print(user.username, user.name, user.state, user.year, user.semester, user.major, user.advisor, user.nickname)
+
+        try:
+            return Response({
+                        'username': user.username,  # 학번
+                        'name': user.name,          # 이름
+                        'state': user.state,        # 0: 재학, 1: 휴학, 2: 졸업
+                        'year': user.year,          # 학년
+                        'semester': user.semester,  # 학기
+                        'major': user.major,        # 전공
+                        'advisor': user.advisor,    # 지도교수
+                        'nickname': user.nickname,  # 닉네임
+                        }, 
+                          status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
