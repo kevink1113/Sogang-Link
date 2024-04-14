@@ -6,6 +6,8 @@
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 
+./chatbot/secret.py
+
 # Local History for Visual Studio Code
 .history/
 

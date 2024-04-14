@@ -22,6 +22,7 @@ class User(AbstractUser):
     login_cookie = models.CharField(max_length=500, null=True)                              # 로그인 쿠키
     nickname = models.CharField(max_length=30, default='', null=True, blank=True)           # 닉네임
     avatar = models.ImageField(upload_to="avatars", blank=True)                             # 프로필 사진
+    thread = models.CharField(max_length=100, default='', null=True)                        # 챗봇 스레드
 
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
