@@ -123,10 +123,10 @@ class ChatView(APIView):
     # @swagger_auto_schema(operation_description="POST 요청을 위한 엔드포인트입니다.")
     def post(self, request, *args, **kwargs):
         user = request.user
-        '''
-       
 
-        '''
+        print(user)
+        print("Question: ", request.data.get('question'))
+
         question = request.data.get('question')
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
         #assist 나중에 숨기거나 해야하나 안숨겨도 별 문제는 없긴함

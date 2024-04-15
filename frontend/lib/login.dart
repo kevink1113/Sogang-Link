@@ -14,6 +14,7 @@ import 'package:lottie/lottie.dart';
 
 late User user;
 late Takes takes;
+late Set semester_list;
 
 class Login extends StatefulWidget {
   @override
@@ -32,6 +33,16 @@ class _LoginState extends State<Login> {
   void printToken() async {
     var token = await SecureStorage.getToken();
     print(token);
+  }
+
+  @override
+  initState() {
+    // TODO: implement initState
+    super.initState();
+
+    SecureStorage.getToken().then((token) => {
+          if (token != null) {tokenlogin(token)}
+        });
   }
 
   Future<void> login() async {
@@ -72,9 +83,42 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Future<void> tokenlogin(String token) async {
+    setState(() {
+      isLoading = true;
+    });
+    var request = Uri.parse("$url/users/info");
+    try {
+      final response =
+          await http.get(request, headers: {"Authorization": "Token $token"});
+
+      if (response.statusCode == 200) {
+        var data =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        user = User.fromJson(data);
+        takes = (await get_timetable(token))!;
+        // setState(() {
+        //   isVerified = true;
+        // });
+        // Future.delayed(Duration(seconds: 0), () {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Home()));
+        // });
+      } else {
+        showToast("로그인 실패");
+      }
+    } catch (e) {
+      showToast("네트워크 오류");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   Future<Takes?> get_timetable(String token) async {
     try {
-      var request = Uri.parse("$url/lecture/takes/$semester");
+      var request = Uri.parse("$url/lecture/takes");
       // var token = await storage.read(key: 'token');
       // convert token to base64
       // printToken();

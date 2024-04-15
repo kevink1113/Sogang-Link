@@ -122,6 +122,30 @@ class _TimeTable extends State<TimeTable> {
         child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        DropdownButton<String>(
+          value: semester.toString(),
+          icon: const Icon(Icons.arrow_downward),
+          elevation: 16,
+          style: const TextStyle(color: Colors.deepPurple),
+          underline: Container(
+            height: 2,
+            color: Colors.deepPurpleAccent,
+          ),
+          onChanged: (String? value) {
+            // This is called when the user selects an item.
+            setState(() {
+              semester = int.parse(value!);
+            });
+          },
+          items: takes.semesters
+              .toList()
+              .map<DropdownMenuItem<String>>((int value) {
+            return DropdownMenuItem<String>(
+              value: value.toString(),
+              child: Text(value.toString()),
+            );
+          }).toList(),
+        ),
         SizedBox(
           height: (kColumnLength / 2 * kBoxSize) + kFirstColumnHeight,
           child: Row(
