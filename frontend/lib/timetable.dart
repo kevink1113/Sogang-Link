@@ -22,7 +22,7 @@ class _TimeTable extends State<TimeTable> {
   List week = ['월', '화', '수', '목', '금'];
   var kColumnLength = 22;
   double kFirstColumnHeight = 40;
-  double kBoxSize = 90;
+  double kBoxSize = 70;
   int semester = 2024010;
   Codec<String, String> stringToBase64 = utf8.fuse(base64);
   // final storage = FlutterSecureStorage();

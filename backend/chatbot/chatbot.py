@@ -93,8 +93,32 @@ def chatbot_query(assistant_id, user, thread_id, question):
             thread_id=thread_id,
             run_id=runs.id
         )
-        time.sleep(0.5)
+        # time.sleep(0.5)
     messages = client.beta.threads.messages.list(
             thread_id=thread_id
         )
     return messages
+
+
+class EventHandler(AssistantEventHandler):
+    @override
+    def on_text_created(self, text) -> None:
+        print(f"\n서강gpt > ", end="", flush=True)
+
+    @override
+    def on_text_delta(self, delta, snapshot):
+        print(delta.value, end="", flush=True)
+
+def chatbot_query_stream(assistant_id, user, thread_id, question):
+    client.beta.threads.messages.create(
+        thread_id=thread_id,
+        role="user",
+        content=question
+    )
+    with client.beta.threads.runs.stream(
+            thread_id=thread_id,
+            assistant_id=assistant_id,
+            event_handler=EventHandler(),
+    ) as stream:
+        stream.until_done()
+    

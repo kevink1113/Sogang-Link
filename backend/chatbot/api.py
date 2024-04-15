@@ -12,3 +12,4 @@ def get_course_info():
 def get_takes_info(username):
     takes = Takes.objects.filter(student_id=username)
     return TakesSerializer(takes, many=True).data
+    

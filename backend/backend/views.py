@@ -13,6 +13,7 @@ from django.contrib.auth import login as auth_login
 from drf_yasg.utils import swagger_auto_schema
 
 from chatbot.chatbot import chatbot_query
+from chatbot.chatbot import chatbot_query_stream
 from chatbot.api import *
 
 class LoginView(APIView):
@@ -130,15 +131,21 @@ class ChatView(APIView):
         question = request.data.get('question')
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
         #assist 나중에 숨기거나 해야하나 안숨겨도 별 문제는 없긴함
-        thread_id = "thread_bsA3VBjvUYSYyNLNpBKD1EfH"
-        #thread_id = user.thread_id
-        messages = chatbot_query(assistant_id, user, thread_id, question)
+        # thread_id = "thread_QkJXOaYm6rzUUcsF1xhZh9DU"
+        thread_id = user.thread
 
+        # ========== 그냥 한번에 버전, stream 버전 ==========
+
+        # messages = chatbot_query(assistant_id, user, thread_id, question)
+        messages = chatbot_query_stream(assistant_id, user, thread_id, question)
+        # ===================== 디버깅용 출력 =====================
         total_message = "대화:\n"
         for i, message in enumerate(reversed(messages.data), start=1):
             total_message += "서강gpt>" if message.role == "assistant" else "당신>"
             for content in message.content:
                 total_message += content.text.value + "\n"
+        print("total message: ", total_message)
+        # ===================== 디버깅용 출력 =====================
 
         recent_question = messages.data[1].content[0].text.value
         recent_answer = messages.data[0].content[0].text.value
