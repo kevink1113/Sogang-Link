@@ -10,11 +10,23 @@ from .crawl_saint import get_saint_cookies
 from .auth_backend import PasswordlessAuthBackend
 from django.contrib.auth import login as auth_login
 
+# from backend.chatbot import chatbot_function_call
+# from chatbot import chatbot_function_call
+from chatbot.chatbot import chatbot_function_call
+
+
 from drf_yasg.utils import swagger_auto_schema
+import openai
+from openai import AssistantEventHandler
 
 from chatbot.chatbot import chatbot_query
 from chatbot.chatbot import chatbot_query_stream
+from chatbot.secret import get_secret
 from chatbot.api import *
+
+from django.http import StreamingHttpResponse, JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+import json
 
 class LoginView(APIView):
     """
@@ -154,3 +166,43 @@ class ChatView(APIView):
         print(recent_answer)
         return Response({'answer': recent_answer},
                         status=status.HTTP_200_OK)
+        
+
+
+class StreamView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+        thread_id = user.thread  # Ensure user has a 'thread' attribute or handle accordingly
+        question = request.data.get('question', '')
+
+        # Setup OpenAI client
+        client = openai.OpenAI(api_key=get_secret())
+
+        # Create a message in the thread
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=question
+        )
+
+        def event_stream():
+            # Stream the thread's run
+            with client.beta.threads.runs.stream(thread_id=thread_id, assistant_id=assistant_id) as stream:
+                for event in stream:
+                    # Handle different types of events
+                    if hasattr(event, 'status'):
+                        if event.status == "completed":
+                            break
+                        elif event.status == "requires_action":
+                            # Handle action required status
+                            chatbot_function_call(event, assistant_id, user, thread_id)
+                    # Send back text updates
+                    if hasattr(event, 'content') and 'text' in event.content:
+                        text = event.content['text']
+                        yield f"data: {json.dumps({'text': text})}\n\n"
+
+        # Set headers to notify the client that this is an event-stream.
+        return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
