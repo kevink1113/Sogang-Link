@@ -7,11 +7,33 @@ from .serializers import TakesSerializer
 
 from drf_yasg.utils import swagger_auto_schema
 
+
+# This code uses the `csv` module to read the data from the `classrooms.csv` file. 
+# It then iterates over each row of the CSV file and processes the data to import the classrooms into the system. 
+# You will need to replace the comments with the actual code to perform the necessary operations 
+# for importing the classrooms.
+
+classrooms = ["[AS109]","[AS111]","[AS301]","[AS303]","[AS305]","[AS311]","[AS412]","[AS414]","[AS510]","[AS611]","[AS612]","[AS714]","[AS912]",
+        "[D104B]","[D105]","[D202]","[D301]","[D302]","[D303A]","[D303B]","[D304]","[D401A]","[D402]","[D406]","[D412]","[D502]","[D503]","[D504]","[DB101]","[DB102]",
+        "[F401]",
+        "[GA303B]","[GA305]","[GA401]","[GA402]","[GA403]","[GA404]","[GA505]","[GA506]",
+        "[GN101]","[GN102]","[GN201]","[GN202]","[GN203]","[GN301]","[GN304]","[GN311]",
+        "[J102]","[J104]","[J106]","[J107]","[J108]","[J109]","[J110]","[J112]","[J114]","[J116]","[J118]","[J120]","[J128]","[J202]","[J204]","[J207]","[J209]","[J211]",
+        "[J215]","[J217]","[J219]","[J302]","[J307]","[J309]","[J311]","[J313]","[J315]","[J317]","[J319]","[J321]","[J323]","[J325]","[J327]","[J602]","[J609]","[J616]",
+        "[K201]","[K202]","[K203]","[K204]","[K207]","[K208]","[K212]","[K213]","[K301]","[K302]","[K303]","[K304]","[K305]","[K306]","[K307]","[K309]","[K401]","[K402]",
+        "[K403]","[K404]","[K405]","[K406]","[K407]","[K501]","[K502]","[K503]","[K504]","[K506]","[K507]",
+        "[MA102]","[MA104]","[MA106]","[MA201]","[MA202]","[MA203]","[MA204]","[MA206]","[MA208]","[MA308]","[MA610]",
+        "[PA101]","[PA201]","[PA203]","[PA405]",
+        "[R103]","[R107]","[R108]","[R110]","[R112]","[R113]","[R114]","[R115]","[R117]","[R119]","[R1418]","[R204]","[R210]","[R404]","[R405]","[R708]","[R712]","[R714]","[R903]","[R914]",
+        "[RA110A]","[RA204]","[RA205]","[RA308]","[RA310]","[RA406A]","[RA406B]","[RA408]","[RA410]",
+        "[X229]","[X238]","[X349]","[X353]","[X423]","[X426]","[X427]","[X428]","[X429]","[X430]","[X513]","[X514]"]
+
 # Create your views here.
 from rest_framework import viewsets
 from .models import Course
 from .serializers import CourseSerializer
-
+import datetime
+from django.http import JsonResponse
 
 class CourseViewSet(viewsets.ModelViewSet):
     """
@@ -122,3 +144,35 @@ class SemesterTakesListView(APIView):
         takes = Takes.objects.filter(course__semester=semester)
         serializer = TakesSerializer(takes, many=True)
         return Response(serializer.data)
+
+
+class ClassroomListView(APIView):
+    # permission_classes = [IsAuthenticated]  # Uncomment this if authentication is required
+
+    def get(self, request, format=None):
+        current_time = datetime.datetime.now()
+        # day = request.query_params.get('day', current_time.weekday() + 1)  # Defaults to current day if not specified
+        # time = request.query_params.get('time', current_time.strftime('%H:%M:%S'))  # Defaults to current time if not specified
+
+        # Convert 'time' to datetime.time object for comparison
+        # time = datetime.datetime.strptime(time, '%H:%M:%S').time()
+        day =  current_time.weekday() + 1
+        print("day: ", day, " time: ", current_time)
+
+        # Get all classrooms
+        all_classrooms = set(Course.objects.values_list('classroom', flat=True).distinct())
+        
+        # Get used classrooms for the given day and time
+        used_classrooms = set(Course.objects.filter(
+            day=day,
+            start_time__lte=current_time,
+            end_time__gte=current_time
+        ).values_list('classroom', flat=True).distinct())
+
+        # Determine free classrooms
+        free_classrooms = all_classrooms - used_classrooms
+
+        print("used_classrooms: ", used_classrooms)
+
+        return JsonResponse({"free_classrooms": list(free_classrooms)}, status=200)
+    
