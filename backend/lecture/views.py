@@ -151,28 +151,52 @@ class ClassroomListView(APIView):
 
     def get(self, request, format=None):
         current_time = datetime.datetime.now()
-        # day = request.query_params.get('day', current_time.weekday() + 1)  # Defaults to current day if not specified
-        # time = request.query_params.get('time', current_time.strftime('%H:%M:%S'))  # Defaults to current time if not specified
+        day = current_time.weekday() + 1  # Convert current day to 1=Monday through 7=Sunday
 
-        # Convert 'time' to datetime.time object for comparison
-        # time = datetime.datetime.strptime(time, '%H:%M:%S').time()
-        day =  current_time.weekday() + 1
-        print("day: ", day, " time: ", current_time)
-
-        # Get all classrooms
+        # Fetch all classrooms
         all_classrooms = set(Course.objects.values_list('classroom', flat=True).distinct())
-        
-        # Get used classrooms for the given day and time
-        used_classrooms = set(Course.objects.filter(
-            day=day,
-            start_time__lte=current_time,
-            end_time__gte=current_time
-        ).values_list('classroom', flat=True).distinct())
 
-        # Determine free classrooms
-        free_classrooms = all_classrooms - used_classrooms
+        # Fetch all courses for today, organized by start and end times
+        today_classes = Course.objects.filter(day=day).order_by('start_time', 'end_time')
 
-        print("used_classrooms: ", used_classrooms)
+        # Initialize dictionaries to track availability times
+        next_free_time = {}
+        current_busy_time = {}
 
-        return JsonResponse({"free_classrooms": list(free_classrooms)}, status=200)
-    
+        # Process each class to update availability statuses
+        for course in today_classes:
+            room = course.classroom
+            if course.start_time <= current_time.time() <= course.end_time:
+                # Update when the room will be free next
+                next_free_time[room] = course.end_time
+            elif current_time.time() < course.start_time:
+                # Set when the room will next be busy
+                if room not in current_busy_time:
+                    current_busy_time[room] = course.start_time
+
+        free_classrooms = []
+        occupied_classrooms = []
+
+        # Determine the status for each classroom
+        for room in all_classrooms:
+            if room in ["", None]:  # Skip empty or undefined room entries
+                continue
+
+            if room in next_free_time:
+                # Room is currently occupied; it will be free after the current class
+                availability = next_free_time[room].strftime('%H시 %M분') + "부터 사용 가능"
+                occupied_classrooms.append({'classroom': room, 'available_from': availability})
+            else:
+                # Room is free now; determine how long it remains free
+                if room in current_busy_time:
+                    availability = current_busy_time[room].strftime('%H시 %M분') + "까지 사용 가능"
+                else:
+                    # If no classes are scheduled today in this room
+                    availability = "하루 종일 사용 가능"
+                free_classrooms.append({'classroom': room, 'free_until': availability})
+
+        # Return the classified free and occupied classrooms as JSON
+        return JsonResponse({
+            "free_classrooms": free_classrooms,
+            "occupied_classrooms": occupied_classrooms
+        }, status=200)
