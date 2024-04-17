@@ -5,13 +5,28 @@ from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from .crawl_saint import get_saint_cookies
 from .auth_backend import PasswordlessAuthBackend
 from django.contrib.auth import login as auth_login
 
-from drf_yasg.utils import swagger_auto_schema
+# from backend.chatbot import chatbot_function_call
+# from chatbot import chatbot_function_call
+from chatbot.chatbot import chatbot_function_call
 
-from chatbot.chatbot import query
+
+from drf_yasg.utils import swagger_auto_schema
+import openai
+from openai import AssistantEventHandler
+
+from chatbot.chatbot import chatbot_query
+from chatbot.chatbot import chatbot_query_stream
+from chatbot.secret import get_secret
+from chatbot.api import *
+
+from django.http import StreamingHttpResponse, JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+import json
 
 class LoginView(APIView):
     """
@@ -63,21 +78,20 @@ class LoginView(APIView):
         print("Token: ", token.key, "Created: ", created)
         # 'created' 변수는 토큰이 새로 생성되었는지 여부를 나타냅니다.
         # 여기서 추가적인 로직을 구현할 수 있습니다 (예: 로그 생성).
-        
+
         print(user.username, user.name, user.state, user.year, user.semester, user.major, user.advisor, user.nickname)
 
-
-        return Response({'token': token.key,        # 토큰
-                        'username': user.username,  # 학번
-                        'name': user.name,          # 이름
-                        'state': user.state,        # 0: 재학, 1: 휴학, 2: 졸업
-                        'year': user.year,          # 학년
-                        'semester': user.semester,  # 학기
-                        'major': user.major,        # 전공
-                        'advisor': user.advisor,    # 지도교수
-                        'nickname': user.nickname,  # 닉네임
-                        }, 
-                          status=status.HTTP_200_OK)
+        return Response({'token': token.key,  # 토큰
+                         'username': user.username,  # 학번
+                         'name': user.name,  # 이름
+                         'state': user.state,  # 0: 재학, 1: 휴학, 2: 졸업
+                         'year': user.year,  # 학년
+                         'semester': user.semester,  # 학기
+                         'major': user.major,  # 전공
+                         'advisor': user.advisor,  # 지도교수
+                         'nickname': user.nickname,  # 닉네임
+                         },
+                        status=status.HTTP_200_OK)
 
 
 def my_login_view(request):
@@ -110,6 +124,8 @@ class ChatView(APIView):
         "question": "아메리카노와 에스프레소의 차이에 대해 알려줘"
     }
     """
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
@@ -120,24 +136,73 @@ class ChatView(APIView):
     # @swagger_auto_schema(operation_description="POST 요청을 위한 엔드포인트입니다.")
     def post(self, request, *args, **kwargs):
         user = request.user
+
         print(user)
         print("Question: ", request.data.get('question'))
 
         question = request.data.get('question')
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
-        thread_id = "thread_kh4a6S64esnKDfue5DqGvFGM"
-        messages = query(assistant_id, user, thread_id, question)
+        #assist 나중에 숨기거나 해야하나 안숨겨도 별 문제는 없긴함
+        # thread_id = "thread_QkJXOaYm6rzUUcsF1xhZh9DU"
+        thread_id = user.thread
 
+        # ========== 그냥 한번에 버전, stream 버전 ==========
+
+        # messages = chatbot_query(assistant_id, user, thread_id, question)
+        messages = chatbot_query_stream(assistant_id, user, thread_id, question)
+        # ===================== 디버깅용 출력 =====================
         total_message = "대화:\n"
         for i, message in enumerate(reversed(messages.data), start=1):
-            total_message+="서강gpt>" if message.role == "assistant" else "당신>"
+            total_message += "서강gpt>" if message.role == "assistant" else "당신>"
             for content in message.content:
-                total_message+=content.text.value + "\n"
+                total_message += content.text.value + "\n"
+        print("total message: ", total_message)
+        # ===================== 디버깅용 출력 =====================
 
         recent_question = messages.data[1].content[0].text.value
         recent_answer = messages.data[0].content[0].text.value
 
         print(recent_question)
         print(recent_answer)
-        return Response({'answer' : recent_answer},
+        return Response({'answer': recent_answer},
                         status=status.HTTP_200_OK)
+        
+
+
+class StreamView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+        thread_id = user.thread  # Ensure user has a 'thread' attribute or handle accordingly
+        question = request.data.get('question', '')
+
+        # Setup OpenAI client
+        client = openai.OpenAI(api_key=get_secret())
+
+        # Create a message in the thread
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=question
+        )
+
+        def event_stream():
+            # Stream the thread's run
+            with client.beta.threads.runs.stream(thread_id=thread_id, assistant_id=assistant_id) as stream:
+                for event in stream:
+                    # Handle different types of events
+                    if hasattr(event, 'status'):
+                        if event.status == "completed":
+                            break
+                        elif event.status == "requires_action":
+                            # Handle action required status
+                            chatbot_function_call(event, assistant_id, user, thread_id)
+                    # Send back text updates
+                    if hasattr(event, 'content') and 'text' in event.content:
+                        text = event.content['text']
+                        yield f"data: {json.dumps({'text': text})}\n\n"
+
+        # Set headers to notify the client that this is an event-stream.
+        return StreamingHttpResponse(event_stream(), content_type='text/event-stream')

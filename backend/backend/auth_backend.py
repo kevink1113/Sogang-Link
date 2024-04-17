@@ -6,6 +6,9 @@ from users.models import User
 from lecture.models import Course, Takes
 from .crawl_saint import get_saint_cookies, get_student_info, get_takes_info_by_semester, get_takes_info, get_grade_info
 
+from chatbot.setting import create_assistant, create_thread
+
+
 class PasswordlessAuthBackend(ModelBackend):
     """Log in to Django without providing a password."""
     def authenticate(self, username=None, cookies=None):
@@ -22,6 +25,9 @@ class PasswordlessAuthBackend(ModelBackend):
             print("기존 사용자 로그인")
         except User.DoesNotExist:
             user = User(username=username)
+            new_thread = create_thread().id
+            user.thread = new_thread
+            print("Created thread id: ", user.thread)
             user.set_unusable_password()  # 비밀번호를 설정하지 않음. (비밀번호 방식 인증이 아니므로)
             user.save()
             print("새 사용자 만듦")
