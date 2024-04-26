@@ -147,55 +147,60 @@ class SemesterTakesListView(APIView):
 
 
 class ClassroomListView(APIView):
-    # permission_classes = [IsAuthenticated]  # Uncomment this if authentication is required
-
     def get(self, request, format=None):
         current_time = datetime.datetime.now()
-        day = current_time.weekday() + 1  # Convert current day to 1=Monday through 7=Sunday
+        day = current_time.weekday() + 1  # Monday is 1, Sunday is 7
 
-        # Fetch all classrooms
+        # Fetch all classrooms and today's classes
         all_classrooms = set(Course.objects.values_list('classroom', flat=True).distinct())
+        today_classes = Course.objects.filter(day__icontains=day, semester=2024010).order_by('start_time', 'end_time')
+        # for i in today_classes:
+        #     print(i.course_id, i.classroom, i.start_time, i.end_time)
+        # Track the latest end time for ongoing or past classes and next start time for future classes
+        last_end_time = {}
+        next_start_time = {}
 
-        # Fetch all courses for today, organized by start and end times
-        today_classes = Course.objects.filter(day=day).order_by('start_time', 'end_time')
-
-        # Initialize dictionaries to track availability times
-        next_free_time = {}
-        current_busy_time = {}
-
-        # Process each class to update availability statuses
         for course in today_classes:
             room = course.classroom
+            if room in ["", None]:
+                continue  # Skip empty or undefined room entries
+            
             if course.start_time <= current_time.time() <= course.end_time:
-                # Update when the room will be free next
-                next_free_time[room] = course.end_time
+                # Update last end time if the class is ongoing
+                last_end_time[room] = course.end_time
             elif current_time.time() < course.start_time:
-                # Set when the room will next be busy
-                if room not in current_busy_time:
-                    current_busy_time[room] = course.start_time
+                # Update the next start time if the class is in the future
+                if room not in next_start_time or next_start_time[room] > course.start_time:
+                    next_start_time[room] = course.start_time
 
         free_classrooms = []
         occupied_classrooms = []
 
-        # Determine the status for each classroom
         for room in all_classrooms:
-            if room in ["", None]:  # Skip empty or undefined room entries
+            if room in ["", None]:
                 continue
 
-            if room in next_free_time:
-                # Room is currently occupied; it will be free after the current class
-                availability = next_free_time[room].strftime('%H시 %M분') + "부터 사용 가능"
-                occupied_classrooms.append({'classroom': room, 'available_from': availability})
-            else:
-                # Room is free now; determine how long it remains free
-                if room in current_busy_time:
-                    availability = current_busy_time[room].strftime('%H시 %M분') + "까지 사용 가능"
+            if room in last_end_time:
+                if room in next_start_time:
+                    # Calculate the break duration
+                    break_duration = (datetime.datetime.combine(datetime.date.today(), next_start_time[room]) - 
+                                      datetime.datetime.combine(datetime.date.today(), last_end_time[room])).total_seconds() / 60
+                    if break_duration > 15:
+                        # If the break is longer than 15 minutes, mark as soon available
+                        availability = last_end_time[room].strftime('%H시 %M분') + "부터 사용 가능"
+                        occupied_classrooms.append({'classroom': room, 'available_from': availability})
                 else:
-                    # If no classes are scheduled today in this room
-                    availability = "하루 종일 사용 가능"
+                    # No more classes today, so it's available after the last one ends
+                    availability = last_end_time[room].strftime('%H시 %M분') + "부터 사용 가능"
+                    occupied_classrooms.append({'classroom': room, 'available_from': availability})
+            else:
+                # If the room is not in last_end_time, it's currently free
+                if room in next_start_time:
+                    availability = next_start_time[room].strftime('%H시 %M분') + "까지 사용 가능"
+                else:
+                    availability = "오늘 남은 수업 없음"
                 free_classrooms.append({'classroom': room, 'free_until': availability})
 
-        # Return the classified free and occupied classrooms as JSON
         return JsonResponse({
             "free_classrooms": free_classrooms,
             "occupied_classrooms": occupied_classrooms
