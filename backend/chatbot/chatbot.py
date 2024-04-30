@@ -56,6 +56,7 @@ def chatbot_function_call(runs, assistant_id, user, thread_id):
     tool_outputs = []
     for tool in tools:
         tool_id = tool.id
+
         action = tool.function.name
         data = ""
         if action == "get_user_info":
