@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -65,6 +66,44 @@ class _GptChat extends State<GptChat> {
     }
   }
 
+  Future<void> GPTstreamcall(String token, String question) async {
+    try {
+      String answer = "";
+      _addMessage(types.TextMessage(
+        author: const types.User(id: 'GPT'),
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        id: randomString(),
+        text: answer,
+      ));
+
+      final client = HttpClient();
+      final req = await client.openUrl(
+          "post", Uri.parse("http://127.0.0.1:8000/stream"));
+      req.headers.set("content-type", "application/json");
+      req.headers.set("Authorization", "Token $token");
+      req.write('{"question": $question}');
+
+      final res = await req.close();
+
+      await for (var data in res) {
+        final string = utf8.decode(data);
+        answer = "$answer$string";
+        print(answer);
+        setState(() {
+          _messages.removeAt(_messages.length - 1);
+        });
+        _addMessage(types.TextMessage(
+          author: const types.User(id: 'GPT'),
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          id: randomString(),
+          text: answer,
+        ));
+      }
+    } catch (e) {
+      print("gpt error");
+    }
+  }
+
   Future<void> _handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: _user,
@@ -74,6 +113,10 @@ class _GptChat extends State<GptChat> {
     );
 
     _addMessage(textMessage);
+
+    // setState(() {
+    //   _messages.removeAt(_messages.length - 1);
+    // });
 
     SecureStorage.getToken().then((token) => {
           if (token != null)
