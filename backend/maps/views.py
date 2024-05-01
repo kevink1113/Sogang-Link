@@ -8,17 +8,21 @@ import datetime
 
 
 class ClassroomListView(APIView):
-    
-    # def get_by_building(self, building):
-        
-
     def get(self, request, format=None):
         current_time = datetime.datetime.now()
         day = current_time.weekday() + 1  # Monday is 1, Sunday is 7
 
+        building = request.query_params.get('building', '')  # Default to empty string if not provided'
+
+
         # Fetch all classrooms and today's classes
-        all_classrooms = set(Course.objects.values_list('classroom', flat=True).distinct())
-        today_classes = Course.objects.filter(day__icontains=day, semester=2024010).order_by('start_time', 'end_time')
+        # all_classrooms = set(Course.objects.values_list('classroom', flat=True).distinct())
+        # today_classes = Course.objects.filter(day__icontains=day, semester=2024010).order_by('start_time', 'end_time')
+        
+        all_classrooms = set(Course.objects.filter(classroom__icontains=building).values_list('classroom', flat=True).distinct())
+        today_classes = Course.objects.filter(day__icontains=day, semester=2024010, classroom__icontains=building).order_by('start_time', 'end_time')
+
+        
         # for i in today_classes:
         #     print(i.course_id, i.classroom, i.start_time, i.end_time)
         # Track the latest end time for ongoing or past classes and next start time for future classes
