@@ -16,7 +16,15 @@ class CourseSerializer(serializers.ModelSerializer):
         model = Course
         fields = '__all__'
 
+# class TakesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Takes
+#         fields = '__all__'
+
+
 class TakesSerializer(serializers.ModelSerializer):
+    course = CourseSerializer(read_only=True)
+
     class Meta:
         model = Takes
-        fields = '__all__'
+        fields = ['course', 'middle_grade', 'final_grade']

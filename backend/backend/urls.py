@@ -49,6 +49,7 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('lecture/', include('lecture.urls')),
     path('notice', NoticeViewSet.as_view(), name='notice'),
+    path('maps/', include('maps.urls')),
 ]
 
 if settings.DEBUG:

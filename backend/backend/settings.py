@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'lecture.apps.LectureConfig',
     'notices.apps.NoticesConfig',
+    'maps.apps.MapsConfig',
 ]
 
 MIDDLEWARE = [
