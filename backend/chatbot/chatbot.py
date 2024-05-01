@@ -136,6 +136,8 @@ def chatbot_query_stream(assistant_id, user, thread_id, question):
         role="user",
         content=question
     )
+    if runs.status == "requires_action":  # 만약 function call이 필요하다면
+        chatbot_function_call(runs, assistant_id, user, thread_id)
     with client.beta.threads.runs.stream(
             thread_id=thread_id,
             assistant_id=assistant_id,
