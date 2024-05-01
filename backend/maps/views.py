@@ -8,6 +8,10 @@ import datetime
 
 
 class ClassroomListView(APIView):
+    
+    # def get_by_building(self, building):
+        
+
     def get(self, request, format=None):
         current_time = datetime.datetime.now()
         day = current_time.weekday() + 1  # Monday is 1, Sunday is 7
