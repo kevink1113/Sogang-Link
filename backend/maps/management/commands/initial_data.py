@@ -33,13 +33,22 @@ buildings = [
     "서강빌딩",
     "남문",
     "아루페관(AR관)",
-    "체욱관",
+    "체육관",
     "청년광장",
     "베르크만스 우정원(BW관)"
     ]
 
 class Command(BaseCommand):
     help = 'Initializes the database with building and facility data'
+
+    def find_abbr(self, building_name):
+        abbr = ""
+        # find alphabet in the building name, not korean
+        for char in building_name:
+            if 'a' <= char.lower() <= 'z':
+                abbr += char
+        return abbr
+    
 
     def handle(self, *args, **options):
         # 건물 추가
@@ -49,36 +58,38 @@ class Command(BaseCommand):
         Facility.objects.all().delete()
         
         for building_name in buildings:
-            Building.objects.create(name=building_name)
+            # abbr is an alphabet in the building name
+            Building.objects.create(name=building_name, abbr=self.find_abbr(building_name))
+            # Building.objects.create(name=building_name)
         
         Facility.objects.create(
             building= Building.objects.get(name="김대건관(K관)"),
             name="K관 열람실",
             description="B1에 위치해 있습니다. 노트북 전용실 존재.",
             open_hours="08:00 - 20:00",
-            facility_type='열람실'
+            facility_type='reading_room'
         )
         Facility.objects.create(
             building= Building.objects.get(name="김대건관(K관)"),
             name="인쇄소",
             description="3층에 위치해 있습니다. 계좌번호: 국민 123-456-7890",
             open_hours="08:00 - 20:00",
-            facility_type='인쇄소'
+            facility_type='print_shop'
         )
 
         Facility.objects.create(
             building= Building.objects.get(name="정하상관(J관)"),
-            name="J관 열람실",
+            name="J관 일반열람실",
             description="1층에 위치해 있습니다. 노트북 전용실 존재.",
             open_hours="08:00 - 20:00",
-            facility_type='열람실'
+            facility_type='reading_room'
         )
         Facility.objects.create(
             building= Building.objects.get(name="정하상관(J관)"),
             name="인쇄소",
             description="2층에 위치해 있습니다. 계좌번호: 국민 123-456-7890",
             open_hours="08:00 - 20:00",
-            facility_type='인쇄소'
+            facility_type='print_shop'
         )
         
         # # 중앙 도서관에 열람실 추가
