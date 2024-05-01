@@ -99,18 +99,57 @@ class _TimeTable extends State<TimeTable> {
               top: top,
               left: 0,
               child: Stack(children: [
-                Container(
-                  width: MediaQuery.of(context).size.width / 5,
-                  height: height,
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.all(Radius.circular(2)),
+                InkWell(
+                  onTap: () => showModalBottomSheet<void>(
+                      showDragHandle: true,
+                      backgroundColor: Colors.white,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 200,
+                          // decoration: BoxDecoration(
+                          //   color: Colors.transparent,
+                          //   borderRadius: BorderRadius.only(
+                          //     topLeft: Radius.circular(20.0),
+                          //     topRight: Radius.circular(20.0),
+                          //   ),
+                          // ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text("과목: ${lecture.course.name}",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )),
+                                Text("교수명: ${lecture.course.advisor}",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )),
+                                Text("교실: ${lecture.course.classroom}",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 5,
+                    height: height,
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                    ),
+                    child: Text(
+                      "${lecture.course.name}\n${lecture.course.classroom}",
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
-                  child: Text(
-                    "${lecture.course.name}\n${lecture.course.classroom}",
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
+                )
               ]),
             ),
           );

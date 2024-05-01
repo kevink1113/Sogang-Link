@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:http/http.dart' as http;
+import 'package:soganglink/storage.dart';
 
 String randomString() {
   final random = Random.secure();
@@ -39,14 +41,31 @@ class _GptChat extends State<GptChat> {
     });
   }
 
-  void _handleSendPressed(types.PartialText message) {
-    _addMessage(types.TextMessage(
-      author: const types.User(id: 'abcd'),
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: randomString(),
-      text: "hello",
-    ));
+  Future<void> GPTcall(String token, String question) async {
+    var request = Uri.parse("http://127.0.0.1:8000/chat");
+    try {
+      final response = await http.post(request, headers: {
+        "Authorization": "Token $token"
+      }, body: {
+        "question": question,
+      });
 
+      if (response.statusCode == 200) {
+        var answer =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        _addMessage(types.TextMessage(
+          author: const types.User(id: 'GPT'),
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          id: randomString(),
+          text: answer["answer"],
+        ));
+      }
+    } catch (e) {
+      print("gpt error");
+    }
+  }
+
+  Future<void> _handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -55,5 +74,14 @@ class _GptChat extends State<GptChat> {
     );
 
     _addMessage(textMessage);
+
+    SecureStorage.getToken().then((token) => {
+          if (token != null)
+            {
+              SecureStorage.getToken().then((token) => {
+                    if (token != null) {GPTcall(token, message.text)}
+                  })
+            }
+        });
   }
 }
