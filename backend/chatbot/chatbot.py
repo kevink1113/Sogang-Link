@@ -171,7 +171,7 @@ class EventHandler(AssistantEventHandler):
                     thread_id=self.thread_id,
                     run_id=self.run_id,
                     tool_outputs=self.tool_outputs,
-                    event_handler=EventHandler(self.thread_id, self.assistant_id)
+                    event_handler=EventHandler(self.thread_id, self.assistant_id, self.user)
             ) as stream:
                 stream.until_done()
 
@@ -191,7 +191,7 @@ def chatbot_query_stream(assistant_id, user, thread_id, question):
     with client.beta.threads.runs.stream(
             thread_id=thread_id,
             assistant_id=assistant_id,
-            event_handler=EventHandler(thread_id=thread_id, assistant_id=assistant_id, user),
+            event_handler=EventHandler(thread_id=thread_id, assistant_id=assistant_id, user=user),
     ) as stream:
         stream.until_done()
     
