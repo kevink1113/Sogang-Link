@@ -124,11 +124,12 @@ def chatbot_query(assistant_id, user, thread_id, question):
 
 
 class EventHandler(AssistantEventHandler):
-    def __init__(self, thread_id, assistant_id):
+    def __init__(self, thread_id, assistant_id, user):
         super().__init__()
         self.thread_id = thread_id
         self.assistant_id = assistant_id
         self.run_id = None
+        self.user = user
         self.tool_outputs = []
 
     @override
@@ -156,11 +157,11 @@ class EventHandler(AssistantEventHandler):
 
                 #함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
                 if function_name == "get_user_info":
-                    data = get_user_info(user.username)
+                    data = get_user_info(self.user.username)
                 elif function_name == "get_course_info":
                     data = get_course_info()
                 elif function_name == "get_takes_info":
-                    data = get_takes_info(user.username)
+                    data = get_takes_info(self.user.username)
                 self.tool_outputs.append({
                     "tool_call_id": tool_id,
                     "output": json.dumps(data)
@@ -190,7 +191,7 @@ def chatbot_query_stream(assistant_id, user, thread_id, question):
     with client.beta.threads.runs.stream(
             thread_id=thread_id,
             assistant_id=assistant_id,
-            event_handler=EventHandler(thread_id=thread_id, assistant_id=assistant_id),
+            event_handler=EventHandler(thread_id=thread_id, assistant_id=assistant_id, user),
     ) as stream:
         stream.until_done()
     
