@@ -95,7 +95,8 @@ def cancel_active_runs(client, thread_id):
 
 def chatbot_query(assistant_id, user, thread_id, question):
     # 만약 이전에 진행중인 run이 있다면 취소
-    #cancel_active_runs(client, thread_id)
+    # 이거 오류 나서 지움. 쿼리 실행에 필요한 함수는 아니니까 일단 지웠고, 나중에 내가 고칠테니까 신경안써도 ㄱㅊ
+    # cancel_active_runs(client, thread_id)
 
     # 클리어 한 다음 새로운 질문을 추가
     client.beta.threads.messages.create(
@@ -140,11 +141,11 @@ class EventHandler(AssistantEventHandler):
 
     @override
     def on_tool_call_done(self, tool_call: ToolCall):
-        print(tool_call)
+        # run 참조
         run = client.beta.threads.runs.retrieve(
             thread_id=self.thread_id,
             run_id=self.run_id)
-
+        # 처음 tool_call에서 모든 tool_call을 처리
         if run.status == "requires_action":
             tools = run.required_action.submit_tool_outputs.tool_calls
             for tool in tools:
@@ -153,6 +154,7 @@ class EventHandler(AssistantEventHandler):
                 function_name = tool.function.name
                 data = ""
 
+                #함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
                 if function_name == "get_user_info":
                     data = get_user_info(user.username)
                 elif function_name == "get_course_info":
@@ -163,7 +165,7 @@ class EventHandler(AssistantEventHandler):
                     "tool_call_id": tool_id,
                     "output": json.dumps(data)
                 })
-
+            #스트림으로 보내기
             with client.beta.threads.runs.submit_tool_outputs_stream(
                     thread_id=self.thread_id,
                     run_id=self.run_id,
@@ -174,14 +176,17 @@ class EventHandler(AssistantEventHandler):
 
     @override
     def on_run_step_created(self, run_step: RunStep):
+        # run_id 저장
         self.run_id = run_step.run_id
 
 def chatbot_query_stream(assistant_id, user, thread_id, question):
+    # 질문 보내기
     client.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
         content=question
     )
+    # 스트림으로 받기
     with client.beta.threads.runs.stream(
             thread_id=thread_id,
             assistant_id=assistant_id,

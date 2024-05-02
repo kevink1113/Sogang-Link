@@ -149,7 +149,8 @@ class ChatView(APIView):
         # ========== 그냥 한번에 버전, stream 버전 ==========
 
         messages = chatbot_query(assistant_id, user, thread_id, question) # TODO: chatbot_query_stream으로 변경
-        # messages =
+        # messages = chatbot_query_stream(assistant_id, user, thread_id, question)
+        # chatbot_query_setrem은 message 반환 안해서 변경함
         chatbot_query_stream(assistant_id, user, thread_id, question)
         # ===================== 디버깅용 출력 =====================
         total_message = "대화:\n"
