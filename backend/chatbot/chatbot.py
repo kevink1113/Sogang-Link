@@ -1,5 +1,6 @@
 import os
 import openai
+from openai.types.beta.threads.runs import ToolCall, RunStep
 from typing_extensions import override
 from openai import AssistantEventHandler
 import time
@@ -94,7 +95,7 @@ def cancel_active_runs(client, thread_id):
 
 def chatbot_query(assistant_id, user, thread_id, question):
     # 만약 이전에 진행중인 run이 있다면 취소
-    cancel_active_runs(client, thread_id)
+    #cancel_active_runs(client, thread_id)
 
     # 클리어 한 다음 새로운 질문을 추가
     client.beta.threads.messages.create(
@@ -112,7 +113,7 @@ def chatbot_query(assistant_id, user, thread_id, question):
     # run이 완료되거나 실패할 때까지 기다림
     while runs.status not in ["completed", "failed"]:
         if runs.status == "requires_action": # 만약 function call이 필요하다면
-            chatbot_function_call(runs, assistant_id, user, thread_id) 
+            chatbot_function_call(runs, assistant_id, user, thread_id)
         runs = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=runs.id)
 
     # run이 완료되면 메시지 반환
@@ -122,6 +123,13 @@ def chatbot_query(assistant_id, user, thread_id, question):
 
 
 class EventHandler(AssistantEventHandler):
+    def __init__(self, thread_id, assistant_id):
+        super().__init__()
+        self.thread_id = thread_id
+        self.assistant_id = assistant_id
+        self.run_id = None
+        self.tool_outputs = []
+
     @override
     def on_text_created(self, text) -> None:
         print(f"\n서강gpt > ", end="", flush=True)
@@ -130,18 +138,54 @@ class EventHandler(AssistantEventHandler):
     def on_text_delta(self, delta, snapshot):
         print(delta.value, end="", flush=True)
 
+    @override
+    def on_tool_call_done(self, tool_call: ToolCall):
+        print(tool_call)
+        run = client.beta.threads.runs.retrieve(
+            thread_id=self.thread_id,
+            run_id=self.run_id)
+
+        if run.status == "requires_action":
+            tools = run.required_action.submit_tool_outputs.tool_calls
+            for tool in tools:
+                tool_id = tool.id
+                function_args = tool.function.arguments
+                function_name = tool.function.name
+                data = ""
+
+                if function_name == "get_user_info":
+                    data = get_user_info(user.username)
+                elif function_name == "get_course_info":
+                    data = get_course_info()
+                elif function_name == "get_takes_info":
+                    data = get_takes_info(user.username)
+                self.tool_outputs.append({
+                    "tool_call_id": tool_id,
+                    "output": json.dumps(data)
+                })
+
+            with client.beta.threads.runs.submit_tool_outputs_stream(
+                    thread_id=self.thread_id,
+                    run_id=self.run_id,
+                    tool_outputs=self.tool_outputs,
+                    event_handler=EventHandler(self.thread_id, self.assistant_id)
+            ) as stream:
+                stream.until_done()
+
+    @override
+    def on_run_step_created(self, run_step: RunStep):
+        self.run_id = run_step.run_id
+
 def chatbot_query_stream(assistant_id, user, thread_id, question):
     client.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
         content=question
     )
-    if runs.status == "requires_action":  # 만약 function call이 필요하다면
-        chatbot_function_call(runs, assistant_id, user, thread_id)
     with client.beta.threads.runs.stream(
             thread_id=thread_id,
             assistant_id=assistant_id,
-            event_handler=EventHandler(),
+            event_handler=EventHandler(thread_id=thread_id, assistant_id=assistant_id),
     ) as stream:
         stream.until_done()
     

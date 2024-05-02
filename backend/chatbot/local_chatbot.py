@@ -17,14 +17,10 @@ thread_id = ""
 class EventHandler(AssistantEventHandler):
     def __init__(self, thread_id, assistant_id):
         super().__init__()
-        self.output = None
-        self.tool_id = None
         self.thread_id = thread_id
         self.assistant_id = assistant_id
         self.run_id = None
-        self.run_step = None
-        self.function_name = ""
-        self.arguments = ""
+        self.tool_outputs = []
 
     @override
     def on_text_created(self, text) -> None:
@@ -35,50 +31,34 @@ class EventHandler(AssistantEventHandler):
         print(delta.value, end="", flush=True)
 
     @override
-    def on_tool_call_created(self, tool_call: ToolCall):
-        self.tool_id = tool_call.id
-        if tool_call.type == "function":
-            self.function_name = tool_call.function.name
-
-        print(f"\nassistant > {tool_call.type}\n", flush=True)
-
-        run = client.beta.threads.runs.retrieve(
-            thread_id=self.thread_id,
-            run_id=self.run_id)
-
-        while run.status in ["queued", "in_progress"]:
-            run = client.beta.threads.runs.retrieve(
-                thread_id=self.thread_id,
-                run_id=self.run_id)
-
-    @override
     def on_tool_call_done(self, tool_call: ToolCall):
+        print(tool_call)
         run = client.beta.threads.runs.retrieve(
             thread_id=self.thread_id,
             run_id=self.run_id)
 
         if run.status == "requires_action":
-            if self.function_name == "tell_secret":
-                self.output = tell_secret(self.arguments)
+            tools = run.required_action.submit_tool_outputs.tool_calls
+            for tool in tools:
+                tool_id = tool.id
+                function_args = tool.function.arguments
+                function_name = tool.function.name
+                data = ""
 
-                with client.beta.threads.runs.submit_tool_outputs_stream(
-                        thread_id=self.thread_id,
-                        run_id=self.run_id,
-                        tool_outputs=[{
-                            "tool_call_id": self.tool_id,
-                            "output": self.output
-                        }],
-                        event_handler=EventHandler(self.thread_id, self.assistant_id)
-                ) as stream:
-                    stream.until_done()
-            else:
-                print("그런 함수는 없습니다.")
-                return
+                if function_name == "tell_secret":
+                    data = tell_secret(function_args)
+                self.tool_outputs.append({
+                    "tool_call_id": tool_id,
+                    "output": json.dumps(data)
+                })
 
-    @override
-    def on_tool_call_delta(self, delta: ToolCallDelta, snapshot: ToolCall):
-        if delta.type == "function":
-            self.arguments += delta.function.arguments
+            with client.beta.threads.runs.submit_tool_outputs_stream(
+                    thread_id=self.thread_id,
+                    run_id=self.run_id,
+                    tool_outputs=self.tool_outputs,
+                    event_handler=EventHandler(self.thread_id, self.assistant_id)
+            ) as stream:
+                stream.until_done()
 
     @override
     def on_run_step_created(self, run_step: RunStep):
