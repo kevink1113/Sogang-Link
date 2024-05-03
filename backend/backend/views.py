@@ -159,33 +159,20 @@ class ChatView(APIView):
         }
         # response 정의
     ))
-    # def post(self, request, *args, **kwargs):
-    #     user = request.user
-
-    #     print(user)
-    #     print("Question: ", request.data.get('question'))
-
-    #     question = request.data.get('question')
-    #     assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
-    #     thread_id = user.thread
-
-    #     chatbot_query_stream(assistant_id, user, thread_id, question)
-
-    #     recent_question = messages.data[1].content[0].text.value
-    #     recent_answer = messages.data[0].content[0].text.value
-
-    #     print(recent_question)
-    #     print(recent_answer)
-    #     return Response({'answer': recent_answer},
-    #                     status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         user = request.user
         question = request.data.get('question')
+        print("Question recieved: ", question)
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+
         thread_id = client.beta.threads.create().id#user.thread
         # Initialize the streaming process
         # 질문 보내기
+
+        # cancel_active_runs(client, thread_id)
+        # print("Active runs cancelled")
+
 
         cancel_active_runs(client, thread_id)
         client.beta.threads.messages.create(
@@ -194,17 +181,18 @@ class ChatView(APIView):
             content=question
         )
         def event_stream():
+
             # 스트림으로 받기
 
             with client.beta.threads.runs.stream(
                     thread_id=thread_id,
                     assistant_id=assistant_id
             ) as stream:
+                print("Stream started")
                 try:
-                    # Yield data as server-sent events
                     for event in stream:
-                        if isinstance(event, ThreadMessageDelta):
-                            # 메시지 델타 이벤트 처리
+                        # print(event, end="\n\n")
+                        if isinstance(event, ThreadMessageDelta):   # 메시지 델타 이벤트 처리
                             data = event.data.delta.content
                             for text in data:
                                 print(text.text.value, end='', flush=True)
