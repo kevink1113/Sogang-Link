@@ -165,27 +165,28 @@ class ChatView(APIView):
         question = request.data.get('question')
         print("Question recieved: ", question)
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
-        thread_id = user.thread
-        
+
+        thread_id = client.beta.threads.create().id#user.thread
+        # Initialize the streaming process
+        # 질문 보내기
+
+        # cancel_active_runs(client, thread_id)
+        # print("Active runs cancelled")
+
+
         cancel_active_runs(client, thread_id)
-        print("Active runs cancelled")
-
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=question
+        )
         def event_stream():
-            handler = EventHandler(thread_id=thread_id, assistant_id=assistant_id, user=user)
-            # 질문 보내기
 
-            # Streaming process 초기화
-            client.beta.threads.messages.create(
-                thread_id=thread_id,
-                role="user",
-                content=question
-            )
-            print("threads.messages.create() called")
-            # Stream으로 받기
+            # 스트림으로 받기
+
             with client.beta.threads.runs.stream(
                     thread_id=thread_id,
-                    assistant_id=assistant_id,
-                    event_handler=handler,
+                    assistant_id=assistant_id
             ) as stream:
                 print("Stream started")
                 try:
@@ -194,76 +195,92 @@ class ChatView(APIView):
                         if isinstance(event, ThreadMessageDelta):   # 메시지 델타 이벤트 처리
                             data = event.data.delta.content
                             for text in data:
+                                print(text.text.value, end='', flush=True)
                                 yield f"data: {json.dumps({'text': text.text.value})}\n\n"
-                        elif isinstance(event, ThreadRunCompleted): # 실행 완료 이벤트 처리
+
+                        elif isinstance(event, ThreadRunRequiresAction):
+                            run = event.data
+                            tools = run.required_action.submit_tool_outputs.tool_calls
+                            tool_outputs = []
+                            for tool in tools:
+                                tool_id = tool.id
+                                function_args = tool.function.arguments
+                                function_name = tool.function.name
+                                data = ""
+
+                                # 함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
+                                if function_name == "get_user_info":
+                                    data = get_user_info(user.username)
+                                elif function_name == "get_course_info":
+                                    data = get_course_info()
+                                elif function_name == "get_takes_info":
+                                    data = get_takes_info(user.username)
+                                tool_outputs.append({
+                                    "tool_call_id": tool_id,
+                                    "output": json.dumps(data)
+                                })
+                            # 스트림으로 보내기
+                            with client.beta.threads.runs.submit_tool_outputs_stream(
+                                    thread_id=run.thread_id,
+                                    run_id=run.id,
+                                    tool_outputs=tool_outputs
+                            ) as stream2:
+                                for event2 in stream2:
+                                    if isinstance(event2, ThreadMessageDelta):
+                                        # 메시지 델타 이벤트 처리
+                                        data = event2.data.delta.content
+                                        for text in data:
+                                            print(text.text.value, end='', flush=True)
+                                            yield f"data: {json.dumps({'text': text.text.value})}\n\n"
+
+                        elif isinstance(event, ThreadRunCompleted):
+                            # 실행 완료 이벤트 처리
                             yield "data: run_completed\n\n"
-                except Exception as e:
-                    print(f"Error during streaming: {str(e)}")  # 로깅 강화
-                    yield f"data: {json.dumps({'error': 'Error occurred'})}\n\n"
-                finally:
-                    print("Stream closed")  # 스트림 종료 로깅
+                except GeneratorExit:
+                    # Handle the case when the client disconnects
                     stream.close()
 
-        # 연결을 유지하는 StreamingHttpResponse 반환
+
+        # Return a StreamingHttpResponse that keeps the connection open
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         return response
 
-# event_stream()에서 사용할 이벤트 핸들러 클래스
-class EventHandler(AssistantEventHandler):
-    def __init__(self, thread_id, assistant_id, user):
-        super().__init__()
-        self.thread_id = thread_id
-        self.assistant_id = assistant_id
-        self.run_id = None
-        self.user = user
-        self.tool_outputs = []
 
-    @override
-    def on_text_created(self, text) -> None:            # 메시지 생성 이벤트 처리 (디버깅용)
-        print(f"\n서강gpt > ", end="", flush=True)
+class StreamView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+        thread_id = user.thread  # Ensure user has a 'thread' attribute or handle accordingly
+        question = request.data.get('question', '')
 
-    @override
-    def on_text_delta(self, delta, snapshot):           # 메시지 델타 이벤트 처리 (디버깅용)
-        print(delta.value, end="", flush=True)
+        # Setup OpenAI client
+        client = openai.OpenAI(api_key=get_secret())
 
-    @override
-    def on_tool_call_done(self, tool_call: ToolCall):   # 함수 호출 완료 이벤트 처리
-        print(f"\n{tool_call.function.name} 함수 호출 완료\n", end="", flush=True)
-        # run 참조
-        run = client.beta.threads.runs.retrieve(
-            thread_id=self.thread_id,
-            run_id=self.run_id)
-        # 처음 tool_call에서 모든 tool_call을 처리
-        if run.status == "requires_action":
-            tools = run.required_action.submit_tool_outputs.tool_calls
-            for tool in tools:
-                tool_id = tool.id
-                function_args = tool.function.arguments
-                function_name = tool.function.name
-                data = ""
+        # Create a message in the thread
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=question
+        )
 
-                #함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
-                if function_name == "get_user_info":
-                    data = get_user_info(self.user.username)
-                elif function_name == "get_course_info":
-                    data = get_course_info()
-                elif function_name == "get_takes_info":
-                    data = get_takes_info(self.user.username)
-                self.tool_outputs.append({
-                    "tool_call_id": tool_id,
-                    "output": json.dumps(data)
-                })
-            #스트림으로 보내기
-            with client.beta.threads.runs.submit_tool_outputs_stream(
-                    thread_id=self.thread_id,
-                    run_id=self.run_id,
-                    tool_outputs=self.tool_outputs,
-                    event_handler=EventHandler(self.thread_id, self.assistant_id, self.user)
-            ) as stream:
-                stream.until_done()
+        def event_stream():
+            # Stream the thread's run
+            with client.beta.threads.runs.stream(thread_id=thread_id, assistant_id=assistant_id) as stream:
+                for event in stream:
+                    # Handle different types of events
+                    if hasattr(event, 'status'):
+                        if event.status == "completed":
+                            break
+                        elif event.status == "requires_action":
+                            # Handle action required status
+                            chatbot_function_call(event, assistant_id, user, thread_id)
+                    # Send back text updates
+                    if hasattr(event, 'content') and 'text' in event.content:
+                        text = event.content['text']
+                        yield f"data: {json.dumps({'text': text})}\n\n"
 
-    @override
-    def on_run_step_created(self, run_step: RunStep):
-        # run_id 저장
-        self.run_id = run_step.run_id
+        # Set headers to notify the client that this is an event-stream.
+        return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
