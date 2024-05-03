@@ -3,22 +3,82 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from lecture.models import Course
 import datetime
+from maps.models import Building, Facility
 
 # Create your views here.
 
 
-class ClassroomListView(APIView):
-    
-    # def get_by_building(self, building):
-        
+class BuildingInfo:
+  def __init__(self, name, classrooms):
+    self.name = name
+    # self.classrooms = classrooms
+    # facility info
+    self.facility = {
+      "toilet": "있음",
+      "elevator": "없음",
+      "parking": "없음",
+      "vending_machine": "있음",
+      "AED": "없음",
+      "건물개방시간": "09:00 - 18:00",
+      "열람실": False,
+    }
 
-    def get(self, request, format=None):
+
+buildings = [
+      BuildingInfo("정문", []),
+      BuildingInfo("알바트로스 탑", []),
+      BuildingInfo("본관", []),
+      BuildingInfo("게페르트남덕우경제관(GN관)", []),
+      BuildingInfo("예수회공동체", []),
+      BuildingInfo("삼성가브리엘관(GA관)", []),
+      BuildingInfo("금호아시아나바오로경영관(GA관)", []),
+      BuildingInfo("토마스모어관(T관)", []),
+      BuildingInfo("마태오관(MA관)", []),
+      BuildingInfo("메리홀(M관)", []),
+      BuildingInfo("성이냐시오관(I관)", []),
+      BuildingInfo("엠마오관(E관)", []),
+      BuildingInfo("로욜라도서관", []),
+      BuildingInfo("최양업관(CY관)", []),
+      BuildingInfo("하비에르관(X관)", []),
+      BuildingInfo("다산관(D관)", []),
+      BuildingInfo("곤자가국제학사(GH)", []),
+      BuildingInfo("후문", []),
+      BuildingInfo("곤자가플라자(GP)", []),
+      BuildingInfo("떼이야르관(TE관)", []),
+      BuildingInfo("정하상관(J관)", []),
+      BuildingInfo("포스코 프란치스코관(F관)", []),
+      BuildingInfo("리치별관(RA관)", []),
+      BuildingInfo("대운동장", []),
+      BuildingInfo("아담샬관(AS관)", []),
+      BuildingInfo("리치과학관(R관)", []),
+      BuildingInfo("예수회센터", []),
+      BuildingInfo("김대건관(K관)", []),
+      BuildingInfo("벨라르미노학사", []),
+      BuildingInfo("서강빌딩", []),
+      BuildingInfo("남문", []),
+      BuildingInfo("아루페관(AR관)", []),
+      BuildingInfo("체욱관", []),
+      BuildingInfo("청년광장", []),
+      BuildingInfo("베르크만스 우정원(BW관)", []),
+    ]
+
+
+class ClassroomListView(APIView):
+
+  def get_classroom_info(self, building):
         current_time = datetime.datetime.now()
         day = current_time.weekday() + 1  # Monday is 1, Sunday is 7
 
-        # Fetch all classrooms and today's classes
-        all_classrooms = set(Course.objects.values_list('classroom', flat=True).distinct())
-        today_classes = Course.objects.filter(day__icontains=day, semester=2024010).order_by('start_time', 'end_time')
+        # Define a regex pattern that matches the building followed by numbers
+        if building == "D":
+            regex_pattern = r"^\[D(B)?\d+\]$"  # Matches "[D123]", "[DB123]" but not "[DAB123]"
+        else:
+            regex_pattern = f"^\[{building}\d+\]$" if building else ".*"  # Standard regex for other buildings
+
+        # 정규표현식에 맞춰 강의실을 필터링
+        all_classrooms = set(Course.objects.filter(classroom__regex=regex_pattern).values_list('classroom', flat=True).distinct())
+        today_classes = Course.objects.filter(day__icontains=day, semester=2024010, classroom__regex=regex_pattern).order_by('start_time', 'end_time')
+
         # for i in today_classes:
         #     print(i.course_id, i.classroom, i.start_time, i.end_time)
         # Track the latest end time for ongoing or past classes and next start time for future classes
@@ -65,113 +125,80 @@ class ClassroomListView(APIView):
                 else:
                     availability = "오늘 남은 수업 없음"
                 free_classrooms.append({'classroom': room, 'free_until': availability})
+        return free_classrooms, occupied_classrooms
+        # return ({
+        #     "free_classrooms": free_classrooms,
+        #     "occupied_classrooms": occupied_classrooms
+        # })
 
-        return JsonResponse({
-            "free_classrooms": free_classrooms,
-            "occupied_classrooms": occupied_classrooms
-        }, status=200)
+
+
+  def get(self, request, format=None):
+      free_classrooms, occupied_classrooms = self.get_classroom_info(request.GET.get('building'))
     
-
-
-class BuildingInfo:
-  def __init__(self, name, classrooms):
-    self.name = name
-    self.classrooms = classrooms
-    # facility info
-    self.facility = {
-      "toilet": "있음",
-      "elevator": "없음",
-      "parking": "없음",
-      "vending_machine": "있음",
-      "AED": "없음",
-    }
-
+      return JsonResponse({
+          "free_classrooms": free_classrooms, 
+          "occupied_classrooms": occupied_classrooms
+          }, status=200)
+  
 
 class BuildingInfoListView(APIView):
-  buildings = [
-      BuildingInfo("정문", []),
-      BuildingInfo("알바트로스 탑", []),
-      BuildingInfo("본관", []),
-      BuildingInfo("게페르트남덕우경제관(GN관)", []),
-      BuildingInfo("예수회공동체", []),
-      BuildingInfo("삼성가브리엘관(GA관)", []),
-      BuildingInfo("금호아시아나바오로경영관(GA관)", []),
-      BuildingInfo("토마스모어관(T관)", []),
-      BuildingInfo("마태오관(MA관)", []),
-      BuildingInfo("메리홀(M관)", []),
-      BuildingInfo("성이냐시오관(I관)", []),
-      BuildingInfo("엠마오관(E관)", []),
-      BuildingInfo("로욜라도서관", []),
-      BuildingInfo("최양업관(CY관)", []),
-      BuildingInfo("하비에르관(X관)", []),
-      BuildingInfo("다산관(D관)", []),
-      BuildingInfo("곤자가국제학사(GH)", []),
-      BuildingInfo("후문", []),
-      BuildingInfo("곤자가플라자(GP)", []),
-      BuildingInfo("떼이야르관(TE관)", []),
-      BuildingInfo("정하상관(J관)", []),
-      BuildingInfo("포스코 프란치스코관(F관)", []),
-      BuildingInfo("리치별관(RA관)", []),
-      BuildingInfo("대운동장", []),
-      BuildingInfo("아담샬관(AS관)", []),
-      BuildingInfo("리치과학관(R관)", []),
-      BuildingInfo("예수회센터", []),
-      BuildingInfo("김대건관(K관)", []),
-      BuildingInfo("벨라르미노학사", []),
-      BuildingInfo("서강빌딩", []),
-      BuildingInfo("남문", []),
-      BuildingInfo("아루페관(AR관)", []),
-      BuildingInfo("체욱관", []),
-      BuildingInfo("청년광장", []),
-      BuildingInfo("베르크만스 우정원(BW관)", []),
-    ]
-  def get(self, request, format=None):
-    return JsonResponse({
-      "buildings": buildings
-    }, status=200)
+    
+    def get(self, request, format=None):
 
-"""
-class BuildingInfoListView(APIView):
-  def get(self, request, format=None):
-    # buildings = Course.objects.values_list('building', flat=True).distinct()
-    buildings = [
-      "정문",
-      "알바트로스 탑",
-      "본관",
-      "게페르트남덕우경제관(GN관)",
-      "예수회공동체",
-      "삼성가브리엘관(GA관)",
-      "금호아시아나바오로경영관(GA관)",
-      "토마스모어관(T관)",
-      "마태오관(MA관)",
-      "메리홀(M관)",
-      "성이냐시오관(I관)",
-      "엠마오관(E관)",
-      "로욜라도서관"
-      "최양업관(CY관)",
-      "하비에르관(X관)",
-      "다산관(D관)",
-      "곤자가국제학사(GH)",
-      "후문",
-      "곤자가플라자(GP)",
-      "떼이야르관(TE관)",
-      "정하상관(J관)",
-      "포스코 프란치스코관(F관)",
-      "리치별관(RA관)",
-      "대운동장",
-      "아담샬관(AS관)",
-      "리치과학관(R관)",
-      "예수회센터",
-      "김대건관(K관)",
-      "벨라르미노학사",
-      "서강빌딩",
-      "남문",
-      "아루페관(AR관)",
-      "체욱관",
-      "청년광장",
-      "베르크만스 우정원(BW관)",
-    ]
-    return JsonResponse({
-      "buildings": buildings
-    }, status=200)
-"""
+        building = request.GET.get('building') # 약어로 받아옴
+        
+
+        empty_classrooms = ClassroomListView().get_classroom_info(building)[0] # ex. 'K'의 빈 강의실 정보
+        # empty_classroom 배열로 변환
+        empty_classrooms = [
+            f"{room['classroom']}: {room['free_until']}" for room in empty_classrooms
+        ]
+
+
+        # Build the response object
+        response_data = {
+            # "readingRoom": [
+            #     f"총 {total_seats}석",
+            #     f"가용 {available_seats}석"
+            # ],
+            # "printShop": [
+            #     "오픈" if is_open else "닫힘",
+            #     f"시간: {hours}"
+            # ],
+            "emptyClassrooms": empty_classrooms
+        }
+
+        # if building is K or J append readingRoom to response data
+        # if building in ["K", "J"]:
+        #     build = Building.objects.get(abbr=building)
+        #     facility = Facility.objects.get(building=build, facility_type='reading_room')
+        #     response_data["readingRoom"] = [
+        #         f"총 {facility.total_seats}석",
+        #         f"가용 {facility.available_seats}석",
+        #         f"열람실 시간: {facility.open_hours}"
+        #     ]
+        
+        building = Building.objects.get(abbr=building)
+        facilities = Facility.objects.filter(building=building)
+
+        for facility in facilities:
+            if facility.facility_type == 'reading_room':
+                response_data["readingRoom"] = [
+                    f"{facility.description}",
+                    f"총 {facility.total_seats}석",
+                    f"가용 {facility.available_seats}석",
+                    f"열람실 시간: {facility.open_hours}"
+                ]
+            elif facility.facility_type == 'print_shop':
+                response_data["printShop"] = [
+                    f"{facility.description}",
+                    f"시간: {facility.open_hours}"
+                ]
+            else:
+                response_data["etc"] = [
+                    f"{facility.description}",
+                    f"시간: {facility.open_hours}"
+                ]
+
+        return JsonResponse(response_data, status=200)
