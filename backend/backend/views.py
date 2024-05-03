@@ -159,82 +159,57 @@ class ChatView(APIView):
         }
         # response 정의
     ))
-    # def post(self, request, *args, **kwargs):
-    #     user = request.user
-
-    #     print(user)
-    #     print("Question: ", request.data.get('question'))
-
-    #     question = request.data.get('question')
-    #     assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
-    #     thread_id = user.thread
-
-    #     chatbot_query_stream(assistant_id, user, thread_id, question)
-
-    #     recent_question = messages.data[1].content[0].text.value
-    #     recent_answer = messages.data[0].content[0].text.value
-
-    #     print(recent_question)
-    #     print(recent_answer)
-    #     return Response({'answer': recent_answer},
-    #                     status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         user = request.user
         question = request.data.get('question')
+        print("Question recieved: ", question)
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
         thread_id = user.thread
         
         cancel_active_runs(client, thread_id)
+        print("Active runs cancelled")
 
         def event_stream():
             handler = EventHandler(thread_id=thread_id, assistant_id=assistant_id, user=user)
-            # Initialize the streaming process
             # 질문 보내기
+
+            # Streaming process 초기화
             client.beta.threads.messages.create(
                 thread_id=thread_id,
                 role="user",
                 content=question
             )
-            # 스트림으로 받기
+            print("threads.messages.create() called")
+            # Stream으로 받기
             with client.beta.threads.runs.stream(
                     thread_id=thread_id,
                     assistant_id=assistant_id,
                     event_handler=handler,
             ) as stream:
+                print("Stream started")
                 try:
-                    # Yield data as server-sent events
                     for event in stream:
-                        if isinstance(event, ThreadMessageDelta):
-                            # 메시지 델타 이벤트 처리
+                        # print(event, end="\n\n")
+                        if isinstance(event, ThreadMessageDelta):   # 메시지 델타 이벤트 처리
                             data = event.data.delta.content
                             for text in data:
-                                print(text.text.value, end='')
                                 yield f"data: {json.dumps({'text': text.text.value})}\n\n"
-                                # yield "data: run_writing\n\n"
-                                # yield text.text.value 
-                            # yield f"data: {'text_update': event.data.delta.content}\n\n"
-                        # elif isinstance(event, ThreadMessageCompleted):
-                            # 메시지 완료 이벤트 처리
-
-                            # yield f"data: {'text': event.data.content}\n\n"
-                        elif isinstance(event, ThreadRunCompleted):
-                            # 실행 완료 이벤트 처리
+                        elif isinstance(event, ThreadRunCompleted): # 실행 완료 이벤트 처리
                             yield "data: run_completed\n\n"
-                        # else:
-                        #     # 처리하지 못한 이벤트 타입 로깅
-                        #     print(f"Unhandled event type: {type(event)}")
-                        #     yield f"data: {json.dumps({'error': 'Unhandled event type'})}\n\n"
-
-                except GeneratorExit:
-                    # Handle the case when the client disconnects
+                except Exception as e:
+                    print(f"Error during streaming: {str(e)}")  # 로깅 강화
+                    yield f"data: {json.dumps({'error': 'Error occurred'})}\n\n"
+                finally:
+                    print("Stream closed")  # 스트림 종료 로깅
                     stream.close()
 
-        # Return a StreamingHttpResponse that keeps the connection open
+        # 연결을 유지하는 StreamingHttpResponse 반환
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         return response
 
+# event_stream()에서 사용할 이벤트 핸들러 클래스
 class EventHandler(AssistantEventHandler):
     def __init__(self, thread_id, assistant_id, user):
         super().__init__()
@@ -245,15 +220,16 @@ class EventHandler(AssistantEventHandler):
         self.tool_outputs = []
 
     @override
-    def on_text_created(self, text) -> None:
+    def on_text_created(self, text) -> None:            # 메시지 생성 이벤트 처리 (디버깅용)
         print(f"\n서강gpt > ", end="", flush=True)
 
     @override
-    def on_text_delta(self, delta, snapshot):
+    def on_text_delta(self, delta, snapshot):           # 메시지 델타 이벤트 처리 (디버깅용)
         print(delta.value, end="", flush=True)
 
     @override
-    def on_tool_call_done(self, tool_call: ToolCall):
+    def on_tool_call_done(self, tool_call: ToolCall):   # 함수 호출 완료 이벤트 처리
+        print(f"\n{tool_call.function.name} 함수 호출 완료\n", end="", flush=True)
         # run 참조
         run = client.beta.threads.runs.retrieve(
             thread_id=self.thread_id,
@@ -291,42 +267,3 @@ class EventHandler(AssistantEventHandler):
     def on_run_step_created(self, run_step: RunStep):
         # run_id 저장
         self.run_id = run_step.run_id
-
-
-class StreamView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
-        thread_id = user.thread  # Ensure user has a 'thread' attribute or handle accordingly
-        question = request.data.get('question', '')
-
-        # Setup OpenAI client
-        client = openai.OpenAI(api_key=get_secret())
-
-        # Create a message in the thread
-        client.beta.threads.messages.create(
-            thread_id=thread_id,
-            role="user",
-            content=question
-        )
-
-        def event_stream():
-            # Stream the thread's run
-            with client.beta.threads.runs.stream(thread_id=thread_id, assistant_id=assistant_id) as stream:
-                for event in stream:
-                    # Handle different types of events
-                    if hasattr(event, 'status'):
-                        if event.status == "completed":
-                            break
-                        elif event.status == "requires_action":
-                            # Handle action required status
-                            chatbot_function_call(event, assistant_id, user, thread_id)
-                    # Send back text updates
-                    if hasattr(event, 'content') and 'text' in event.content:
-                        text = event.content['text']
-                        yield f"data: {json.dumps({'text': text})}\n\n"
-
-        # Set headers to notify the client that this is an event-stream.
-        return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
