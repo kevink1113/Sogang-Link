@@ -209,12 +209,21 @@ class ChatView(APIView):
                                 data = ""
 
                                 # 함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
+                                function_args = json.loads(function_args)
+
+                                semester = None
+                                if(function_args.get('semester') != None):
+                                    semester = function_args['semester']
+                                # Use function_args in the function call
+
                                 if function_name == "get_user_info":
                                     data = get_user_info(user.username)
                                 elif function_name == "get_course_info":
                                     data = get_course_info()
                                 elif function_name == "get_takes_info":
-                                    data = get_takes_info(user.username)
+                                    data = get_takes_info(user.username, semester)
+                                elif function_name == "get_empty_classrooms":
+                                    data = get_empty_classrooms(function_args['building'])
                                 tool_outputs.append({
                                     "tool_call_id": tool_id,
                                     "output": json.dumps(data)
