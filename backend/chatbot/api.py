@@ -29,10 +29,26 @@ def get_user_info(username):
 '''
 
 
-def get_course_info():
-    course = Course.objects.all()
-    print("CourseSerialser: ", CourseSerializer(course, many=True).data)
-    return CourseSerializer(course, many=True).data
+def get_course_info(semester="", name="", credit="", day="", classroom="", advisor="", major=""):
+    queryset = Course.objects.all()
+
+    if semester:
+        queryset = queryset.filter(semester=semester)
+    if name:
+        queryset = queryset.filter(name__icontains=name)
+    if credit:
+        queryset = queryset.filter(credit=credit)
+    if day:
+        queryset = queryset.filter(day__icontains=day)
+    if classroom:
+        queryset = queryset.filter(classroom__icontains=classroom)
+    if advisor:
+        queryset = queryset.filter(advisor__icontains=advisor)
+    if major:
+        queryset = queryset.filter(major__icontains=major)
+
+    print("CourseSerialser: ", CourseSerializer(queryset, many=True).data)
+    return CourseSerializer(queryset, many=True).data
 
 
 def get_course_info_by_filter(
