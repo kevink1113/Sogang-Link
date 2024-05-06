@@ -161,27 +161,36 @@ class _TimeTable extends State<TimeTable> {
         child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        DropdownButton<String>(
-          value: semester.toString(),
-          icon: const Icon(Icons.arrow_downward),
-          elevation: 16,
-          style: const TextStyle(color: Colors.deepPurple),
-          underline: Container(
-            height: 2,
-            color: Colors.deepPurpleAccent,
-          ),
-          onChanged: (String? value) {
-            // This is called when the user selects an item.
-            setState(() {
-              semester = int.parse(value!);
-            });
-          },
-          items: takes.semesters
-              .toList()
-              .map<DropdownMenuItem<String>>((int value) {
-            return DropdownMenuItem<String>(
-              value: value.toString(),
-              child: Text(value.toString()),
+        Wrap(
+          spacing: 8.0, // Horizontal space between chips
+          runSpacing: 4.0, // Vertical space between chip rows
+          children: takes.semesters.toList().map<Widget>((int value) {
+            return ChoiceChip(
+              label: Text(
+                value.toString(),
+                style: TextStyle(
+                  color:
+                      semester == value ? Colors.white : Colors.grey.shade800,
+                ),
+              ),
+              selected: semester == value,
+              onSelected: (bool selected) {
+                setState(() {
+                  if (selected) {
+                    semester = value;
+                  }
+                });
+              },
+              backgroundColor:
+                  semester == value ? Color(0xFF9e2a2f) : Colors.grey.shade300,
+              selectedColor: Color(0xFF9e2a2f),
+              padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 8,
+              avatar:
+                  null, // Explicitly remove any avatar, such as a check mark
             );
           }).toList(),
         ),
