@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework.test import APIRequestFactory
 from lecture.views import CourseViewSet
+from maps.views import ClassroomListView
 
 
 def get_user_info(username):
@@ -28,10 +29,26 @@ def get_user_info(username):
 '''
 
 
-def get_course_info():
-    course = Course.objects.all()
-    print("CourseSerialser: ", CourseSerializer(course, many=True).data)
-    return CourseSerializer(course, many=True).data
+def get_course_info(semester="", name="", credit="", day="", classroom="", advisor="", major=""):
+    queryset = Course.objects.all()
+
+    if semester:
+        queryset = queryset.filter(semester=semester)
+    if name:
+        queryset = queryset.filter(name__icontains=name)
+    if credit:
+        queryset = queryset.filter(credit=credit)
+    if day:
+        queryset = queryset.filter(day__icontains=day)
+    if classroom:
+        queryset = queryset.filter(classroom__icontains=classroom)
+    if advisor:
+        queryset = queryset.filter(advisor__icontains=advisor)
+    if major:
+        queryset = queryset.filter(major__icontains=major)
+
+    print("CourseSerialser: ", CourseSerializer(queryset, many=True).data)
+    return CourseSerializer(queryset, many=True).data
 
 
 def get_course_info_by_filter(
@@ -67,8 +84,9 @@ def get_course_info_by_filter(
 '''
 
 
-def get_takes_info(username):
-    takes = Takes.objects.filter(student_id=username)
+def get_takes_info(username, semester):
+    takes = Takes.objects.filter(student_id=username, course__semester=semester)
+    print("Takes: ", takes)
     return TakesSerializer(takes, many=True).data  # To.윤상현  Modified Sererializer
 
 
@@ -93,6 +111,14 @@ def get_takes_info_by_filter(
     ).all()
     return TakesSerializer(takes, many=True).data
 
+def get_empty_classrooms(building):
+    # Fetching classroom info
+    empty_classrooms_data = ClassroomListView.get_classroom_info(building)
+    print("EmptyClassrooms: ", empty_classrooms_data)
+    
+    # Ensure this is returning a tuple or list of two elements if that is what the serializer expects
+    # For example:
+    return empty_classrooms_data, []  # Assuming no occupied classrooms are returned
 
 
 
@@ -142,3 +168,28 @@ def get_takes_info_by_filter(
 # def get_takes_info(user):
 #     data = internal_api_client('/lecture/takes', {'semester': '2024010'})
 #     return data
+
+def main():
+    # Demo 함수
+    username = "20191559"
+    semester = "2024010"
+    course_id = "CSE4187"
+    building = "K"
+    
+    # user_info = get_user_info(username)
+    # print("User Info:", user_info)
+    
+    # course_info = get_course_info()
+    # print("Course Info:", course_info)
+    
+    # filtered_course_info = get_course_info_by_filter(course_id=course_id, semester=semester)
+    # print("Filtered Course Info:", filtered_course_info)
+    
+    # takes_info = get_takes_info(username, semester)
+    # print("Takes Info:", takes_info)
+    
+    empty_classrooms = get_empty_classrooms(building)
+    print("Empty Classrooms:", empty_classrooms)
+
+if __name__ == "__main__":
+    main()

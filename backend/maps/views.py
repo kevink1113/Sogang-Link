@@ -64,8 +64,8 @@ buildings = [
 
 
 class ClassroomListView(APIView):
-
-  def get_classroom_info(self, building):
+    @staticmethod
+    def get_classroom_info(building):
         current_time = datetime.datetime.now()
         day = current_time.weekday() + 1  # Monday is 1, Sunday is 7
 
@@ -131,23 +131,22 @@ class ClassroomListView(APIView):
         #     "occupied_classrooms": occupied_classrooms
         # })
 
+    def get(self, request, format=None):
+        free_classrooms, occupied_classrooms = self.get_classroom_info(request.GET.get('building'))
+        test = self.get_classroom_info(request.GET.get('building'))
+        print("TEST: ", test)
+        return JsonResponse({
+            "free_classrooms": free_classrooms, 
+            "occupied_classrooms": occupied_classrooms
+            }, status=200)
 
-
-  def get(self, request, format=None):
-      free_classrooms, occupied_classrooms = self.get_classroom_info(request.GET.get('building'))
-    
-      return JsonResponse({
-          "free_classrooms": free_classrooms, 
-          "occupied_classrooms": occupied_classrooms
-          }, status=200)
-  
 
 class BuildingInfoListView(APIView):
     
     def get(self, request, format=None):
 
         building = request.GET.get('building') # 약어로 받아옴
-        
+
 
         empty_classrooms = ClassroomListView().get_classroom_info(building)[0] # ex. 'K'의 빈 강의실 정보
         # empty_classroom 배열로 변환
