@@ -40,9 +40,11 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_extensions',
     'users.apps.UsersConfig',
     'lecture.apps.LectureConfig',
     'notices.apps.NoticesConfig',
+    'maps.apps.MapsConfig',
 ]
 
 MIDDLEWARE = [

@@ -22,7 +22,7 @@ class _TimeTable extends State<TimeTable> {
   List week = ['월', '화', '수', '목', '금'];
   var kColumnLength = 22;
   double kFirstColumnHeight = 40;
-  double kBoxSize = 90;
+  double kBoxSize = 70;
   int semester = 2024010;
   Codec<String, String> stringToBase64 = utf8.fuse(base64);
   // final storage = FlutterSecureStorage();
@@ -99,18 +99,57 @@ class _TimeTable extends State<TimeTable> {
               top: top,
               left: 0,
               child: Stack(children: [
-                Container(
-                  width: MediaQuery.of(context).size.width / 5,
-                  height: height,
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.all(Radius.circular(2)),
+                InkWell(
+                  onTap: () => showModalBottomSheet<void>(
+                      showDragHandle: true,
+                      backgroundColor: Colors.white,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 200,
+                          // decoration: BoxDecoration(
+                          //   color: Colors.transparent,
+                          //   borderRadius: BorderRadius.only(
+                          //     topLeft: Radius.circular(20.0),
+                          //     topRight: Radius.circular(20.0),
+                          //   ),
+                          // ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text("과목: ${lecture.course.name}",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )),
+                                Text("교수명: ${lecture.course.advisor}",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )),
+                                Text("교실: ${lecture.course.classroom}",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 5,
+                    height: height,
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                    ),
+                    child: Text(
+                      "${lecture.course.name}\n${lecture.course.classroom}",
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
-                  child: Text(
-                    "${lecture.course.name}\n${lecture.course.classroom}",
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
+                )
               ]),
             ),
           );
@@ -122,27 +161,36 @@ class _TimeTable extends State<TimeTable> {
         child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        DropdownButton<String>(
-          value: semester.toString(),
-          icon: const Icon(Icons.arrow_downward),
-          elevation: 16,
-          style: const TextStyle(color: Colors.deepPurple),
-          underline: Container(
-            height: 2,
-            color: Colors.deepPurpleAccent,
-          ),
-          onChanged: (String? value) {
-            // This is called when the user selects an item.
-            setState(() {
-              semester = int.parse(value!);
-            });
-          },
-          items: takes.semesters
-              .toList()
-              .map<DropdownMenuItem<String>>((int value) {
-            return DropdownMenuItem<String>(
-              value: value.toString(),
-              child: Text(value.toString()),
+        Wrap(
+          spacing: 8.0, // Horizontal space between chips
+          runSpacing: 4.0, // Vertical space between chip rows
+          children: takes.semesters.toList().map<Widget>((int value) {
+            return ChoiceChip(
+              label: Text(
+                value.toString(),
+                style: TextStyle(
+                  color:
+                      semester == value ? Colors.white : Colors.grey.shade800,
+                ),
+              ),
+              selected: semester == value,
+              onSelected: (bool selected) {
+                setState(() {
+                  if (selected) {
+                    semester = value;
+                  }
+                });
+              },
+              backgroundColor:
+                  semester == value ? Color(0xFF9e2a2f) : Colors.grey.shade300,
+              selectedColor: Color(0xFF9e2a2f),
+              padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 8,
+              avatar:
+                  null, // Explicitly remove any avatar, such as a check mark
             );
           }).toList(),
         ),

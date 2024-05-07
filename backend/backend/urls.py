@@ -43,11 +43,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', LoginView.as_view(), name='login'),
     path('chat', ChatView.as_view(), name='chat'),
+    # path('stream', StreamView.as_view(), name='stream'),
     # path('login/', my_login_view, name='my_login_view'),
     path('offline/', offline, name='offline'),
     path('users/', include('users.urls')),
     path('lecture/', include('lecture.urls')),
     path('notice', NoticeViewSet.as_view(), name='notice'),
+    path('maps/', include('maps.urls')),
 ]
 
 if settings.DEBUG:

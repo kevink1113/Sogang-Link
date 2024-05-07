@@ -8,12 +8,37 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .crawl_saint import get_saint_cookies
 from .auth_backend import PasswordlessAuthBackend
+
+import openai
+from chatbot.secret import get_secret
+from chatbot.api import *
+
 from django.contrib.auth import login as auth_login
+from typing_extensions import override
+from openai.types.beta.threads.runs import ToolCall, RunStep
+
+from openai.types.beta.assistant_stream_event import (
+    ThreadRunRequiresAction, ThreadMessageDelta, ThreadRunCompleted,ThreadMessageCompleted,
+    ThreadRunFailed, ThreadRunCancelling, ThreadRunCancelled, ThreadRunExpired, ThreadRunStepFailed,
+    ThreadRunStepCancelled)
+# from backend.chatbot import chatbot_function_call
+# from chatbot import chatbot_function_call
+from chatbot.chatbot import chatbot_function_call
+
+client = openai.OpenAI(api_key=get_secret())
 
 from drf_yasg.utils import swagger_auto_schema
+import openai
+from openai import AssistantEventHandler
 
 from chatbot.chatbot import chatbot_query
+from chatbot.chatbot import chatbot_query_stream
+from chatbot.secret import get_secret
 from chatbot.api import *
+
+from django.http import StreamingHttpResponse, JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+import json
 
 class LoginView(APIView):
     """
@@ -101,6 +126,20 @@ def my_login_view(request):
 def offline(request):
     return render(request, 'offline.html')
 
+def cancel_active_runs(client, thread_id):
+    """
+    명시된 thread에서 실행중인 모든 run을 취소하는 함수
+
+    :param client: 사용할 OpenAI client
+    :param thread_id: 실행중인 active run(들)이 있는 thread ID
+    """
+
+    active_runs = client.beta.threads.runs.list(thread_id=thread_id).data
+    for run in active_runs:
+        if run.status not in ["completed", "failed", "cancelled", "expired"]: # 취소된 run은 다시 취소하지 않음
+            client.beta.threads.runs.cancel(thread_id=thread_id, run_id=run.id)
+            print(f"Cancelled run {run.id}")
+
 
 class ChatView(APIView):
     """
@@ -120,30 +159,148 @@ class ChatView(APIView):
         }
         # response 정의
     ))
-    # @swagger_auto_schema(operation_description="POST 요청을 위한 엔드포인트입니다.")
+
     def post(self, request, *args, **kwargs):
         user = request.user
-
-        print(user)
-        print("Question: ", request.data.get('question'))
-
         question = request.data.get('question')
+        print("Question recieved: ", question)
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
-        #assist 나중에 숨기거나 해야하나 안숨겨도 별 문제는 없긴함
-        thread_id = "thread_bsA3VBjvUYSYyNLNpBKD1EfH"
-        #thread_id = user.thread_id
-        messages = chatbot_query(assistant_id, user, thread_id, question)
 
-        total_message = "대화:\n"
-        for i, message in enumerate(reversed(messages.data), start=1):
-            total_message += "서강gpt>" if message.role == "assistant" else "당신>"
-            for content in message.content:
-                total_message += content.text.value + "\n"
+        thread_id = client.beta.threads.create().id#user.thread
+        # Initialize the streaming process
+        # 질문 보내기
 
-        recent_question = messages.data[1].content[0].text.value
-        recent_answer = messages.data[0].content[0].text.value
+        # cancel_active_runs(client, thread_id)
+        # print("Active runs cancelled")
 
-        print(recent_question)
-        print(recent_answer)
-        return Response({'answer': recent_answer},
-                        status=status.HTTP_200_OK)
+
+        cancel_active_runs(client, thread_id)
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=question
+        )
+        def event_stream():
+
+            # 스트림으로 받기
+
+            with client.beta.threads.runs.stream(
+                    thread_id=thread_id,
+                    assistant_id=assistant_id
+            ) as stream:
+                print("Stream started")
+                try:
+                    for event in stream:
+                        # print(event, end="\n\n")
+                        if isinstance(event, ThreadMessageDelta):   # 메시지 델타 이벤트 처리
+                            data = event.data.delta.content
+                            for text in data:
+                                print(text.text.value, end='', flush=True)
+                                yield f"data: {json.dumps({'text': text.text.value})}\n\n"
+
+                        elif isinstance(event, ThreadRunRequiresAction):
+                            run = event.data
+                            tools = run.required_action.submit_tool_outputs.tool_calls
+                            tool_outputs = []
+                            for tool in tools:
+                                tool_id = tool.id
+                                function_args = tool.function.arguments
+                                function_name = tool.function.name
+                                data = ""
+
+                                # 함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
+                                function_args = json.loads(function_args)
+
+                                # semester = None
+                                # if(function_args.get('semester') != None):
+                                #     semester = function_args['semester']
+                                # # Use function_args in the function call
+
+                                if function_name == "get_user_info":
+                                    data = get_user_info(user.username)
+                                elif function_name == "get_course_info":
+                                    data = get_course_info(
+                                        semester=function_args.get('semester', ""),
+                                        name=function_args.get('name', ""),
+                                        credit=function_args.get('credit', ""),
+                                        day=function_args.get('day', ""),
+                                        classroom=function_args.get('classroom', ""),
+                                        advisor=function_args.get('advisor', ""),
+                                        major=function_args.get('major', "")
+                                    )
+                                elif function_name == "get_takes_info":
+                                    data = get_takes_info(
+                                        username=user.username, 
+                                        semester=function_args.get('semester', ""),
+                                    )
+                                elif function_name == "get_empty_classrooms":
+                                    data = get_empty_classrooms(function_args['building'])
+                                tool_outputs.append({
+                                    "tool_call_id": tool_id,
+                                    "output": json.dumps(data)
+                                })
+                            # 스트림으로 보내기
+                            with client.beta.threads.runs.submit_tool_outputs_stream(
+                                    thread_id=run.thread_id,
+                                    run_id=run.id,
+                                    tool_outputs=tool_outputs
+                            ) as stream2:
+                                for event2 in stream2:
+                                    if isinstance(event2, ThreadMessageDelta):
+                                        # 메시지 델타 이벤트 처리
+                                        data = event2.data.delta.content
+                                        for text in data:
+                                            print(text.text.value, end='', flush=True)
+                                            yield f"data: {json.dumps({'text': text.text.value})}\n\n"
+
+                        elif isinstance(event, ThreadRunCompleted):
+                            # 실행 완료 이벤트 처리
+                            yield "data: run_completed\n\n"
+                except GeneratorExit:
+                    # Handle the case when the client disconnects
+                    stream.close()
+
+
+        # Return a StreamingHttpResponse that keeps the connection open
+        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        response['Cache-Control'] = 'no-cache'
+        return response
+
+
+class StreamView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
+        thread_id = user.thread  # Ensure user has a 'thread' attribute or handle accordingly
+        question = request.data.get('question', '')
+
+        # Setup OpenAI client
+        client = openai.OpenAI(api_key=get_secret())
+
+        # Create a message in the thread
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=question
+        )
+
+        def event_stream():
+            # Stream the thread's run
+            with client.beta.threads.runs.stream(thread_id=thread_id, assistant_id=assistant_id) as stream:
+                for event in stream:
+                    # Handle different types of events
+                    if hasattr(event, 'status'):
+                        if event.status == "completed":
+                            break
+                        elif event.status == "requires_action":
+                            # Handle action required status
+                            chatbot_function_call(event, assistant_id, user, thread_id)
+                    # Send back text updates
+                    if hasattr(event, 'content') and 'text' in event.content:
+                        text = event.content['text']
+                        yield f"data: {json.dumps({'text': text})}\n\n"
+
+        # Set headers to notify the client that this is an event-stream.
+        return StreamingHttpResponse(event_stream(), content_type='text/event-stream')

@@ -1,6 +1,6 @@
 import os
 import openai
-from secret import get_secret
+from chatbot.secret import get_secret
 
 client = openai.OpenAI(api_key=get_secret())
 #######################################################################################
