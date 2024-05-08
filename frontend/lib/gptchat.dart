@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -76,30 +75,24 @@ class _GptChat extends State<GptChat> {
         text: answer,
       ));
 
-      final client = HttpClient();
-      final req = await client.openUrl(
-          "post", Uri.parse("http://127.0.0.1:8000/stream"));
-      req.headers.set("content-type", "application/json");
-      req.headers.set("Authorization", "Token $token");
-      req.write('{"question": $question}');
+      final client = http.Client();
 
-      final res = await req.close();
+      final request =
+          http.Request('POST', Uri.parse("http://127.0.0.1:8000/chat"));
 
-      await for (var data in res) {
-        final string = utf8.decode(data);
-        answer = "$answer$string";
-        print(answer);
-        setState(() {
-          _messages.removeAt(_messages.length - 1);
-        });
-        _addMessage(types.TextMessage(
-          author: const types.User(id: 'GPT'),
-          createdAt: DateTime.now().millisecondsSinceEpoch,
-          id: randomString(),
-          text: answer,
-        ));
-      }
+      Map<String, String> bodyMap = {'question': question};
+      request.body = jsonEncode(bodyMap);
+      request.headers['Authorization'] = 'Token $token';
+      request.headers['Content-type'] = 'application/json';
+
+      final response = await client.send(request);
+
+      // 스트림 데이터 처리
+      response.stream.listen((line) {
+        print((utf8.decode(line).substring(6)));
+      });
     } catch (e) {
+      print(e);
       print("gpt error");
     }
   }
@@ -122,7 +115,7 @@ class _GptChat extends State<GptChat> {
           if (token != null)
             {
               SecureStorage.getToken().then((token) => {
-                    if (token != null) {GPTcall(token, message.text)}
+                    if (token != null) {GPTstreamcall(token, message.text)}
                   })
             }
         });
