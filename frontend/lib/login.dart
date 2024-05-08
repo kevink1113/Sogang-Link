@@ -12,6 +12,8 @@ import 'storage.dart'; // Import the secure storage class
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 
+final String url = "http://127.0.0.1:8000";
+
 late User user;
 late Takes takes;
 late Set semester_list;
@@ -24,7 +26,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final idController = TextEditingController();
   final passwordController = TextEditingController();
-  final String url = "http://127.0.0.1:8000";
   bool isLoading = false;
   bool isVerified = false;
   int semester = 2024010;

@@ -1,11 +1,18 @@
+import 'dart:convert';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:soganglink/data/courses/takes.dart';
 import 'package:soganglink/data/login/User.dart';
+import 'package:soganglink/data/notice/notice.dart';
 import 'package:soganglink/login.dart';
+import 'package:soganglink/storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,6 +23,7 @@ class HomePage extends StatefulWidget {
 class _HomePage extends State<HomePage> {
   List<Widget> courses = [];
   int semester = 2024010;
+  NoticeList? notice = null;
   @override
   void initState() {
     // TODO: implement initState
@@ -26,6 +34,29 @@ class _HomePage extends State<HomePage> {
         if (lecture.course.semester != semester) continue;
         courses.add(Text(lecture.course.name));
       }
+    }
+
+    var request = Uri.parse("$url/notice");
+    try {
+      SecureStorage.getToken().then((token) {
+        try {
+          http.get(request, headers: {"Authorization": "Token $token"}).then(
+              (response) {
+            if (response.statusCode == 200) {
+              setState(() {
+                notice = NoticeList.fromJsonlist(
+                    jsonDecode(utf8.decode(response.bodyBytes)));
+              });
+            } else {
+              print("로그인 실패");
+            }
+          });
+        } catch (e) {
+          print("네트워크 오류");
+        }
+      });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -187,15 +218,28 @@ class _HomePage extends State<HomePage> {
             ),
             height: 500,
             margin: EdgeInsets.fromLTRB(20, 30, 20, 30),
-            child: Center(
-              child: Text(
-                '둥글고 테두리 색상',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              ),
-            ),
+            child: (notice != null)
+                ? Center(
+                    child: ListView.builder(
+                    itemCount: notice!.noticelist.length,
+                    itemBuilder: ((context, index) {
+                      return RichText(
+                        text: TextSpan(
+                          text: notice!.noticelist[index].title,
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.black,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              launchUrl(
+                                  Uri.parse(notice!.noticelist[index].url));
+                            },
+                        ),
+                      );
+                    }),
+                  ))
+                : Center(child: Text('로딩중')),
           ),
           Container(
             alignment: Alignment.center,
