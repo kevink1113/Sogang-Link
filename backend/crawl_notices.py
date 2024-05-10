@@ -6,7 +6,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options  # for suppressing the browser
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import pyperclip  # 클립보드 사용을 위해
+# import pyperclip  # 클립보드 사용을 위해
+import argparse
 
 from urllib import parse
 from datetime import datetime
@@ -21,10 +22,15 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django.setup()
 from notices.models import Notice
 
+def get_args():
+    parser = argparse.ArgumentParser(description="Crawl notices from a university website")
+    parser.add_argument('--type', type=str, default='일반공지', help='크롤링할 공지 구분, default는 일반공지')
+    parser.add_argument('--num', type=int, default='10', help='크롤링할 공지 개수, default는 최근 10개')
+    return parser.parse_args()
 
 
 
-def scrape_links(url):
+def scrape_links(url, num):
     options = Options()
     options.add_argument("window-size=1400,1500")
         
@@ -50,7 +56,7 @@ def scrape_links(url):
     driver.execute_script("arguments[0].click();", first_row)
     collected_data = []  # 제목과 링크를 저장할 리스트
 
-    for _ in range(5):  # 10번 반복
+    for _ in range(num):  # num번 반복
         # 새 페이지 로딩 대기
         # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.cursor-pointer")))
         
@@ -103,21 +109,24 @@ def scrape_links(url):
     return collected_data
 
 
-def crawl_by_board(board_name):
+def crawl_by_board(board_name, num):
     '''
     게시판별로 크롤링하는 함수
     '''
-
+    print("Trying to crawl ", board_name)
     base_url = "https://sogang.ac.kr/ko/"
     if(board_name == "일반공지"):
-        extracted_links = scrape_links(base_url + "story/notification-general")
+        extracted_links = scrape_links(base_url + "story/notification-general", num)
         
     elif(board_name == "학사공지"):
-        extracted_links = scrape_links(base_url + "academic-support/notices")
+        extracted_links = scrape_links(base_url + "academic-support/notices", num)
     elif(board_name == "장학공지"):
-        extracted_links = scrape_links(base_url + "scholarship-notice")
+        extracted_links = scrape_links(base_url + "scholarship-notice", num)
+    else:
+        print(board_name, " board not supported")
+        return
 
-    existing_links = Notice.objects.values_list('url', flat=True)
+    existing_links = Notice.objects.values_list('url', flat=True).order_by('-date')[:100] # 최근 100개 중에서만 비교하게 해서 로드 줄임
     # existing_links = existing_links.order_by('-id')[:3]
     new_links = [link for link in extracted_links if link['link'] not in existing_links]
     
@@ -130,7 +139,15 @@ def crawl_by_board(board_name):
 
 # 결과 출력
 if __name__ == "__main__":
-    crawl_by_board("일반공지")
+    args = get_args()
+    print("======================== Crawler Notice ========================")
+    print("기본은 일반공지, 최근 10개 크롤링합니다.")
+    print("옵션을 적용하려면 python crawl_notices.py --type=일반공지 --num=10")
+    print("type은 일반공지, 학사공지, 장학공지 중 하나를 선택")
+    print("================================================================\n")
+
+    crawl_by_board(args.type, args.num)
+    # crawl_by_board("일반공지", num=10)
     # extracted_links = scrape_links()
     # print("========== Extracted Links ==========")
     # for link in extracted_links:
