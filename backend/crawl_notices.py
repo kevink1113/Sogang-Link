@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options  # for suppressing the browser
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pyperclip  # 클립보드 사용을 위해
@@ -24,7 +25,22 @@ from notices.models import Notice
 
 
 def scrape_links(url):
-    driver = webdriver.Chrome()
+    options = Options()
+    options.add_argument("window-size=1400,1500")
+        
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument("--single-process")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disk-cache-size=4096")
+    options.add_argument("--disable-infobars")  # Disables the "Chrome is being controlled" infobar
+    options.add_argument("--disable-extensions")  # Disables existing extensions
+    options.add_argument("--disable-popup-blocking")  # Disables popups
+    options.add_argument("--ignore-certificate-errors")  # Ignores certificate-related errors
+    options.add_argument("--disable-print-preview")  # Disables features that can interfere
+
+
+    driver = webdriver.Chrome(options=options)
     driver.get(url)
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "table")))
 
@@ -59,19 +75,22 @@ def scrape_links(url):
         date_time = seoul_tz.localize(parsed_date_time)
 
         link_icon = driver.find_element(By.CSS_SELECTOR, "img[alt='link']")
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable(link_icon))
+        # WebDriverWait(driver, 10).until(EC.element_to_be_clickable(link_icon))
+        
         # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "img[alt='link']")))
-        ActionChains(driver).move_to_element(link_icon).click().perform()
+        # ActionChains(driver).move_to_element(link_icon).click().perform()
 
         # driver.execute_script("arguments[0].scrollIntoView(true);", link_icon)
-        driver.execute_script("arguments[0].click();", link_icon)
+        # driver.execute_script("arguments[0].click();", link_icon)
         
         # 클립보드에서 링크 가져오기
         # time.sleep(1)  # 클립보드 복사를 위한 충분한 시간 확보
-        link_url = pyperclip.paste()
+        # link_url = pyperclip.paste()
 
         # decode url
-        link_url = parse.unquote(link_url)
+        # link_url = parse.unquote(link_url)
+        link_url = driver.current_url
+        
 
 
         print("title: ", title, " link: ", link_url, " date: ", date_time)
