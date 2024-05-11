@@ -50,6 +50,7 @@ urlpatterns = [
     path('lecture/', include('lecture.urls')),
     path('notice', NoticeViewSet.as_view(), name='notice'),
     path('maps/', include('maps.urls')),
+    path('posts/', include('posts.urls')),
 ]
 
 if settings.DEBUG:
