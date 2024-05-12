@@ -3,7 +3,13 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from lecture.models import Course
 import datetime
-from maps.models import Building, Facility
+from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+
+from maps.models import Building, Facility, Menu
+from .serializers import MenuSerializer
+from django_filters import rest_framework as filters
+
 
 # Create your views here.
 
@@ -201,3 +207,18 @@ class BuildingInfoListView(APIView):
                 ]
 
         return JsonResponse(response_data, status=200)
+
+
+class MenuFilter(filters.FilterSet):
+    facility_name = filters.CharFilter(field_name='facility__name', lookup_expr='icontains')
+
+    class Meta:
+        model = Menu
+        fields = ['facility_name', 'date']  # Specify all fields needed for filtering here
+
+
+class MenuListView(generics.ListAPIView):
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MenuFilter  # Use this to specify your custom filter

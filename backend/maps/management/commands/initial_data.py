@@ -54,62 +54,115 @@ class Command(BaseCommand):
         # 건물 추가
         # building = Building.objects.create(name="중앙 도서관")
         # 생성하기 전에 모두 삭제
-        Building.objects.all().delete()
-        Facility.objects.all().delete()
+        # Building.objects.all().delete()
+        # Facility.objects.all().delete()
         
         for building_name in buildings:
             # abbr is an alphabet in the building name
-            Building.objects.create(name=building_name, abbr=self.find_abbr(building_name))
+            Building.objects.update_or_create(name=building_name, abbr=self.find_abbr(building_name))
             # Building.objects.create(name=building_name)
         
-        Facility.objects.create(
-            building= Building.objects.get(name="김대건관(K관)"),
+        # 열람실
+        # - 도서관 열람실
+        # TODO: 정보 확인
+        Facility.objects.update_or_create(
+            building= Building.objects.get(name="로욜라도서관"),
+            name="111 일반열람실",
+            description="3층에 위치해 있습니다.\n노트북 전용실 존재.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+        Facility.objects.update_or_create(
+            building= Building.objects.get(name="로욜라도서관"),
+            name="112 일반열람실",
+            description="3층에 위치해 있습니다.\n노트북 전용실 존재.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+        Facility.objects.update_or_create(
+            building= Building.objects.get(name="로욜라도서관"),
+            name="113 일반열람실",
+            description="3층에 위치해 있습니다.\n노트북 전용실 존재.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+        Facility.objects.update_or_create(
+            building= Building.objects.get(name="로욜라도서관"),
+            name="133 일반열람실",
+            description="3층에 위치해 있습니다.\n노트북 전용실 존재.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+        # - 건물 열람실
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="K"),
             name="K관 열람실",
             description="B1에 위치해 있습니다. 노트북 전용실 존재.",
             open_hours="08:00 - 20:00",
             facility_type='reading_room'
         )
-        Facility.objects.create(
-            building= Building.objects.get(name="김대건관(K관)"),
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="X"),
+            name="X관 대학원열람실",
+            description="B1에 위치해 있습니다. 노트북 전용실 존재.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="PA"),
+            name="PA관 열람실",
+            description="1층에 위치해 있습니다.\n노트북 전용실 존재.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="J"),
+            name="J관 일반열람실",
+            description="1층에 위치해 있습니다.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="J"),
+            name="J관 노트북전용실",
+            description="1층에 위치해 있습니다.",
+            open_hours="08:00 - 20:00",
+            facility_type='reading_room'
+        )
+
+
+        # 인쇄소
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="J"),
             name="인쇄소",
-            description="3층에 위치해 있습니다. 계좌번호: 국민 123-456-7890",
+            description="2층에 위치해 있습니다.\n계좌번호: 국민 123-456-7890",
+            open_hours="08:00 - 20:00",
+            facility_type='print_shop'
+        )
+        
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="K"),
+            name="인쇄소",
+            description="3층에 위치해 있습니다.\n계좌번호: 국민 123-456-7890",
             open_hours="08:00 - 20:00",
             facility_type='print_shop'
         )
 
-        Facility.objects.create(
-            building= Building.objects.get(name="정하상관(J관)"),
-            name="J관 일반열람실",
-            description="1층에 위치해 있습니다. 노트북 전용실 존재.",
-            open_hours="08:00 - 20:00",
-            facility_type='reading_room'
+
+        # 학생식당
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="BW"),
+            name="우정원 학생식당",
+            description="1층에 위치해 있습니다.\n가격: 3,500원 ~ 6,000원\n전화번호: 02-705-8255",
+            open_hours="평일 11:00~ 15:00",
+            facility_type='cafeteria'
         )
-        Facility.objects.create(
-            building= Building.objects.get(name="정하상관(J관)"),
-            name="인쇄소",
-            description="2층에 위치해 있습니다. 계좌번호: 국민 123-456-7890",
-            open_hours="08:00 - 20:00",
-            facility_type='print_shop'
+        Facility.objects.update_or_create(
+            building= Building.objects.get(abbr="E"),
+            name="엠마오 학생식당",
+            description="3층에 위치해 있습니다.\n가격: 5,000원 ~ 6,000원\n전화번호: 02-3274-4831",
+            open_hours="평일 11:00~ 15:00",
+            facility_type='cafeteria'
         )
-        
-        # # 중앙 도서관에 열람실 추가
-        # Facility.objects.create(
-        #     building=building,
-        #     name="중앙 도서관 열람실",
-        #     description="24시간 운영되는 열람실입니다.",
-        #     open_hours="00:00 - 24:00",
-        #     total_seats=120,
-        #     available_seats=45,
-        #     facility_type='reading_room'
-        # )
-        
-        # # 중앙 도서관에 인쇄소 추가
-        # Facility.objects.create(
-        #     building=building,
-        #     name="도서관 인쇄소",
-        #     description="학생들의 인쇄 및 복사 요구를 충족시킵니다.",
-        #     open_hours="09:00 - 18:00",
-        #     facility_type='print_shop'
-        # )
         
         self.stdout.write(self.style.SUCCESS('Successfully initialized the database.'))

@@ -7,15 +7,14 @@ class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, default='', related_name='posts')
-    mod = models.IntegerField(null=True)
-    image = models.ImageField(upload_to='post_pictures/', null=True)
+    # mod = models.IntegerField(null=True)
+    board = models.CharField(max_length=100, default='free')
+    image = models.ImageField(upload_to='post_pictures/', null=True, blank=True)
 
-    upvote = models.ManyToManyField(User, related_name='upvoted_posts')
-    upvote_num = models.IntegerField(default=0)
-
-    view = models.ManyToManyField(User, related_name='viewed_posts')
-    view_num = models.IntegerField(default=0)
-
+    upvotes = models.ManyToManyField(User, related_name='upvoted_posts', blank=True)
+    downvotes = models.ManyToManyField(User, related_name='downvoted_posts', blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    
     def delete_post(self):
         self.delete()
 

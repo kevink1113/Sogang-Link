@@ -120,6 +120,19 @@ def crawl_courses(year, semester):
         options = Options()
         # options.add_argument("--headless")
         options.add_argument("window-size=1400,1500")
+        
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument("--single-process")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disk-cache-size=4096")
+        options.add_argument("--disable-infobars")  # Disables the "Chrome is being controlled" infobar
+        options.add_argument("--disable-extensions")  # Disables existing extensions
+        options.add_argument("--disable-popup-blocking")  # Disables popups
+        options.add_argument("--ignore-certificate-errors")  # Ignores certificate-related errors
+        options.add_argument("--disable-print-preview")  # Disables features that can interfere
+
+        
         driver = webdriver.Chrome(options=options)
         driver.get(target_url)
         print('Entering Target Page...')
@@ -155,11 +168,14 @@ def crawl_courses(year, semester):
         print('Saving data...')
         # 스크래핑
         html = driver.page_source
+        print("GOT driver.page_source")
         # print("==html===")
         # print(html)
         # print("==html end===")
         result_df = lxmlToDataframe(html)
+        print("GOT lxmlTODataFrame")
         result_df = preprocessor(result_df)
+        print("GOT preprocessor result")
         print(f'{year} year, {semester} semester crawling done.')
         driver.close()
         return result_df

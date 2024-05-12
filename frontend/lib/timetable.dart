@@ -28,15 +28,27 @@ class _TimeTable extends State<TimeTable> {
   Codec<String, String> stringToBase64 = utf8.fuse(base64);
   Color c = Colors.primaries[Random().nextInt(Colors.primaries.length)];
   List<Color> cs = [
-    Colors.red,
-    Colors.yellow,
-    Colors.blue,
-    Colors.purple,
-    Colors.orange,
-    Colors.red,
-    Colors.red,
-    Colors.red,
-    Colors.red,
+    Color.fromRGBO(94, 131, 193, 1),
+    Color.fromRGBO(198, 104, 91, 1),
+    Color.fromRGBO(196, 158, 82, 1),
+    Color.fromRGBO(209, 135, 80, 1),
+    Color.fromRGBO(125, 105, 185, 1),
+    Color.fromRGBO(157, 194, 100, 1),
+    Color.fromRGBO(91, 163, 106, 1),
+    Color.fromRGBO(96, 171, 155, 1),
+    Color.fromRGBO(170, 116, 192, 1),
+    // Color(0xffe66633),
+    // Color(0xff59a136),
+    // Color(0xff005ca1),
+    // Color(0xff4517a1),
+    // Colors.yellow,
+    // Colors.blue,
+    // Colors.purple,
+    // Colors.orange,
+    // Colors.red,
+    // Colors.red,
+    // Colors.red,
+    // Colors.red,
   ];
 
   @override
@@ -128,11 +140,14 @@ class _TimeTable extends State<TimeTable> {
                     height: height,
                     decoration: BoxDecoration(
                       color: cs[count % (cs.length)],
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      borderRadius: BorderRadius.all(Radius.circular(0)),
                     ),
                     child: Text(
                       "${lecture.course.name}\n${lecture.course.classroom}",
-                      style: const TextStyle(color: Colors.black, fontSize: 12),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 )
@@ -211,7 +226,7 @@ class _TimeTable extends State<TimeTable> {
             (index) {
               if (index % 2 == 0) {
                 return const Divider(
-                  color: Colors.black,
+                  color: Colors.grey,
                   height: 0,
                 );
               }
@@ -229,7 +244,7 @@ class _TimeTable extends State<TimeTable> {
   List<Widget> buildDayColumn(int index, List<Widget> lecturesForTheDay) {
     return [
       const VerticalDivider(
-        color: Colors.black,
+        color: Colors.grey,
         width: 0,
       ),
       Expanded(
@@ -250,7 +265,7 @@ class _TimeTable extends State<TimeTable> {
                   (index) {
                     if (index % 2 == 0) {
                       return const Divider(
-                        color: Colors.black,
+                        color: Colors.grey,
                         height: 0,
                       );
                     }

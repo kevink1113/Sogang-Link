@@ -53,6 +53,7 @@ def fetch_seat_info(url):
                     facility.available_seats = clean_seats(cols[4].text.strip())
                     # Facility.usage_rate = cols[5].text.strip()
                     facility.save()
+                    print("Saved stat of ", cols[1].text.strip())
 
                 room_info = {
                     'room_name': cols[1].text.strip(),

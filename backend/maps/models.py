@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import JSONField
+from django.utils.timezone import now
 
 # Create your models here.
 
@@ -24,3 +25,12 @@ class Facility(models.Model): # 열람실, 프린트샵, 카페 등
 
     def __str__(self):
         return f"{self.name} in {self.building.name}"
+
+
+class Menu(models.Model):
+    facility = models.ForeignKey(Facility, related_name='menus', on_delete=models.CASCADE)
+    date = models.DateField(default=now)
+    items_by_corner = JSONField(default=dict)  # Store items grouped by corners
+
+    def __str__(self):
+        return f"{self.facility.name} menu for {self.date}"

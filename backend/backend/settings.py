@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +25,7 @@ SECRET_KEY = 'django-insecure-xq%3-e$lb@rh9m=euj&%swl^m&73sw^7)dmhxh!j#n8f)xkkc2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["34.64.245.20", "127.0.0.1"]
 
 # Application definition
 
@@ -41,10 +42,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_extensions',
+    'django_filters',
     'users.apps.UsersConfig',
     'lecture.apps.LectureConfig',
     'notices.apps.NoticesConfig',
     'maps.apps.MapsConfig',
+    'posts.apps.PostsConfig',
 ]
 
 MIDDLEWARE = [
@@ -179,3 +182,7 @@ AUTHENTICATION_BACKENDS = (
 AUTH_USER_MODEL = 'users.User'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000000  # Adjust this number based on your needs
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
