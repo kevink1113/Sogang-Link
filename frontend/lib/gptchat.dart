@@ -65,6 +65,38 @@ class _GptChat extends State<GptChat> {
     }
   }
 
+  Future<void> GPTstreamcall(String token, String question) async {
+    try {
+      String answer = "";
+      _addMessage(types.TextMessage(
+        author: const types.User(id: 'GPT'),
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        id: randomString(),
+        text: answer,
+      ));
+
+      final client = http.Client();
+
+      final request =
+          http.Request('POST', Uri.parse("http://127.0.0.1:8000/chat"));
+
+      Map<String, String> bodyMap = {'question': question};
+      request.body = jsonEncode(bodyMap);
+      request.headers['Authorization'] = 'Token $token';
+      request.headers['Content-type'] = 'application/json';
+
+      final response = await client.send(request);
+
+      // 스트림 데이터 처리
+      response.stream.listen((line) {
+        print((utf8.decode(line).substring(6)));
+      });
+    } catch (e) {
+      print(e);
+      print("gpt error");
+    }
+  }
+
   Future<void> _handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: _user,
@@ -75,11 +107,15 @@ class _GptChat extends State<GptChat> {
 
     _addMessage(textMessage);
 
+    // setState(() {
+    //   _messages.removeAt(_messages.length - 1);
+    // });
+
     SecureStorage.getToken().then((token) => {
           if (token != null)
             {
               SecureStorage.getToken().then((token) => {
-                    if (token != null) {GPTcall(token, message.text)}
+                    if (token != null) {GPTstreamcall(token, message.text)}
                   })
             }
         });

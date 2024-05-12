@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/homepage.dart';
+import 'package:soganglink/setting.dart';
 import 'package:soganglink/storage.dart';
 import 'package:soganglink/timetable.dart';
+import 'package:soganglink/tools.dart';
 import 'gptchat.dart';
 import 'login.dart';
+import 'setting.dart';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -15,12 +18,12 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _selectedIndex = 2;
   final List<Widget> _pages = [
-    const HomePage(),
+    const Tools(),
     const TimeTable(),
     const HomePage(),
     const HomePage(), // 게시판 페이지 예시로 임시로 HomePage 사용
     const GptChat(),
-    const HomePage(), // 설정 페이지 예시로 임시로 HomePage 사용
+    const Setting(), // 설정 페이지 예시로 임시로 HomePage 사용
   ];
 
   void _onItemTapped(int index) {
@@ -54,6 +57,7 @@ class _HomeState extends State<Home> {
               color: Colors.white,
             ),
             onPressed: () {
+              SecureStorage.deleteToken();
               Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (_) => Login()));
             },

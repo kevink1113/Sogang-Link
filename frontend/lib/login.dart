@@ -12,6 +12,8 @@ import 'storage.dart'; // Import the secure storage class
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 
+final String url = "http://34.64.245.20:8000";
+
 late User user;
 late Takes takes;
 late Set semester_list;
@@ -24,7 +26,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final idController = TextEditingController();
   final passwordController = TextEditingController();
-  final String url = "http://127.0.0.1:8000";
   bool isLoading = false;
   bool isVerified = false;
   int semester = 2024010;
@@ -72,6 +73,7 @@ class _LoginState extends State<Login> {
               context, MaterialPageRoute(builder: (_) => Home()));
         });
       } else {
+        print(response.body);
         showToast("로그인 실패");
       }
     } catch (e) {
@@ -126,10 +128,10 @@ class _LoginState extends State<Login> {
       final response =
           await http.get(request, headers: {"Authorization": "Token $token"});
 
-      var tmp = jsonDecode(utf8.decode(response.bodyBytes));
-      Takes takes = Takes.fromJsonlist(tmp);
       if (response.statusCode == 200) {
         // Assuming 'Home' is your home widget after login success
+        var tmp = jsonDecode(utf8.decode(response.bodyBytes));
+        Takes takes = Takes.fromJsonlist(tmp);
         return takes;
       } else {
         Fluttertoast.showToast(
