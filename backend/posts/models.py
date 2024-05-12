@@ -11,11 +11,9 @@ class Post(models.Model):
     board = models.CharField(max_length=100, default='free')
     image = models.ImageField(upload_to='post_pictures/', null=True, blank=True)
 
-    upvote = models.ManyToManyField(User, related_name='upvoted_posts', blank=True)
-    upvote_num = models.IntegerField(default=0)
-
-    view = models.ManyToManyField(User, related_name='viewed_posts', blank=True)
-    view_num = models.IntegerField(default=0, null=True, blank=True)
+    upvotes = models.ManyToManyField(User, related_name='upvoted_posts', blank=True)
+    downvotes = models.ManyToManyField(User, related_name='downvoted_posts', blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
     
     def delete_post(self):
         self.delete()
