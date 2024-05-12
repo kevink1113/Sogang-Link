@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "131941295256",
+    "project_id": "soganggpt-8a6aa",
+    "storage_bucket": "soganggpt-8a6aa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131941295256:android:47330c7b6def0e1e5d1ced",
+        "android_client_info": {
+          "package_name": "com.soganglink.soganglink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL6CHevxKGqFi1te3ziaEwuzIz0U9btN8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
