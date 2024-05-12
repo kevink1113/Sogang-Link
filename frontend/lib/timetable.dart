@@ -18,6 +18,7 @@ class TimeTable extends StatefulWidget {
 }
 
 class _TimeTable extends State<TimeTable> {
+  final GlobalKey _containerkey = GlobalKey();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   List week = ['월', '화', '수', '목', '금'];
   var kColumnLength = 22;
@@ -25,74 +26,53 @@ class _TimeTable extends State<TimeTable> {
   double kBoxSize = 70;
   int semester = 2024010;
   Codec<String, String> stringToBase64 = utf8.fuse(base64);
-  // final storage = FlutterSecureStorage();
-
-  var url = 'http://127.0.0.1:8000/lecture/takes';
-
-  // Future<Takes?> get_timetable() async {
-  //   try {
-  //     var request = Uri.parse("$url/$semester");
-  //     // var token = await storage.read(key: 'token');
-  //     var token = await SecureStorage.getToken();
-  //     // convert token to base64
-  //     // printToken();
-
-  //     final response =
-  //         await http.get(request, headers: {"Authorization": "Token $token"});
-
-  //     var tmp = jsonDecode(utf8.decode(response.bodyBytes));
-  //     Takes takes = Takes.fromJsonlist(tmp);
-  //     if (response.statusCode == 200) {
-  //       // Assuming 'Home' is your home widget after login success
-  //       return takes;
-  //     } else {
-  //       Fluttertoast.showToast(
-  //           msg: "로그인 실패",
-  //           toastLength: Toast.LENGTH_SHORT,
-  //           gravity: ToastGravity.CENTER,
-  //           timeInSecForIosWeb: 1,
-  //           backgroundColor: Colors.red,
-  //           textColor: Colors.white,
-  //           fontSize: 16.0);
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //     Fluttertoast.showToast(
-  //         msg: "네트워크 오류",
-  //         toastLength: Toast.LENGTH_SHORT,
-  //         gravity: ToastGravity.CENTER,
-  //         timeInSecForIosWeb: 1,
-  //         backgroundColor: Colors.red,
-  //         textColor: Colors.white,
-  //         fontSize: 16.0);
-  //     return null;
-  //   }
-  // }
+  Color c = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+  List<Color> cs = [
+    Colors.red,
+    Colors.yellow,
+    Colors.blue,
+    Colors.purple,
+    Colors.orange,
+    Colors.red,
+    Colors.red,
+    Colors.red,
+    Colors.red,
+  ];
 
   @override
   initState() {
     // TODO: implement initState
+
     super.initState();
+  }
+
+  Size? _getSize() {
+    if (_containerkey.currentContext != null) {
+      final RenderBox renderBox =
+          _containerkey.currentContext!.findRenderObject() as RenderBox;
+      Size size = renderBox.size;
+      return size;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     List<List<Widget>> lecturesForTheDay = new List.generate(5, (index) => []);
-
+    int count = 0;
     for (Take lecture in takes.cousrses_takes) {
       if (lecture.course.semester != semester) continue;
       if (lecture.course.start_time == null) continue;
       if (lecture.course.day == null) continue;
+
       double top =
           kFirstColumnHeight + (lecture.course.start_time! / 60.0) * kBoxSize;
       double height =
           ((lecture.course.end_time! - lecture.course.start_time!) / 60.0) *
               kBoxSize;
-
       for (int i = 0; i < lecture.course.day!.length; i++) {
         var v = int.parse(lecture.course.day![i]) - 1;
+
         if (v >= 0 && v < 5) {
           lecturesForTheDay[v].add(
             Positioned(
@@ -132,6 +112,12 @@ class _TimeTable extends State<TimeTable> {
                                     style: TextStyle(
                                       fontSize: 16,
                                     )),
+                                (lecture.final_grade != null)
+                                    ? Text("성적: ${lecture.final_grade}",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ))
+                                    : Text(" ")
                               ],
                             ),
                           ),
@@ -140,13 +126,13 @@ class _TimeTable extends State<TimeTable> {
                   child: Container(
                     width: MediaQuery.of(context).size.width / 5,
                     height: height,
-                    decoration: const BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                    decoration: BoxDecoration(
+                      color: cs[count % (cs.length)],
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                     child: Text(
                       "${lecture.course.name}\n${lecture.course.classroom}",
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      style: const TextStyle(color: Colors.black, fontSize: 12),
                     ),
                   ),
                 )
@@ -155,10 +141,12 @@ class _TimeTable extends State<TimeTable> {
           );
         }
       }
+      count++;
     }
 
     return SingleChildScrollView(
         child: Column(
+      key: _containerkey,
       mainAxisSize: MainAxisSize.min,
       children: [
         Wrap(

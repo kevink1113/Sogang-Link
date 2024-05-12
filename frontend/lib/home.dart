@@ -4,6 +4,7 @@ import 'package:soganglink/homepage.dart';
 import 'package:soganglink/setting.dart';
 import 'package:soganglink/storage.dart';
 import 'package:soganglink/timetable.dart';
+import 'package:soganglink/tools.dart';
 import 'gptchat.dart';
 import 'login.dart';
 import 'setting.dart';
@@ -17,7 +18,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _selectedIndex = 2;
   final List<Widget> _pages = [
-    const HomePage(),
+    const Tools(),
     const TimeTable(),
     const HomePage(),
     const HomePage(), // 게시판 페이지 예시로 임시로 HomePage 사용

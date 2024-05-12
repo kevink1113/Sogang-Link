@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePage extends State<HomePage> {
-  List<Widget> courses = [];
+  List<DataRow> courses = [];
   int semester = 2024010;
   NoticeList? notice = null;
   @override
@@ -32,7 +32,49 @@ class _HomePage extends State<HomePage> {
     if (takes != null) {
       for (Take lecture in takes.cousrses_takes) {
         if (lecture.course.semester != semester) continue;
-        courses.add(Text(lecture.course.name));
+
+        String time = "";
+
+        if (lecture.course.start_time != null &&
+            lecture.course.end_time != null) {
+          DateTime start = DateTime(2022, 12, 1, 9)
+              .add(Duration(minutes: lecture.course.start_time!));
+          DateTime end = DateTime(2022, 12, 1, 9)
+              .add(Duration(minutes: lecture.course.end_time!));
+          time = "${start.hour}:${start.minute} ~ ${end.hour}:${end.minute}";
+        } else {
+          time = "?";
+        }
+        courses.add(DataRow(cells: [
+          DataCell(Text(
+            lecture.course.name,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+            ),
+          )),
+          DataCell(Text(
+            lecture.course.classroom!,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+            ),
+          )),
+          DataCell(Text(
+            lecture.course.advisor!,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+            ),
+          )),
+          DataCell(Text(
+            time,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+            ),
+          )),
+        ]));
       }
     }
 
@@ -186,7 +228,7 @@ class _HomePage extends State<HomePage> {
               ),
               margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -199,15 +241,25 @@ class _HomePage extends State<HomePage> {
                         letterSpacing: 2.0,
                       ),
                     ),
-                    Column(
-                      children: courses,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                    )
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: double.infinity),
+                      child: DataTable(
+                          horizontalMargin: 12.0,
+                          columnSpacing: 28.0,
+                          columns: [
+                            DataColumn(label: Text("과목명")),
+                            DataColumn(label: Text("강의실")),
+                            DataColumn(label: Text("교수명")),
+                            DataColumn(label: Text("시간")),
+                          ],
+                          rows: courses),
+                    ),
                   ],
                 ),
               )),
           Container(
-            alignment: Alignment.center,
+            alignment: Alignment.topLeft,
             decoration: BoxDecoration(
               color: Colors.white, // Container의 배경색
               borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
@@ -216,53 +268,46 @@ class _HomePage extends State<HomePage> {
               //   width: 2, // 테두리 두께
               // ),
             ),
-            height: 500,
-            margin: EdgeInsets.fromLTRB(20, 30, 20, 30),
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
             child: (notice != null)
-                ? Center(
-                    child: ListView.builder(
-                    itemCount: notice!.noticelist.length,
-                    itemBuilder: ((context, index) {
-                      return RichText(
-                        text: TextSpan(
-                          text: notice!.noticelist[index].title,
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.black,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              launchUrl(
-                                  Uri.parse(notice!.noticelist[index].url));
-                            },
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "공지사항",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    }),
-                  ))
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: min(notice!.noticelist.length, 10),
+                        itemBuilder: ((context, index) {
+                          return RichText(
+                            text: TextSpan(
+                              text: notice!.noticelist[index].title,
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  launchUrl(
+                                      Uri.parse(notice!.noticelist[index].url));
+                                },
+                            ),
+                          );
+                        }),
+                      )
+                    ],
+                  )
                 : Center(child: Text('로딩중')),
           ),
-          Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white, // Container의 배경색
-              borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-              // border: Border.all(
-              //   color: Colors.blue, // 테두리 색상
-              //   width: 2, // 테두리 두께
-              // ),
-            ),
-            height: 500,
-            margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
-            child: Center(
-              child: Text(
-                '둥글고 테두리 색상',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          )
         ],
       ),
     );
