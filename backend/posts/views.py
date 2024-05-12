@@ -8,7 +8,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models import F
+import django_filters
 
+class PostFilter(django_filters.FilterSet):
+    class Meta:
+        model = Post
+        fields = {
+            'title': ['icontains'],
+            'content': ['icontains'],
+            'board': ['exact'],
+            'author': ['exact'],
+        }
 
 
 class PostListCreateView(generics.ListCreateAPIView):
@@ -20,6 +30,7 @@ class PostListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self): # To reduce DB query
         return Post.objects.all().prefetch_related('upvotes', 'downvotes')
+
 
 class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
@@ -47,10 +58,12 @@ class CommentListCreateView(generics.ListCreateAPIView):
         post_id = self.kwargs.get('post_id')
         serializer.save(author=self.request.user, post_id=post_id)
 
+
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthorOrReadOnly]
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthorOrReadOnly])
@@ -66,6 +79,7 @@ def toggle_upvote(request, pk):
         voted = True
     return Response({"voted": voted}, status=status.HTTP_200_OK)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthorOrReadOnly])
 def toggle_downvote(request, pk):
@@ -79,3 +93,11 @@ def toggle_downvote(request, pk):
         post.upvotes.remove(request.user)
         voted = True
     return Response({"voted": voted}, status=status.HTTP_200_OK)
+
+
+class PostSearchListView(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = PostFilter
+    search_fields = ['title', 'content']
