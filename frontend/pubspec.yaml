@@ -52,6 +52,7 @@ dependencies:
   settings_ui: ^2.0.2
   firebase_core: ^2.31.0
   provider: ^6.1.2
+  flutter_markdown: ^0.7.1
 
 dev_dependencies:
   flutter_test:

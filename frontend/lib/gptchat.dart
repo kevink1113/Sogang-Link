@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:soganglink/storage.dart';
 
 class GptChat extends StatefulWidget {
@@ -19,9 +20,6 @@ class _GptChatState extends State<GptChat> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        // appBar: AppBar(
-        //   title: Text('Flutter Chat Demo'),
-        // ),
         body: Chat(
           l10n: const ChatL10nKo(
             inputPlaceholder: '여기에 입력하세요...',
@@ -30,6 +28,7 @@ class _GptChatState extends State<GptChat> {
           onSendPressed: _handleSendPressed,
           user: _user,
           showUserNames: true,
+          textMessageBuilder: _customTextMessageBuilder,
         ),
       );
 
@@ -122,6 +121,31 @@ class _GptChatState extends State<GptChat> {
 
     final token = '527faebec62c87affb7cf30e38d3e8beac327a41';
     GPTstreamcall(token, message.text);
+  }
+
+  Widget _customTextMessageBuilder(
+    types.TextMessage message, {
+    required int messageWidth,
+    required bool showName,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      constraints: BoxConstraints(maxWidth: messageWidth.toDouble()),
+      decoration: BoxDecoration(
+        color: message.author.id == _user.id
+            ? Color(0xFF9e2a2f)
+            : Colors.grey[200],
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: MarkdownBody(
+        data: message.text,
+        styleSheet: MarkdownStyleSheet(
+          p: TextStyle(
+            color: message.author.id == _user.id ? Colors.white : Colors.black,
+          ),
+        ),
+      ),
+    );
   }
 }
 
