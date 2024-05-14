@@ -22,7 +22,7 @@ class _HomeState extends State<Home> {
     const TimeTable(),
     const HomePage(),
     const HomePage(), // 게시판 페이지 예시로 임시로 HomePage 사용
-    const GptChat(),
+    GptChat(),
     const Setting(), // 설정 페이지 예시로 임시로 HomePage 사용
   ];
 

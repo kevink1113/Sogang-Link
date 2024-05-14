@@ -6,27 +6,25 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:soganglink/storage.dart';
 
-String randomString() {
-  final random = Random.secure();
-  final values = List<int>.generate(16, (i) => random.nextInt(255));
-  return base64UrlEncode(values);
-}
-
 class GptChat extends StatefulWidget {
-  const GptChat({Key? key}) : super(key: key);
   @override
-  _GptChat createState() => _GptChat();
+  _GptChatState createState() => _GptChatState();
 }
 
-class _GptChat extends State<GptChat> {
+class _GptChatState extends State<GptChat> {
   final List<types.Message> _messages = [];
   final _user = const types.User(id: '82091008-a484-4a89-ae75-a22bf8d6f3ac');
+  String _gptMessageId = randomString();
+  String _currentGptMessageText = "";
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        // appBar: AppBar(
+        //   title: Text('Flutter Chat Demo'),
+        // ),
         body: Chat(
           l10n: const ChatL10nKo(
-            inputPlaceholder: 'Here',
+            inputPlaceholder: '여기에 입력하세요...',
           ),
           messages: _messages,
           onSendPressed: _handleSendPressed,
@@ -41,44 +39,35 @@ class _GptChat extends State<GptChat> {
     });
   }
 
-  Future<void> GPTcall(String token, String question) async {
-    var request = Uri.parse("http://127.0.0.1:8000/chat");
-    try {
-      final response = await http.post(request, headers: {
-        "Authorization": "Token $token"
-      }, body: {
-        "question": question,
-      });
-
-      if (response.statusCode == 200) {
-        var answer =
-            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-        _addMessage(types.TextMessage(
+  void _updateGptMessage(String newText) {
+    setState(() {
+      _currentGptMessageText = newText;
+      final index = _messages.indexWhere((msg) => msg.id == _gptMessageId);
+      if (index != -1) {
+        _messages[index] = types.TextMessage(
           author: const types.User(id: 'GPT'),
           createdAt: DateTime.now().millisecondsSinceEpoch,
-          id: randomString(),
-          text: answer["answer"],
-        ));
+          id: _gptMessageId,
+          text: _currentGptMessageText,
+        );
       }
-    } catch (e) {
-      print("gpt error");
-    }
+    });
   }
 
   Future<void> GPTstreamcall(String token, String question) async {
     try {
-      String answer = "";
+      _gptMessageId = randomString();
+      _currentGptMessageText = "";
       _addMessage(types.TextMessage(
         author: const types.User(id: 'GPT'),
         createdAt: DateTime.now().millisecondsSinceEpoch,
-        id: randomString(),
-        text: answer,
+        id: _gptMessageId,
+        text: _currentGptMessageText,
       ));
 
       final client = http.Client();
-
       final request =
-          http.Request('POST', Uri.parse("http://127.0.0.1:8000/chat"));
+          http.Request('POST', Uri.parse("http://34.64.245.20:8000/chat"));
 
       Map<String, String> bodyMap = {'question': question};
       request.body = jsonEncode(bodyMap);
@@ -87,13 +76,37 @@ class _GptChat extends State<GptChat> {
 
       final response = await client.send(request);
 
-      // 스트림 데이터 처리
-      response.stream.listen((line) {
-        print((utf8.decode(line).substring(6)));
+      if (response.statusCode != 200) {
+        print(
+            'Failed to connect to the server. Status code: ${response.statusCode}');
+        return;
+      }
+
+      response.stream.transform(utf8.decoder).transform(LineSplitter()).listen(
+          (data) {
+        data.split('\n').forEach((line) {
+          if (line.startsWith("data: ")) {
+            final raw = line.substring(6).trim();
+            if (raw.isNotEmpty && raw != '[DONE]' && raw != 'run_completed') {
+              try {
+                final decoded = json.decode(raw) as Map<String, dynamic>;
+                final text = decoded['text'];
+                if (text != null && text.isNotEmpty) {
+                  _updateGptMessage(_currentGptMessageText + text);
+                }
+              } catch (e) {
+                print('Error decoding JSON: $e');
+              }
+            }
+          }
+        });
+      }, onDone: () {
+        print("\nStream closed");
+      }, onError: (error) {
+        print("\nStream error: $error");
       });
     } catch (e) {
-      print(e);
-      print("gpt error");
+      print("\ngpt error: $e");
     }
   }
 
@@ -107,17 +120,13 @@ class _GptChat extends State<GptChat> {
 
     _addMessage(textMessage);
 
-    // setState(() {
-    //   _messages.removeAt(_messages.length - 1);
-    // });
-
-    SecureStorage.getToken().then((token) => {
-          if (token != null)
-            {
-              SecureStorage.getToken().then((token) => {
-                    if (token != null) {GPTstreamcall(token, message.text)}
-                  })
-            }
-        });
+    final token = '527faebec62c87affb7cf30e38d3e8beac327a41';
+    GPTstreamcall(token, message.text);
   }
+}
+
+String randomString() {
+  final random = Random.secure();
+  final values = List<int>.generate(16, (i) => random.nextInt(255));
+  return base64UrlEncode(values);
 }
