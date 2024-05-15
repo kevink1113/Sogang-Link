@@ -8,7 +8,8 @@ from rest_framework.test import APIClient
 from rest_framework.test import APIRequestFactory
 from lecture.views import CourseViewSet
 from maps.views import ClassroomListView
-
+from datetime import datetime
+from django.utils import timezone
 
 def get_user_info(username):
     user = User.objects.filter(username=username)
@@ -40,7 +41,7 @@ def get_course_info(semester="", name="", credit="", day="", classroom="", advis
 def get_takes_info(username, semester=""):
     takes = Takes.objects.filter(student_id=username)
     if semester:
-        takes = takes.filter(semester=semester)
+        takes = takes.filter(course__semester=semester)
     print("Takes: ", takes)
     return TakesSerializer(takes, many=True).data  # To.윤상현  Modified Sererializer
 
@@ -55,6 +56,43 @@ def get_empty_classrooms(building):
     return empty_classrooms_data, []  # Assuming no occupied classrooms are returned
 
 
+def get_current_info(username):
+    def get_current_date():
+        return timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    def get_current_semester():
+        month = timezone.now().month
+        semester = ''
+        if 3 <= month <= 6:
+            semester = '1학기 (봄학기)'
+        elif 7 <= month <= 8:
+            semester = '여름학기'
+        elif 9 <= month <= 12:
+            semester = '2학기 (가을학기)'
+        else:
+            semester = '겨울학기'
+
+        year = timezone.now().year
+        if 1 <= month <= 2:
+            return f'{year-1}-{semester}'
+        else:
+            return f'{year}-{semester}'
+
+    def get_academic_progress(username):
+        user = User.objects.filter(username=username).first()
+        if not user:
+            return 'User not found'
+        
+        current_year = user.year
+        current_semester = user.semester
+        
+        return f'{current_year}학년 {current_semester}학기생'
+    
+    return {
+        'current_date': get_current_date(),
+        'current_semester': get_current_semester(),
+        'academic_progress': get_academic_progress(username)
+    }
 
 # API 재활용 방안 강구 중
 # def get_takes_info(user):

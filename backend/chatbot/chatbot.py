@@ -66,6 +66,8 @@ def chatbot_function_call(runs, assistant_id, user, thread_id):
             data = get_course_info()
         elif action == "get_takes_info":
             data = get_takes_info(user.username)
+        elif action == "get_current_info":
+            data = get_current_info(user.username)
         tool_outputs.append({
                 "tool_call_id": tool_id,
                 "output": json.dumps(data)
