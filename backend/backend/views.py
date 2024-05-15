@@ -208,6 +208,7 @@ class ChatView(APIView):
                                 function_args = tool.function.arguments
                                 function_name = tool.function.name
                                 data = ""
+                                print("++++++++++ Function called: ", function_name, "++++++++++++")
 
                                 # 함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
                                 function_args = json.loads(function_args)
@@ -236,6 +237,28 @@ class ChatView(APIView):
                                     )
                                 elif function_name == "get_empty_classrooms":
                                     data = get_empty_classrooms(function_args['building'])
+                                elif function_name == "get_current_info":
+                                    data = get_current_info(user.username)
+                                elif function_name == "get_building_info":
+                                    building_name = function_args.get('building_name', "")
+                                    data = get_building_info(building_name)
+                                elif function_name == "get_facility_info":
+                                    facility_name = function_args.get('facility_name', "")
+                                    data = get_facility_info(facility_name)
+                                elif function_name == "get_menu_info":
+                                    facility_name = function_args.get('facility_name', "")
+                                    date = function_args.get('date', "")
+                                    data = get_menu_info(facility_name, date)
+                                elif function_name == "get_filtered_restaurants":
+                                    name = function_args.get('name', "")
+                                    category = function_args.get('category', "")
+                                    place = function_args.get('place', "")
+                                    min_price = function_args.get('min_price', None)
+                                    max_price = function_args.get('max_price', None)
+                                    tag = function_args.get('tag', "")
+                                    data = get_filtered_restaurants(name, category, place, min_price, max_price, tag)
+
+
                                 tool_outputs.append({
                                     "tool_call_id": tool_id,
                                     "output": json.dumps(data)
