@@ -17,6 +17,10 @@ from maps.models import Building, Facility, Menu, Restaurant
 from .serializers import BuildingSerializer, FacilitySerializer, MenuSerializer, RestaurantSerializer
 
 
+from maps.models import Building, Facility, Menu, Restaurant
+from .serializers import BuildingSerializer, FacilitySerializer, MenuSerializer, RestaurantSerializer
+
+
 def get_user_info(username):
     user = User.objects.filter(username=username)
     return UserSerializer(user, many=True).data
@@ -197,6 +201,73 @@ def get_filtered_restaurants(name=None, category=None, place=None, min_price=Non
         'status': 'success',
         'restaurant_data': restaurant_data
     }
+
+
+def get_building_info(building_name):
+    try:
+        building = Building.objects.get(name=building_name)
+        building_data = BuildingSerializer(building).data
+        return {
+            'status': 'success',
+            'building_data': building_data
+        }
+    except Building.DoesNotExist:
+        return {
+            'status': 'error',
+            'message': f'Building "{building_name}" not found.'
+        }
+    
+def get_facility_info(facility_name):
+    try:
+        facility = Facility.objects.get(name=facility_name)
+        facility_data = FacilitySerializer(facility).data
+        return {
+            'status': 'success',
+            'facility_data': facility_data
+        }
+    except Facility.DoesNotExist:
+        return {
+            'status': 'error',
+            'message': f'Facility "{facility_name}" not found.'
+        }
+
+def get_menu_info(facility_name, date):
+    try:
+        menu = Menu.objects.get(facility__name=facility_name, date=date)
+        menu_data = MenuSerializer(menu).data
+        return {
+            'status': 'success',
+            'menu_data': menu_data
+        }
+    except Menu.DoesNotExist:
+        return {
+            'status': 'error',
+            'message': f'Menu for facility "{facility_name}" on date "{date}" not found.'
+        }
+
+def get_filtered_restaurants(name=None, category=None, place=None, min_price=None, max_price=None, tag=None):
+    print("====== Get Filtered Restaurants =======")
+    restaurants = Restaurant.objects.all()
+    
+    if name:
+        restaurants = restaurants.filter(name__icontains=name)
+    if category:
+        restaurants = restaurants.filter(category__icontains=category)
+    if place:
+        restaurants = restaurants.filter(place__icontains=place)
+    if min_price is not None:
+        restaurants = restaurants.filter(avg_Price__gte=min_price)
+    if max_price is not None:
+        restaurants = restaurants.filter(avg_Price__lte=max_price)
+    if tag:
+        restaurants = restaurants.filter(tags__name__icontains=tag)
+    
+    restaurant_data = RestaurantSerializer(restaurants, many=True).data
+    return {
+        'status': 'success',
+        'restaurant_data': restaurant_data
+    }
+
 
 
 def get_building_info(building_name):
