@@ -1,5 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+
 from django.http import JsonResponse
 from lecture.models import Course
 import datetime
@@ -8,8 +12,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from maps.models import Building, Facility, Menu
 from .serializers import MenuSerializer
-from django_filters import rest_framework as filters
 
+from .models import Restaurant, Tag
+from .serializers import RestaurantSerializer, TagSerializer
+from .filters import RestaurantFilter
+from django_filters import CharFilter
 
 # Create your views here.
 
@@ -209,8 +216,8 @@ class BuildingInfoListView(APIView):
         return JsonResponse(response_data, status=200)
 
 
-class MenuFilter(filters.FilterSet):
-    facility_name = filters.CharFilter(field_name='facility__name', lookup_expr='icontains')
+class MenuFilter(FilterSet):
+    facility_name = CharFilter(field_name='facility__name', lookup_expr='icontains')
 
     class Meta:
         model = Menu
@@ -222,3 +229,16 @@ class MenuListView(generics.ListAPIView):
     serializer_class = MenuSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = MenuFilter  # Use this to specify your custom filter
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+class RestaurantViewSet(viewsets.ModelViewSet):
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filterset_class = RestaurantFilter
+    search_fields = ['name', 'OneLiner']
+    ordering_fields = ['trav_time', 'avg_Price']

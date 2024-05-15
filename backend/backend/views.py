@@ -166,7 +166,8 @@ class ChatView(APIView):
         print("Question recieved: ", question)
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
 
-        thread_id = client.beta.threads.create().id#user.thread
+        # thread_id = client.beta.threads.create().id#user.thread
+        thread_id = user.thread
         # Initialize the streaming process
         # 질문 보내기
 

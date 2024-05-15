@@ -34,3 +34,38 @@ class Menu(models.Model):
 
     def __str__(self):
         return f"{self.facility.name} menu for {self.date}"
+    
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Restaurant(models.Model):
+    name = models.CharField(max_length=100)             # ex. 수저가
+    address = models.CharField(max_length=255)          # ex. 서울특별시 마포구 광성로4길 10
+    category = models.CharField(max_length=50)          # ex. 중식
+    trav_time = models.IntegerField()                   # ex. 0
+    place = models.CharField(max_length=50)             # ex. 서강
+    avg_Price = models.IntegerField()                   # ex. 14000
+    tags = models.ManyToManyField(Tag, related_name='restaurants')  # ex. ['매운', '밥맛']
+    times = models.JSONField()  # ex. ["10:30", "15:00", "16:00", "20:00"]
+    image = models.URLField()   
+    # MapLink = models.URLField()
+    NaverMap = models.URLField()    # 네이버 지도 주소
+    OneLiner = models.TextField()   # 한줄평
+
+    def __str__(self):
+        return self.name
+
+    def get_open_hours(self):
+        if len(self.times) == 2:
+            return f"Open from {self.times[0]} to {self.times[1]}"
+        elif len(self.times) > 2:
+            open_time = self.times[0]
+            close_time = self.times[-1]
+            break_times = ", ".join([f"{self.times[i]}~{self.times[i+1]}" for i in range(1, len(self.times) - 2, 2)])
+            return f"Open from {open_time} to {close_time}, Break times: {break_times}"
+        return "Time information not available"
