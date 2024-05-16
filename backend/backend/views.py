@@ -183,6 +183,76 @@ class ChatView(APIView):
         )
         def event_stream():
 
+            def process_tool(event):
+                run = event.data
+                tools = run.required_action.submit_tool_outputs.tool_calls
+                tool_outputs = []
+                for tool in tools:
+                    tool_id = tool.id
+                    function_args = tool.function.arguments
+                    function_name = tool.function.name
+                    data = ""
+                    print("++++++++++ Function called: ", function_name, "++++++++++++")
+
+                    # 함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
+                    function_args = json.loads(function_args)
+
+                    # semester = None
+                    # if(function_args.get('semester') != None):
+                    #     semester = function_args['semester']
+                    # # Use function_args in the function call
+
+                    if function_name == "get_user_info":
+                        data = get_user_info(user.username)
+                    elif function_name == "get_course_info":
+                        data = get_course_info(
+                            semester=function_args.get('semester', ""),
+                            name=function_args.get('name', ""),
+                            credit=function_args.get('credit', ""),
+                            day=function_args.get('day', ""),
+                            classroom=function_args.get('classroom', ""),
+                            advisor=function_args.get('advisor', ""),
+                            major=function_args.get('major', "")
+                        )
+                    elif function_name == "get_takes_info":
+                        data = get_takes_info(
+                            username=user.username,
+                            semester=function_args.get('semester', ""),
+                            final_grade=function_args.get('final_grade', "")
+                        )
+                    elif function_name == "get_empty_classrooms":
+                        data = get_empty_classrooms(function_args['building'])
+                    elif function_name == "get_current_info":
+                        data = get_current_info(user.username)
+                    elif function_name == "get_building_info":
+                        building_name = function_args.get('building_name', "")
+                        data = get_building_info(building_name)
+                    elif function_name == "get_facility_info":
+                        facility_name = function_args.get('facility_name', "")
+                        data = get_facility_info(facility_name)
+                    elif function_name == "get_menu_info":
+                        facility_name = function_args.get('facility_name', "")
+                        date = function_args.get('date', "")
+                        data = get_menu_info(facility_name, date)
+                    elif function_name == "get_filtered_restaurants":
+                        name = function_args.get('name', "")
+                        category = function_args.get('category', "")
+                        place = function_args.get('place', "")
+                        min_price = function_args.get('min_price', None)
+                        max_price = function_args.get('max_price', None)
+                        tag = function_args.get('tag', "")
+                        data = get_filtered_restaurants(name, category, place, min_price, max_price, tag)
+                    elif function_name == "get_average_grade":
+                        semester = function_args.get('semester', "")
+                        data = get_average_grade(user.username, semester)
+
+                    tool_outputs.append({
+                        "tool_call_id": tool_id,
+                        "output": json.dumps(data)
+                    })
+
+                    return tool_outputs
+
             # 스트림으로 받기
 
             with client.beta.threads.runs.stream(
@@ -200,70 +270,8 @@ class ChatView(APIView):
                                 yield f"data: {json.dumps({'text': text.text.value})}\n\n"
 
                         elif isinstance(event, ThreadRunRequiresAction):
+                            tool_outputs = process_tool(event)
                             run = event.data
-                            tools = run.required_action.submit_tool_outputs.tool_calls
-                            tool_outputs = []
-                            for tool in tools:
-                                tool_id = tool.id
-                                function_args = tool.function.arguments
-                                function_name = tool.function.name
-                                data = ""
-                                print("++++++++++ Function called: ", function_name, "++++++++++++")
-
-                                # 함수 하드 코딩 안 하는 방법이 있긴 한데, 좀 가독성이 구려서 그냥 하드코딩 합시다.
-                                function_args = json.loads(function_args)
-
-                                # semester = None
-                                # if(function_args.get('semester') != None):
-                                #     semester = function_args['semester']
-                                # # Use function_args in the function call
-
-                                if function_name == "get_user_info":
-                                    data = get_user_info(user.username)
-                                elif function_name == "get_course_info":
-                                    data = get_course_info(
-                                        semester=function_args.get('semester', ""),
-                                        name=function_args.get('name', ""),
-                                        credit=function_args.get('credit', ""),
-                                        day=function_args.get('day', ""),
-                                        classroom=function_args.get('classroom', ""),
-                                        advisor=function_args.get('advisor', ""),
-                                        major=function_args.get('major', "")
-                                    )
-                                elif function_name == "get_takes_info":
-                                    data = get_takes_info(
-                                        username=user.username, 
-                                        semester=function_args.get('semester', ""),
-                                        final_grade=function_args.get('final_grade', "")
-                                    )
-                                elif function_name == "get_empty_classrooms":
-                                    data = get_empty_classrooms(function_args['building'])
-                                elif function_name == "get_current_info":
-                                    data = get_current_info(user.username)
-                                elif function_name == "get_building_info":
-                                    building_name = function_args.get('building_name', "")
-                                    data = get_building_info(building_name)
-                                elif function_name == "get_facility_info":
-                                    facility_name = function_args.get('facility_name', "")
-                                    data = get_facility_info(facility_name)
-                                elif function_name == "get_menu_info":
-                                    facility_name = function_args.get('facility_name', "")
-                                    date = function_args.get('date', "")
-                                    data = get_menu_info(facility_name, date)
-                                elif function_name == "get_filtered_restaurants":
-                                    name = function_args.get('name', "")
-                                    category = function_args.get('category', "")
-                                    place = function_args.get('place', "")
-                                    min_price = function_args.get('min_price', None)
-                                    max_price = function_args.get('max_price', None)
-                                    tag = function_args.get('tag', "")
-                                    data = get_filtered_restaurants(name, category, place, min_price, max_price, tag)
-
-
-                                tool_outputs.append({
-                                    "tool_call_id": tool_id,
-                                    "output": json.dumps(data)
-                                })
                             # 스트림으로 보내기
                             with client.beta.threads.runs.submit_tool_outputs_stream(
                                     thread_id=run.thread_id,
@@ -271,12 +279,15 @@ class ChatView(APIView):
                                     tool_outputs=tool_outputs
                             ) as stream2:
                                 for event2 in stream2:
-                                    if isinstance(event2, ThreadMessageDelta):
-                                        # 메시지 델타 이벤트 처리
-                                        data = event2.data.delta.content
-                                        for text in data:
+                                    # print(event, end="\n\n")
+                                    if isinstance(event2, ThreadMessageDelta):  # 메시지 델타 이벤트 처리
+                                        data2 = event2.data.delta.content
+                                        for text in data2:
                                             print(text.text.value, end='', flush=True)
                                             yield f"data: {json.dumps({'text': text.text.value})}\n\n"
+                                    elif isinstance(event, ThreadRunCompleted):
+                                        # 실행 완료 이벤트 처리
+                                        yield "data: run_completed\n\n"
 
                         elif isinstance(event, ThreadRunCompleted):
                             # 실행 완료 이벤트 처리

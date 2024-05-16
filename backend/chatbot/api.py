@@ -48,11 +48,38 @@ def get_takes_info(username, semester="", final_grade=""):
     print("[" + semester + " " + final_grade + "]")
     takes = Takes.objects.filter(student_id=username)
     if semester:
-        takes = takes.filter(semester=semester)
+        takes = takes.filter(course__semester=semester)
     if final_grade:
         takes = takes.filter(final_grade__icontains=final_grade)
     print("Takes: ", takes)
     return TakesSerializer(takes, many=True).data  # To.윤상현  Modified Sererializer
+
+
+def get_grade(grade):
+    if ord(grade[0]) >= ord('F'):
+        return 0.
+    res = 4. + ord('A') - ord(grade[0])
+    if grade[1] == '+':
+        res += 0.3
+    elif grade[1] == '-':
+        res -= 0.3
+    return res
+
+
+def get_average_grade(username, semester=""):
+    takes = Takes.objects.filter(student=username, course__semester__icontains=semester)
+    print(takes)
+    res = 0.
+    credit = 0.
+    for subject in takes:
+        print(subject.final_grade,end="")
+        res += get_grade(subject.final_grade)*subject.course.credit
+        if subject.final_grade[0] <= 'F':
+            credit += subject.course.credit
+    print("\n"+str(res)+"/"+str(credit))
+    return res/credit
+
+
 
 
 def get_empty_classrooms(building):
@@ -91,12 +118,12 @@ def get_current_info(username):
         user = User.objects.filter(username=username).first()
         if not user:
             return 'User not found'
-        
+
         current_year = user.year
         current_semester = user.semester
-        
+
         return f'{current_year}학년 {current_semester}학기생'
-    
+
     return {
         'current_date': get_current_date(),
         'current_semester': get_current_semester(),
