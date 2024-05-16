@@ -136,7 +136,7 @@ def cancel_active_runs(client, thread_id):
 
     active_runs = client.beta.threads.runs.list(thread_id=thread_id).data
     for run in active_runs:
-        if run.status not in ["completed", "failed", "cancelled", "expired"]: # 취소된 run은 다시 취소하지 않음
+        if run.status not in ["completed", "failed", "cancelled", "expired", "incomplete"]: # 취소된 run은 다시 취소하지 않음
             client.beta.threads.runs.cancel(thread_id=thread_id, run_id=run.id)
             print(f"Cancelled run {run.id}")
 
