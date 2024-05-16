@@ -144,6 +144,9 @@ def get_menu_info(facility_name, date):
 def get_filtered_restaurants(name=None, category=None, place=None, min_price=None, max_price=None, tag=None):
     print("====== Get Filtered Restaurants =======")
     restaurants = Restaurant.objects.all()
+    print("Received parameters: ")
+    # print(name, category, place, min_price, max_price, tag)
+    print("Name: ", name, "Category: ", category, "Place: ", place, "Min Price: ", min_price, "Max Price: ", max_price, "Tag: ", tag)
     
     if name:
         restaurants = restaurants.filter(name__icontains=name)
@@ -159,6 +162,8 @@ def get_filtered_restaurants(name=None, category=None, place=None, min_price=Non
         restaurants = restaurants.filter(tags__name__icontains=tag)
     
     restaurant_data = RestaurantSerializer(restaurants, many=True).data
+    print("Filtered Restaurants: ", restaurant_data)
+
     return {
         'status': 'success',
         'restaurant_data': restaurant_data

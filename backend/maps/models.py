@@ -54,7 +54,7 @@ class Restaurant(models.Model):
     times = models.JSONField()  # ex. ["10:30", "15:00", "16:00", "20:00"]
     image = models.URLField()   
     # MapLink = models.URLField()
-    NaverMap = models.URLField()    # 네이버 지도 주소
+    NaverMap = models.URLField(max_length=512)    # 네이버 지도 주소
     OneLiner = models.TextField()   # 한줄평
 
     def __str__(self):

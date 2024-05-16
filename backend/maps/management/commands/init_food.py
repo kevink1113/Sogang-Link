@@ -1244,7 +1244,7 @@ class Command(BaseCommand):
               "16:00",
               "20:00"
             ],
-            "image":"https:\/\/cdn.discordapp.com\/attachments\/1046418973954158612\/1089790288538632272\/495568_1515510553259_87074.png",
+            "image":"https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDA0MjVfMjY4%2FMDAxNzE0MDE2ODQxMjk0.xCV5LTlT3X02eJguCv9mRTnce_vt2HbA8WDNzqXcej0g.VAtyijJrDY-ZrKIGeOUM97SALWtmBJGnvGSjt5xqSyMg.JPEG%2F20240424_105105.jpg",
             "MapLink":"https:\/\/goo.gl\/maps\/VJw9Cy14t9NowK937",
             "NaverMap":"https:\/\/map.naver.com\/p\/entry\/place\/1644340985?c=15.00,0,0,0,dh",
             "OneLiner":"근방 1km 이내 최고의 중국집"
