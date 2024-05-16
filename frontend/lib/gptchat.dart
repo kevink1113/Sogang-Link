@@ -6,6 +6,8 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:soganglink/storage.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class GptChat extends StatefulWidget {
   @override
@@ -109,6 +111,20 @@ class _GptChatState extends State<GptChat> {
     }
   }
 
+  // Future<void> _handleSendPressed(types.PartialText message) async {
+  //   final textMessage = types.TextMessage(
+  //     author: _user,
+  //     createdAt: DateTime.now().millisecondsSinceEpoch,
+  //     id: randomString(),
+  //     text: message.text,
+  //   );
+
+  //   _addMessage(textMessage);
+
+  //   final token = '527faebec62c87affb7cf30e38d3e8beac327a41';
+  //   GPTstreamcall(token, message.text);
+  // }
+
   Future<void> _handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: _user,
@@ -119,8 +135,14 @@ class _GptChatState extends State<GptChat> {
 
     _addMessage(textMessage);
 
-    final token = '527faebec62c87affb7cf30e38d3e8beac327a41';
-    GPTstreamcall(token, message.text);
+    SecureStorage.getToken().then((token) => {
+          if (token != null)
+            {
+              SecureStorage.getToken().then((token) => {
+                    if (token != null) {GPTstreamcall(token, message.text)}
+                  })
+            }
+        });
   }
 
   Widget _customTextMessageBuilder(
@@ -139,9 +161,23 @@ class _GptChatState extends State<GptChat> {
       ),
       child: MarkdownBody(
         data: message.text,
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            launch(href);
+          }
+        },
+        imageBuilder: (uri, title, alt) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Image.network(uri.toString()),
+          );
+        },
         styleSheet: MarkdownStyleSheet(
           p: TextStyle(
             color: message.author.id == _user.id ? Colors.white : Colors.black,
+          ),
+          a: TextStyle(
+            color: message.author.id == _user.id ? Colors.blue : Colors.blue,
           ),
         ),
       ),
