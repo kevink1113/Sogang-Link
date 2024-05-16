@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/homepage.dart';
 import 'package:soganglink/setting.dart';
@@ -30,6 +31,7 @@ class _HomeState extends State<Home> {
     setState(() {
       _selectedIndex = index;
     });
+    HapticFeedback.mediumImpact();
   }
 
   void printToken() async {
