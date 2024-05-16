@@ -91,7 +91,7 @@ class _TimeTable extends State<TimeTable> {
       double top =
           kFirstColumnHeight + (lecture.course.start_time! / 60.0) * kBoxSize;
       double height =
-          ((lecture.course.end_time! - lecture.course.start_time!) / 80.0) *
+          ((lecture.course.end_time! - lecture.course.start_time!) / 60.0) *
               kBoxSize;
       for (int i = 0; i < lecture.course.day!.length; i++) {
         var v = int.parse(lecture.course.day![i]) - 1;
