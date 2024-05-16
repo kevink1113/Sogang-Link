@@ -234,6 +234,7 @@ class ChatView(APIView):
                                     data = get_takes_info(
                                         username=user.username, 
                                         semester=function_args.get('semester', ""),
+                                        final_grade=function_args.get('final_grade', "")
                                     )
                                 elif function_name == "get_empty_classrooms":
                                     data = get_empty_classrooms(function_args['building'])
