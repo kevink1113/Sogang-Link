@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:soganglink/board.dart';
 import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/homepage.dart';
 import 'package:soganglink/setting.dart';
@@ -22,7 +23,7 @@ class _HomeState extends State<Home> {
     const Tools(),
     const TimeTable(),
     const HomePage(),
-    const HomePage(), // 게시판 페이지 예시로 임시로 HomePage 사용
+    const Board(), // 게시판 페이지 예시로 임시로 HomePage 사용
     GptChat(),
     const Setting(), // 설정 페이지 예시로 임시로 HomePage 사용
   ];
