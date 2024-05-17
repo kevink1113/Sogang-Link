@@ -251,7 +251,7 @@ class ChatView(APIView):
                         "output": json.dumps(data)
                     })
 
-                    return tool_outputs
+                return tool_outputs
 
             # 스트림으로 받기
 

@@ -77,7 +77,7 @@ def get_average_grade(username, semester=""):
         if subject.final_grade[0] <= 'F':
             credit += subject.course.credit
     print("\n"+str(res)+"/"+str(credit))
-    return res/credit
+    return res/credit if credit != 0. else 0
 
 
 
