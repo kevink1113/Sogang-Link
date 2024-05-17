@@ -24,7 +24,8 @@ class Board extends StatefulWidget {
 class _Board extends State<Board> {
   List<DataRow> courses = [];
   int semester = 2024010;
-  PostList? post = null;
+  late PostList post;
+  bool loaded = false;
 
   @override
   void initState() {
@@ -40,9 +41,10 @@ class _Board extends State<Board> {
               setState(() {
                 post = PostList.fromJsonlist(
                     jsonDecode(utf8.decode(response.bodyBytes)));
+                loaded = true;
               });
             } else {
-              print("로그인 실패");
+              print("게시판 가져오기 실패");
             }
           });
         } catch (e) {
@@ -56,32 +58,32 @@ class _Board extends State<Board> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        alignment: Alignment.topLeft,
-        decoration: BoxDecoration(
-          color: Colors.white, // Container의 배경색
-          borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-        ),
-        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-        margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
-        child: (post != null)
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Text(
-                      "자유게시판",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      alignment: Alignment.topLeft,
+      decoration: BoxDecoration(
+        color: Colors.white, // Container의 배경색
+        borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+      ),
+      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+      margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+      child: (loaded)
+          ? (Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: Text(
+                    "자유게시판",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  ListView.builder(
+                ),
+                Expanded(
+                  child: ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: min(post!.postList.length, 20),
@@ -89,30 +91,56 @@ class _Board extends State<Board> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          RichText(
-                            textAlign: TextAlign.left,
-                            text: TextSpan(
-                              text: post!.postList[index].title,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                                overflow: TextOverflow.ellipsis,
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: RichText(
+                              textAlign: TextAlign.left,
+                              text: TextSpan(
+                                text: post?.postList[index].title,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    // 여기에 게시글을 클릭했을 때의 동작을 추가할 수 있습니다.
+                                  },
                               ),
-                              recognizer: TapGestureRecognizer()..onTap = () {},
+                              maxLines: 1,
                             ),
-                            maxLines: 1,
+                            trailing: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  post.postList[index].title,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  post.postList[index].date.toString(),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           Divider(
-                              color: Colors.grey
-                                  .shade300), // Add a divider between items
+                            color: Colors.grey.shade300,
+                          ), // Add a divider between items
                         ],
                       );
                     }),
-                  )
-                ],
-              )
-            : Center(child: Text('로딩중')),
-      ),
+                  ),
+                )
+              ],
+            ))
+          : Center(child: Text('로딩중')),
     );
   }
 }

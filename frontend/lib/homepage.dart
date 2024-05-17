@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:soganglink/data/courses/takes.dart';
 import 'package:soganglink/data/login/User.dart';
@@ -219,6 +220,41 @@ class _HomePage extends State<HomePage> {
                   ],
                 ),
               )),
+          Container(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Container(
+                    height: 150,
+                    width: 400,
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Container의 배경색
+                      borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                    ),
+                    child: Column(
+                      children: [Text("엠마오관"), Text("무언가 학식")],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 50,
+                    child: Container(),
+                  ),
+                  Container(
+                    height: 150,
+                    width: 400,
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Container의 배경색
+                      borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                    ),
+                    child: Column(
+                      children: [Text("엠마오관"), Text("무언가 학식")],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
           Container(
             alignment: Alignment.topLeft,
             decoration: BoxDecoration(

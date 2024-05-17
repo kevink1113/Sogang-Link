@@ -1,8 +1,8 @@
 class Posts {
   final int id;
-  final String? title;
+  final String title;
   final String? content;
-  final String? author;
+  final String author;
   final DateTime date;
   final int view_count;
   final int sum_votes;
