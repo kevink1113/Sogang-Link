@@ -1,3 +1,4 @@
+from django.utils import timezone
 from lecture.models import Course, Takes
 from users.models import User
 from users.serializers import *
