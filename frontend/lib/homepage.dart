@@ -97,6 +97,7 @@ class _HomePage extends State<HomePage> {
         children: [
           GestureDetector(
             onTap: () {
+              HapticFeedback.mediumImpact();
               showModalBottomSheet<void>(
                 showDragHandle: true,
                 backgroundColor: Colors.white,

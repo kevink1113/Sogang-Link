@@ -31,7 +31,7 @@ class _HomeState extends State<Home> {
     setState(() {
       _selectedIndex = index;
     });
-    HapticFeedback.mediumImpact();
+    HapticFeedback.selectionClick();
   }
 
   void printToken() async {
