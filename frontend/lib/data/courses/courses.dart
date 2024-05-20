@@ -9,6 +9,7 @@ class Course {
   final String? classroom;
   final String? advisor;
   final String? major;
+  final int credit;
 
   Course(
       {required this.id,
@@ -20,7 +21,8 @@ class Course {
       required this.end_time,
       required this.classroom,
       required this.advisor,
-      required this.major});
+      required this.major,
+      required this.credit});
 
   factory Course.fromJson(Map<String, dynamic> json) {
     var starttime = null;
@@ -45,6 +47,7 @@ class Course {
         end_time: endtime,
         classroom: json["classroom"],
         advisor: json["advisor"],
-        major: json["major"]);
+        major: json["major"],
+        credit: json["credit"]);
   }
 }
