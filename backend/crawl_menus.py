@@ -36,11 +36,11 @@ def setup_driver():
 def fetch_menus(driver, url):
     driver.get(url)
     # Loop until there is no menu info in the table
-    for _ in range(2):
+    for _ in range(1):
       print("Moved to next page")
       print("current page url: " + driver.current_url)
       # Wait for the table to load
-      WebDriverWait(driver, 10).until(
+      WebDriverWait(driver, 30).until(
           EC.presence_of_element_located((By.CSS_SELECTOR, "table.tableInBWHall1"))
       )
       
