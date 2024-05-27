@@ -24,15 +24,17 @@ DateTime today = DateTime.now();
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePage createState() => _HomePage();
 }
 
-class _HomePage extends State<HomePage> {
+class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
   List<DataRow> courses = [];
   int semester = 2024010;
-  List<DataRow> bwmenus = [];
-  List<DataRow> emmenus = [];
+  List<DataRow> bwmenus = []; //우정원 학식
+  List<DataRow> emmenus = []; //엠마오 학식
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -41,6 +43,7 @@ class _HomePage extends State<HomePage> {
     today = DateTime.now();
     today = DateTime(today.year, today.month, today.day);
     print("today : $today");
+    _tabController = TabController(length: 3, vsync: this);
 
     if (takes != null) {
       for (Take lecture in takes.cousrses_takes) {
@@ -50,40 +53,46 @@ class _HomePage extends State<HomePage> {
 
         if (lecture.course.start_time != null &&
             lecture.course.end_time != null) {
-          DateTime start = DateTime(2022, 12, 1, 9)
+          DateTime start = DateTime(today.year, today.month, today.day, 9)
               .add(Duration(minutes: lecture.course.start_time!));
-          DateTime end = DateTime(2022, 12, 1, 9)
+          DateTime end = DateTime(today.year, today.month, today.day, 9)
               .add(Duration(minutes: lecture.course.end_time!));
           time = "${start.hour}:${start.minute} ~ ${end.hour}:${end.minute}";
         } else {
           time = "?";
         }
-        courses.add(DataRow(cells: [
-          DataCell(Text(
-            lecture.course.name,
-            style: TextStyle(color: Colors.black, fontSize: 15),
-          )),
-          DataCell(Text(
-            lecture.course.classroom!,
-            style: TextStyle(color: Colors.black, fontSize: 15),
-          )),
-          DataCell(Text(
-            lecture.course.advisor!,
-            style: TextStyle(color: Colors.black, fontSize: 15),
-          )),
-          DataCell(Text(
-            time,
-            style: TextStyle(color: Colors.black, fontSize: 15),
-          )),
-        ]));
+
+        for (var char in lecture.course.day!.runes) {
+          if (String.fromCharCode(char) == today.weekday.toString()) {
+            courses.add(DataRow(cells: [
+              DataCell(Text(
+                lecture.course.name,
+                style: TextStyle(color: Colors.black, fontSize: 15),
+              )),
+              DataCell(Text(
+                lecture.course.classroom!,
+                style: TextStyle(color: Colors.black, fontSize: 15),
+              )),
+              DataCell(Text(
+                lecture.course.advisor!,
+                style: TextStyle(color: Colors.black, fontSize: 15),
+              )),
+              DataCell(Text(
+                time,
+                style: TextStyle(color: Colors.black, fontSize: 15),
+              )),
+            ]));
+            break;
+          }
+        }
       }
     }
 
     try {
       SecureStorage.getToken().then((token) {
         try {
-          http.get(Uri.parse("$url/notice?board=일반공지"), headers: {"Authorization": "Token $token"}).then(
-              (response) {
+          http.get(Uri.parse("$url/notice?board=일반공지"),
+              headers: {"Authorization": "Token $token"}).then((response) {
             if (response.statusCode == 200) {
               setState(() {
                 notice = NoticeList.fromJsonlist(
@@ -93,28 +102,28 @@ class _HomePage extends State<HomePage> {
               print("로그인 실패");
             }
           });
-          http.get(Uri.parse("$url/notice?board=학사공지"), headers: {"Authorization": "Token $token"}).then(
-                  (response) {
-                if (response.statusCode == 200) {
-                  setState(() {
-                    academic_notice = NoticeList.fromJsonlist(
-                        jsonDecode(utf8.decode(response.bodyBytes)));
-                  });
-                } else {
-                  print("로그인 실패");
-                }
+          http.get(Uri.parse("$url/notice?board=학사공지"),
+              headers: {"Authorization": "Token $token"}).then((response) {
+            if (response.statusCode == 200) {
+              setState(() {
+                academic_notice = NoticeList.fromJsonlist(
+                    jsonDecode(utf8.decode(response.bodyBytes)));
               });
-          http.get(Uri.parse("$url/notice?board=장학공지"), headers: {"Authorization": "Token $token"}).then(
-                  (response) {
-                if (response.statusCode == 200) {
-                  setState(() {
-                    scholarship_notice = NoticeList.fromJsonlist(
-                        jsonDecode(utf8.decode(response.bodyBytes)));
-                  });
-                } else {
-                  print("로그인 실패");
-                }
+            } else {
+              print("로그인 실패");
+            }
+          });
+          http.get(Uri.parse("$url/notice?board=장학공지"),
+              headers: {"Authorization": "Token $token"}).then((response) {
+            if (response.statusCode == 200) {
+              setState(() {
+                scholarship_notice = NoticeList.fromJsonlist(
+                    jsonDecode(utf8.decode(response.bodyBytes)));
               });
+            } else {
+              print("로그인 실패");
+            }
+          });
         } catch (e) {
           print("네트워크 오류");
         }
@@ -290,7 +299,7 @@ class _HomePage extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      "이수교과목",
+                      "오늘의 교과목",
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 20,
@@ -301,16 +310,18 @@ class _HomePage extends State<HomePage> {
                     ConstrainedBox(
                       constraints:
                           const BoxConstraints(minWidth: double.infinity),
-                      child: DataTable(
-                          horizontalMargin: 12.0,
-                          columnSpacing: 28.0,
-                          columns: [
-                            DataColumn(label: Text("과목명")),
-                            DataColumn(label: Text("강의실")),
-                            DataColumn(label: Text("교수명")),
-                            DataColumn(label: Text("시간")),
-                          ],
-                          rows: courses),
+                      child: (courses.length != 0)
+                          ? DataTable(
+                              horizontalMargin: 12.0,
+                              columnSpacing: 28.0,
+                              columns: [
+                                DataColumn(label: Text("과목명")),
+                                DataColumn(label: Text("강의실")),
+                                DataColumn(label: Text("교수명")),
+                                DataColumn(label: Text("시간")),
+                              ],
+                              rows: courses)
+                          : Center(child: Text('오늘은 공강입니다')),
                     ),
                   ],
                 ),
@@ -331,19 +342,21 @@ class _HomePage extends State<HomePage> {
                             child: Column(
                               children: [
                                 Text(menulist!.BW.facility_name),
-                                ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                      minWidth: double.infinity),
-                                  child: DataTable(
-                                      horizontalMargin: 12.0,
-                                      columnSpacing: 28.0,
-                                      dataRowMaxHeight: double.infinity,
-                                      columns: [
-                                        DataColumn(label: Text("코너")),
-                                        DataColumn(label: Text("메뉴")),
-                                      ],
-                                      rows: bwmenus),
-                                )
+                                (bwmenus.length != 0)
+                                    ? ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                            minWidth: double.infinity),
+                                        child: DataTable(
+                                            horizontalMargin: 12.0,
+                                            columnSpacing: 28.0,
+                                            dataRowMaxHeight: double.infinity,
+                                            columns: [
+                                              DataColumn(label: Text("코너")),
+                                              DataColumn(label: Text("메뉴")),
+                                            ],
+                                            rows: bwmenus),
+                                      )
+                                    : Center(child: Text('오늘은 학식이 없습니다.'))
                               ],
                             ),
                           ),
@@ -361,19 +374,21 @@ class _HomePage extends State<HomePage> {
                             child: Column(
                               children: [
                                 Text(menulist!.Em.facility_name),
-                                ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                      minWidth: double.infinity),
-                                  child: DataTable(
-                                      horizontalMargin: 12.0,
-                                      columnSpacing: 28.0,
-                                      dataRowMaxHeight: double.infinity,
-                                      columns: [
-                                        DataColumn(label: Text("코너")),
-                                        DataColumn(label: Text("메뉴")),
-                                      ],
-                                      rows: emmenus),
-                                )
+                                (emmenus.length != 0)
+                                    ? ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                            minWidth: double.infinity),
+                                        child: DataTable(
+                                            horizontalMargin: 12.0,
+                                            columnSpacing: 28.0,
+                                            dataRowMaxHeight: double.infinity,
+                                            columns: [
+                                              DataColumn(label: Text("코너")),
+                                              DataColumn(label: Text("메뉴")),
+                                            ],
+                                            rows: emmenus),
+                                      )
+                                    : Center(child: Text('오늘은 학식이 없습니다.'))
                               ],
                             ),
                           )
@@ -381,186 +396,171 @@ class _HomePage extends State<HomePage> {
                       ),
                     )
                   : Center(child: Text('로딩중'))),
-          Container(
-            alignment: Alignment.topLeft,
-            decoration: BoxDecoration(
-              color: Colors.white, // Container의 배경색
-              borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-            ),
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-            margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
-            child: (notice != null)
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: Text(
-                          "일반공지",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: min(notice!.noticelist.length, 10),
-                        itemBuilder: ((context, index) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              RichText(
-                                textAlign: TextAlign.left,
-                                text: TextSpan(
-                                  text: notice!.noticelist[index].title,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      launchUrl(Uri.parse(
-                                          notice!.noticelist[index].url));
-                                    },
-                                ),
-                                maxLines: 1,
-                              ),
-                              Divider(
-                                  color: Colors.grey
-                                      .shade300), // Add a divider between items
-                            ],
-                          );
-                        }),
-                      )
-                    ],
-                  )
-                : Center(child: Text('로딩중')),
+          TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(text: '일반공지'),
+              Tab(text: '학사공지'),
+              Tab(text: '장학공지'),
+            ],
           ),
-          Container(
-            alignment: Alignment.topLeft,
-            decoration: BoxDecoration(
-              color: Colors.white, // Container의 배경색
-              borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
-            ),
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-            margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
-            child: (academic_notice != null)
-                ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          SizedBox(
+            height: 500,
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Text(
-                    "학사공지",
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Container(
+                  alignment: Alignment.topLeft,
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Container의 배경색
+                    borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
+                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  child: (notice != null)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: min(notice!.noticelist.length, 10),
+                              itemBuilder: ((context, index) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      textAlign: TextAlign.left,
+                                      text: TextSpan(
+                                        text: notice!.noticelist[index].title,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            launchUrl(Uri.parse(
+                                                notice!.noticelist[index].url));
+                                          },
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                    Divider(
+                                        color: Colors.grey
+                                            .shade300), // Add a divider between items
+                                  ],
+                                );
+                              }),
+                            )
+                          ],
+                        )
+                      : Center(child: Text('로딩중')),
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: min(academic_notice!.noticelist.length, 10),
-                  itemBuilder: ((context, index) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          textAlign: TextAlign.left,
-                          text: TextSpan(
-                            text: academic_notice!.noticelist[index].title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                launchUrl(Uri.parse(
-                                    academic_notice!.noticelist[index].url));
-                              },
-                          ),
-                          maxLines: 1,
-                        ),
-                        Divider(
-                            color: Colors.grey
-                                .shade300), // Add a divider between items
-                      ],
-                    );
-                  }),
-                )
+                Container(
+                  alignment: Alignment.topLeft,
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Container의 배경색
+                    borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                  ),
+                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  child: (academic_notice != null)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount:
+                                  min(academic_notice!.noticelist.length, 10),
+                              itemBuilder: ((context, index) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      textAlign: TextAlign.left,
+                                      text: TextSpan(
+                                        text: academic_notice!
+                                            .noticelist[index].title,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            launchUrl(Uri.parse(academic_notice!
+                                                .noticelist[index].url));
+                                          },
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                    Divider(
+                                        color: Colors.grey
+                                            .shade300), // Add a divider between items
+                                  ],
+                                );
+                              }),
+                            )
+                          ],
+                        )
+                      : Center(child: Text('로딩중')),
+                ),
+                Container(
+                  alignment: Alignment.topLeft,
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Container의 배경색
+                    borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
+                  ),
+                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  child: (scholarship_notice != null)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: min(
+                                  scholarship_notice!.noticelist.length, 10),
+                              itemBuilder: ((context, index) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      textAlign: TextAlign.left,
+                                      text: TextSpan(
+                                        text: scholarship_notice!
+                                            .noticelist[index].title,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            launchUrl(Uri.parse(
+                                                scholarship_notice!
+                                                    .noticelist[index].url));
+                                          },
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                    Divider(
+                                        color: Colors.grey
+                                            .shade300), // Add a divider between items
+                                  ],
+                                );
+                              }),
+                            )
+                          ],
+                        )
+                      : Center(child: Text('로딩중')),
+                ),
               ],
-            )
-                : Center(child: Text('로딩중')),
-          ),
-          Container(
-            alignment: Alignment.topLeft,
-            decoration: BoxDecoration(
-              color: Colors.white, // Container의 배경색
-              borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
             ),
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-            margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
-            child: (scholarship_notice != null)
-                ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Text(
-                    "장학공지",
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: min(scholarship_notice!.noticelist.length, 10),
-                  itemBuilder: ((context, index) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          textAlign: TextAlign.left,
-                          text: TextSpan(
-                            text: scholarship_notice!.noticelist[index].title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                launchUrl(Uri.parse(
-                                    scholarship_notice!.noticelist[index].url));
-                              },
-                          ),
-                          maxLines: 1,
-                        ),
-                        Divider(
-                            color: Colors.grey
-                                .shade300), // Add a divider between items
-                      ],
-                    );
-                  }),
-                )
-              ],
-            )
-                : Center(child: Text('로딩중')),
-          ),
+          )
         ],
       ),
     );
