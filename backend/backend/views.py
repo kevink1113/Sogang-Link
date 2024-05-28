@@ -166,16 +166,13 @@ class ChatView(APIView):
         print("Question recieved: ", question)
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
 
-        # thread_id = client.beta.threads.create().id#user.thread
-        thread_id = user.thread
-        # Initialize the streaming process
+        # ================================= Chatbot Query =================================
+        thread_id = client.beta.threads.create().id # 응답 시간 향상을 위해 새 스레드 사용
+        # thread_id = user.thread                   # 맥락 파악 필요 시 유저 스레드 사용
+        
         # 질문 보내기
 
-        # cancel_active_runs(client, thread_id)
-        # print("Active runs cancelled")
-
-
-        cancel_active_runs(client, thread_id)
+        cancel_active_runs(client, thread_id)       # 실행중인 run 취소: 충돌 방지
         client.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
@@ -262,7 +259,7 @@ class ChatView(APIView):
                 print("Stream started")
                 try:
                     for event in stream:
-                        # print(event, end="\n\n")
+                        print("===== Event: ", event, end="\n\n")
                         if isinstance(event, ThreadMessageDelta):   # 메시지 델타 이벤트 처리
                             data = event.data.delta.content
                             for text in data:
