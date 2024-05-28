@@ -202,6 +202,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
         children: [
           GestureDetector(
             onTap: () {
+              HapticFeedback.mediumImpact();
               showModalBottomSheet<void>(
                 showDragHandle: true,
                 backgroundColor: Colors.white,
@@ -561,6 +562,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
               ],
             ),
           )
+
         ],
       ),
     );
