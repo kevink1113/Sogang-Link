@@ -12,7 +12,7 @@ class NoticeViewSet(APIView):
     def get(self, request):
         board = request.query_params.get('board')
         if board:
-            notices = Notice.objects.filter(board=board)
+            notices = Notice.objects.filter(board=board).order_by("-date")
         else:
             notices = Notice.objects.all()
         

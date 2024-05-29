@@ -1,9 +1,11 @@
 from drf_yasg import openapi
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Takes
-from .serializers import TakesSerializer
+from .serializers import CourseSerializer, TakesSerializer
+from django.shortcuts import get_object_or_404
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -34,32 +36,15 @@ from .models import Course
 from .serializers import CourseSerializer
 import datetime
 from django.http import JsonResponse
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 
 class CourseViewSet(viewsets.ModelViewSet):
-    """
-    TODO: 아직 전체 과목 목록 불러오기만 구현됨. 나머지 기능 구현 필요
-    API endpoint that allows courses to be viewed or edited.
-
-    list:
-    모든 강의를 조회합니다.
-
-    retrieve:
-    특정 강의를 조회합니다.
-
-    create:
-    새로운 강의를 추가합니다.
-
-    update:
-    특정 강의를 수정합니다.
-
-    delete:
-    특정 강의를 삭제합니다.
-
-
-    """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    @swagger_auto_schema(operation_description="courses(개설교과목) GET 요청을 위한 엔드포인트")
+
+    # @swagger_auto_schema(operation_description="courses(개설교과목) GET 요청을 위한 엔드포인트")
     def get_queryset(self):
         queryset = Course.objects.all()
     
@@ -90,10 +75,13 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
 class StudentTakesListView(APIView):
+    
     """
     get:
     현재 로그인한 학생이 수강한 과목 목록을 조회합니다.
     """
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
 
     permission_classes = [IsAuthenticated]
 
@@ -126,16 +114,73 @@ class StudentTakesListView(APIView):
         return Response(serializer.data)
 
 
+    def post(self, request, *args, **kwargs):
+        course_serializer = CourseSerializer(data=request.data)
+        if course_serializer.is_valid():
+            if self.has_time_conflicts(course_serializer.validated_data, request.user):
+                return Response({'error': 'Time conflict with another course.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            course = course_serializer.save()
+            new_take = Takes()
+            new_take.course = course
+            new_take.student = request.user
+            new_take.day = request.data.get('day', '')
+            new_take.classroom = request.data.get('classroom', '')
+            new_take.start_time = request.data.get('start_time', datetime.time(0, 0))
+            new_take.end_time = request.data.get('end_time', datetime.time(0, 0))
+            new_take.real = request.data.get('real', False)
+            new_take.middle_grade = request.data.get('middle_grade', '')
+            new_take.final_grade = request.data.get('final_grade', '')
+            new_take.save()
 
-    # def get(self, request):
-    #     board = request.query_params.get('board')
-    #     if board:
-    #         notices = Notice.objects.filter(board=board)
-    #     else:
-    #         notices = Notice.objects.all()
-        
-    #     serializer = NoticeSerializer(notices, many=True)
-    #     return Response(serializer.data)
+            print("Added new take: ", new_take.course)
+            return Response(TakesSerializer(new_take).data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, pk, *args, **kwargs):
+        take = get_object_or_404(Takes, pk=pk, student=request.user)
+        course_serializer = CourseSerializer(take.course, data=request.data, partial=True)
+
+        if course_serializer.is_valid():
+            if self.has_time_conflicts(course_serializer.validated_data, request.user, excluding_take_id=take.id):
+                return Response({'error': 'Time conflict with another course.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            course_serializer.save()
+            take_serializer = TakesSerializer(take, data=request.data, partial=True)
+            if take_serializer.is_valid():
+                take_serializer.save()
+                return Response(take_serializer.data)
+            else:
+                return Response(take_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(course_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            take = get_object_or_404(Takes, pk=pk, student=request.user)
+            take.delete()
+            return Response({'Take deleted'})
+        except:
+            return Response({'error': 'Take not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+    def has_time_conflicts(self, validated_data, user, excluding_take_id=None):
+        # Extract course schedule data
+        day = validated_data.get('day')
+        start_time = validated_data.get('start_time')
+        end_time = validated_data.get('end_time')
+
+        # Query to check for overlaps
+        query = Takes.objects.filter(
+            student=user,
+            course__day=day,
+            course__start_time__lt=end_time,
+            course__end_time__gt=start_time
+        )
+
+        if excluding_take_id:
+            query = query.exclude(id=excluding_take_id)
+
+        return query.exists()
 
 class SemesterTakesListView(APIView):
     permission_classes = [IsAuthenticated]
