@@ -18,7 +18,7 @@ from typing_extensions import override
 from openai.types.beta.threads.runs import ToolCall, RunStep
 
 from openai.types.beta.assistant_stream_event import (
-    ThreadRunRequiresAction, ThreadMessageDelta, ThreadRunCompleted,ThreadMessageCompleted,
+    ThreadRunRequiresAction, ThreadMessageDelta, ThreadRunCompleted, ThreadMessageCompleted,
     ThreadRunFailed, ThreadRunCancelling, ThreadRunCancelled, ThreadRunExpired, ThreadRunStepFailed,
     ThreadRunStepCancelled)
 # from backend.chatbot import chatbot_function_call
@@ -39,6 +39,7 @@ from chatbot.api import *
 from django.http import StreamingHttpResponse, JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 import json
+
 
 class LoginView(APIView):
     """
@@ -126,6 +127,7 @@ def my_login_view(request):
 def offline(request):
     return render(request, 'offline.html')
 
+
 def cancel_active_runs(client, thread_id):
     """
     명시된 thread에서 실행중인 모든 run을 취소하는 함수
@@ -136,7 +138,7 @@ def cancel_active_runs(client, thread_id):
 
     active_runs = client.beta.threads.runs.list(thread_id=thread_id).data
     for run in active_runs:
-        if run.status not in ["completed", "failed", "cancelled", "expired", "incomplete"]: # 취소된 run은 다시 취소하지 않음
+        if run.status not in ["completed", "failed", "cancelled", "expired", "incomplete"]:  # 취소된 run은 다시 취소하지 않음
             client.beta.threads.runs.cancel(thread_id=thread_id, run_id=run.id)
             print(f"Cancelled run {run.id}")
 
@@ -159,28 +161,25 @@ class ChatView(APIView):
         }
         # response 정의
     ))
-
     def post(self, request, *args, **kwargs):
         user = request.user
         question = request.data.get('question')
         print("Question recieved: ", question)
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
 
-        # thread_id = client.beta.threads.create().id#user.thread
-        thread_id = user.thread
-        # Initialize the streaming process
+        # ================================= Chatbot Query =================================
+        thread_id = client.beta.threads.create().id  # 응답 시간 향상을 위해 새 스레드 사용
+        # thread_id = user.thread                   # 맥락 파악 필요 시 유저 스레드 사용
+
         # 질문 보내기
 
-        # cancel_active_runs(client, thread_id)
-        # print("Active runs cancelled")
-
-
-        cancel_active_runs(client, thread_id)
+        cancel_active_runs(client, thread_id)  # 실행중인 run 취소: 충돌 방지
         client.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
             content=question
         )
+
         def event_stream():
 
             def process_tool(event):
@@ -262,7 +261,7 @@ class ChatView(APIView):
                 print("Stream started")
                 try:
                     for event in stream:
-                        # print(event, end="\n\n")
+                        # print("===== Event: ", event, end="\n\n")
                         if isinstance(event, ThreadMessageDelta):   # 메시지 델타 이벤트 처리
                             data = event.data.delta.content
                             for text in data:
@@ -282,10 +281,52 @@ class ChatView(APIView):
                                     # print(event, end="\n\n")
                                     if isinstance(event2, ThreadMessageDelta):  # 메시지 델타 이벤트 처리
                                         data2 = event2.data.delta.content
-                                        for text in data2:
-                                            print(text.text.value, end='', flush=True)
-                                            yield f"data: {json.dumps({'text': text.text.value})}\n\n"
-                                    elif isinstance(event, ThreadRunCompleted):
+                                        for text2 in data2:
+                                            print(text2.text.value, end='', flush=True)
+                                            yield f"data: {json.dumps({'text': text2.text.value})}\n\n"
+                                    elif isinstance(event2, ThreadRunRequiresAction):
+                                        tool_outputs2 = process_tool(event2)
+                                        run2 = event2.data
+
+                                        with client.beta.threads.runs.submit_tool_outputs_stream(
+                                                thread_id=run2.thread_id,
+                                                run_id=run2.id,
+                                                tool_outputs=tool_outputs2
+                                        ) as stream3:
+                                            for event3 in stream3:
+                                                # print(event, end="\n\n")
+                                                if isinstance(event3, ThreadMessageDelta):  # 메시지 델타 이벤트 처리
+                                                    data3 = event3.data.delta.content
+                                                    for text3 in data3:
+                                                        print(text3.text.value, end='', flush=True)
+                                                        yield f"data: {json.dumps({'text': text3.text.value})}\n\n"
+                                                elif isinstance(event3, ThreadRunCompleted):
+                                                    # 실행 완료 이벤트 처리
+                                                    yield "data: run_completed\n\n"
+                                                elif isinstance(event3, ThreadRunRequiresAction):
+                                                    tool_outputs3 = process_tool(event3)
+                                                    run3 = event3.data
+
+                                                    with client.beta.threads.runs.submit_tool_outputs_stream(
+                                                            thread_id=run3.thread_id,
+                                                            run_id=run3.id,
+                                                            tool_outputs=tool_outputs3
+                                                    ) as stream4:
+                                                        for event4 in stream4:
+                                                            # print(event, end="\n\n")
+                                                            if isinstance(event4, ThreadMessageDelta):  # 메시지 델타 이벤트 처리
+                                                                data4 = event4.data.delta.content
+                                                                for text4 in data4:
+                                                                    print(text4.text.value, end='', flush=True)
+                                                                    yield f"data: {json.dumps({'text': text4.text.value})}\n\n"
+                                                            elif isinstance(event4, ThreadRunCompleted):
+                                                                # 실행 완료 이벤트 처리
+                                                                yield "data: run_completed\n\n"
+                                                elif isinstance(event3, ThreadRunCompleted):
+                                                    # 실행 완료 이벤트 처리
+                                                    yield "data: run_completed\n\n"
+
+                                    elif isinstance(event2, ThreadRunCompleted):
                                         # 실행 완료 이벤트 처리
                                         yield "data: run_completed\n\n"
 
@@ -296,7 +337,6 @@ class ChatView(APIView):
                     # Handle the case when the client disconnects
                     stream.close()
 
-
         # Return a StreamingHttpResponse that keeps the connection open
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
@@ -305,7 +345,7 @@ class ChatView(APIView):
 
 class StreamView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request, *args, **kwargs):
         user = request.user
         assistant_id = "asst_fSEoeHlDpbVT7NA4chr18jLM"
