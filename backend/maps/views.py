@@ -154,6 +154,62 @@ class ClassroomListView(APIView):
             }, status=200)
 
 
+class FacilityInfoListView(APIView):
+    def get(self, request, format=None):
+        # Retrieve parameters from the request
+        building_abbr = request.GET.get('building')
+        facility_type = request.GET.get('type')
+        facility_name = request.GET.get('name')
+
+        # Initialize the query to all facilities
+        query = Facility.objects.all()
+
+        # Apply filters if parameters are provided
+        if building_abbr:
+            try:
+                building = Building.objects.get(abbr=building_abbr)
+                query = query.filter(building=building)
+            except Building.DoesNotExist:
+                return JsonResponse({"error": "Building not found"}, status=404)
+
+        if facility_type:
+            query = query.filter(facility_type=facility_type)  # 예: 'reading_room', 'print_shop', 'cafe', 등
+
+        if facility_name:
+            query = query.filter(name__icontains=facility_name)
+
+        # Check if there are any facilities after filtering
+        if not query.exists():
+            return JsonResponse({"error": "No matching facilities found"}, status=404)
+
+        # Construct the response data based on the queried facilities
+        response_data = []
+        for facility in query:
+            facility_info = {
+                "name": facility.name,
+                "description": facility.description,
+                "hours": facility.open_hours
+            }
+
+            # Specific data based on facility type
+            if facility.facility_type == 'reading_room':
+                facility_info.update({
+                    "type": "readingRoom",
+                    "total_seats": facility.total_seats,
+                    "available_seats": facility.available_seats,
+                })
+            elif facility.facility_type == 'print_shop':
+                facility_info.update({
+                    "type": "printShop"
+                })
+            else:
+                facility_info["type"] = facility.facility_type
+            
+            response_data.append(facility_info)
+
+        return JsonResponse(response_data, safe=False, status=200)  # safe=False to allow list data
+
+
 class BuildingInfoListView(APIView):
     
     def get(self, request, format=None):
