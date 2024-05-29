@@ -262,7 +262,7 @@ class ChatView(APIView):
                 try:
                     for event in stream:
                         # print("===== Event: ", event, end="\n\n")
-                        if isinstance(event, ThreadMessageDelta):  # 메시지 델타 이벤트 처리
+                        if isinstance(event, ThreadMessageDelta):   # 메시지 델타 이벤트 처리
                             data = event.data.delta.content
                             for text in data:
                                 print(text.text.value, end='', flush=True)
