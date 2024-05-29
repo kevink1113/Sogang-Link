@@ -406,7 +406,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
             ],
           ),
           SizedBox(
-            height: 500,
+            height: 800,
             child: TabBarView(
               controller: _tabController,
               children: [
@@ -425,7 +425,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             ListView.builder(
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
-                              itemCount: min(notice!.noticelist.length, 10),
+                              itemCount: min(notice!.noticelist.length, 20),
                               itemBuilder: ((context, index) {
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,7 +474,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               itemCount:
-                                  min(academic_notice!.noticelist.length, 10),
+                                  min(academic_notice!.noticelist.length, 20),
                               itemBuilder: ((context, index) {
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,7 +524,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               itemCount: min(
-                                  scholarship_notice!.noticelist.length, 10),
+                                  scholarship_notice!.noticelist.length, 20),
                               itemBuilder: ((context, index) {
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

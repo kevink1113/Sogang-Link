@@ -6,6 +6,7 @@ import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/login.dart';
 import 'package:soganglink/storage.dart';
 import 'package:soganglink/tools/calcgrade.dart';
+import 'package:soganglink/tools/restaurant/search_tag.dart';
 import 'package:soganglink/tools/studyroom.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:screen_brightness/screen_brightness.dart';
@@ -77,6 +78,22 @@ class _Tools extends State<Tools> {
                 onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (_) => StudyroomStatus()));
+                },
+              ),
+              InkWell(
+                child: Center(
+                    child: Text(
+                      "음식점 검색",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                      ),
+                    )),
+                onTap: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (_) => SearchTag()));
                 },
               )
             ],
