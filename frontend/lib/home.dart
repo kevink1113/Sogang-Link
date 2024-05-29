@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:soganglink/board.dart';
 import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/homepage.dart';
@@ -46,7 +48,13 @@ class _HomeState extends State<Home> {
     return Scaffold(
       backgroundColor: Colors.grey.shade200, // 밝은 회색으로 배경색 설정
       appBar: AppBar(
-        scrolledUnderElevation: 1.0,
+        // leading: SvgPicture.asset(
+        //   'assets/images/aa.svg',
+        //   height: 4,
+        //   width: 4,
+        //   color: Colors.black54,
+        // ),
+        scrolledUnderElevation: 0.0,
         // leading: IconButton(
         //   icon: Icon(Icons.logout),
         //   onPressed: () {
@@ -57,7 +65,7 @@ class _HomeState extends State<Home> {
           IconButton(
             icon: const Icon(
               Icons.logout,
-              color: Colors.white,
+              color: Colors.black54,
             ),
             onPressed: () {
               SecureStorage.deleteToken();
@@ -67,23 +75,31 @@ class _HomeState extends State<Home> {
           ),
         ],
 
-        shadowColor: Colors.black, // AppBar 그림자 색상 변경
-        title: Padding(
-          padding: const EdgeInsets.only(left: 5.0),
-          child: const Text(
-            'Sogang Link',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              // letterSpacing: 5.0,
-            ),
-          ),
+        shadowColor: null,
+        title: SvgPicture.asset(
+          'assets/images/aaa.svg',
+          height: 40,
+          width: 40,
+          // color: Colors.black54,
         ),
-        backgroundColor: Color(0xFF9e2a2f), // AppBar 색상 변경
-        elevation: 0, // AppBar 그림자 제거
+        // title: Padding(
+        //   padding: const EdgeInsets.only(left: 0.0),
+        //   child: const Text(
+        //     'Sogang Link',
+        //     style: TextStyle(
+        //       color: Colors.black54,
+        //       fontSize: 20,
+        //       fontWeight: FontWeight.w600,
+        //       // letterSpacing: 5.0,
+        //     ),
+        //   ),
+        // ),
+        // backgroundColor: Color(0xFF9e2a2f), // AppBar 색상 변경
+        backgroundColor: Color.fromARGB(0, 0, 0, 0), // AppBar 색상 변경
+        // elevation: 0, // AppBar 그림자 제거
         centerTitle: false, // 제목 중앙 정렬
       ),
+
       body: IndexedStack(
         index: _selectedIndex,
         children: _pages,
@@ -99,16 +115,16 @@ class _HomeState extends State<Home> {
             label: '시간표',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_filled),
             label: '홈',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.screen_search_desktop_outlined),
+            icon: Icon(Icons.article),
             label: '게시판',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.mode_comment),
-            label: 'SogangGPT',
+            icon: Icon(Icons.assistant),
+            label: 'GPT',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
@@ -116,6 +132,10 @@ class _HomeState extends State<Home> {
           ),
         ],
         currentIndex: _selectedIndex,
+        selectedLabelStyle:
+            TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
+        unselectedLabelStyle:
+            TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
         selectedItemColor: Color(0xFF9e2a2f), // 선택된 아이템 색상 변경
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed, // 4개 이상의 아이템에도 배경색 유지

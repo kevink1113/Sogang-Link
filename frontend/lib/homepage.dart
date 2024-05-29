@@ -249,8 +249,8 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   color: Colors.white, // Container의 배경색
                   borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                 ),
-                height: 200,
-                margin: EdgeInsets.fromLTRB(20, 30, 20, 10),
+                height: 180,
+                margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -293,7 +293,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 color: Colors.white, // Container의 배경색
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
               ),
-              margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+              margin: EdgeInsets.fromLTRB(15, 20, 15, 20),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Column(
@@ -328,6 +328,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 ),
               )),
           Container(
+              margin: EdgeInsets.fromLTRB(15, 20, 15, 20),
               child: (menulist != null)
                   ? SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -349,7 +350,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                             minWidth: double.infinity),
                                         child: DataTable(
                                             horizontalMargin: 12.0,
-                                            columnSpacing: 28.0,
+                                            columnSpacing: 30.0,
                                             dataRowMaxHeight: double.infinity,
                                             columns: [
                                               DataColumn(label: Text("코너")),
@@ -416,8 +417,8 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                     color: Colors.white, // Container의 배경색
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
-                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                  margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                  margin: EdgeInsets.fromLTRB(15, 20, 15, 30),
                   child: (notice != null)
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,7 +465,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                     color: Colors.white, // Container의 배경색
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
-                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
                   margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
                   child: (academic_notice != null)
                       ? Column(
@@ -514,7 +515,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                     color: Colors.white, // Container의 배경색
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
-                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
                   margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
                   child: (scholarship_notice != null)
                       ? Column(
@@ -562,7 +563,6 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
               ],
             ),
           )
-
         ],
       ),
     );
