@@ -67,19 +67,22 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
             courses.add(DataRow(cells: [
               DataCell(Text(
                 lecture.course.name,
-                style: TextStyle(color: Colors.black, fontSize: 15),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 13,
+                ),
               )),
               DataCell(Text(
                 lecture.course.classroom!,
-                style: TextStyle(color: Colors.black, fontSize: 15),
+                style: TextStyle(color: Colors.black, fontSize: 13),
               )),
               DataCell(Text(
                 lecture.course.advisor!,
-                style: TextStyle(color: Colors.black, fontSize: 15),
+                style: TextStyle(color: Colors.black, fontSize: 13),
               )),
               DataCell(Text(
                 time,
-                style: TextStyle(color: Colors.black, fontSize: 15),
+                style: TextStyle(color: Colors.black, fontSize: 13),
               )),
             ]));
             break;
@@ -150,11 +153,11 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                       bwmenus.add(DataRow(cells: [
                         DataCell(Text(
                           key,
-                          style: TextStyle(color: Colors.black, fontSize: 15),
+                          style: TextStyle(color: Colors.black, fontSize: 13),
                         )),
                         DataCell(Text(
                           menulist!.BW.items_by_date[today]![key][0],
-                          style: TextStyle(color: Colors.black, fontSize: 15),
+                          style: TextStyle(color: Colors.black, fontSize: 13),
                           overflow: TextOverflow.visible,
                           softWrap: true,
                         )),
@@ -168,11 +171,11 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                         emmenus.add(DataRow(cells: [
                           DataCell(Text(
                             key,
-                            style: TextStyle(color: Colors.black, fontSize: 15),
+                            style: TextStyle(color: Colors.black, fontSize: 13),
                           )),
                           DataCell(Text(
                             menulist!.Em.items_by_date[today]![key][0],
-                            style: TextStyle(color: Colors.black, fontSize: 15),
+                            style: TextStyle(color: Colors.black, fontSize: 13),
                             overflow: TextOverflow.visible,
                             softWrap: true,
                           )),
@@ -288,38 +291,76 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 )),
           ),
           Container(
+            margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/5401392.png', // 아이콘 경로
+                  height: 20, // 아이콘 높이
+                  width: 20, // 아이콘 너비
+                ),
+                SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
+                Text(
+                  "오늘의 강의",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    // letterSpacing: 2.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
               alignment: Alignment(-0.95, -1.0),
               decoration: BoxDecoration(
                 color: Colors.white, // Container의 배경색
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
               ),
-              margin: EdgeInsets.fromLTRB(15, 20, 15, 20),
+              margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      "오늘의 교과목",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
                     ConstrainedBox(
                       constraints:
                           const BoxConstraints(minWidth: double.infinity),
                       child: (courses.length != 0)
                           ? DataTable(
                               horizontalMargin: 12.0,
-                              columnSpacing: 28.0,
+                              columnSpacing: 18.0,
                               columns: [
-                                DataColumn(label: Text("과목명")),
-                                DataColumn(label: Text("강의실")),
-                                DataColumn(label: Text("교수명")),
-                                DataColumn(label: Text("시간")),
+                                DataColumn(
+                                    label: Text(
+                                  "과목명",
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600),
+                                )),
+                                DataColumn(
+                                    label: Text(
+                                  "강의실",
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600),
+                                )),
+                                DataColumn(
+                                    label: Text(
+                                  "교수명",
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600),
+                                )),
+                                DataColumn(
+                                    label: Text(
+                                  "시간",
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600),
+                                )),
                               ],
                               rows: courses)
                           : Center(child: Text('오늘은 공강입니다')),
@@ -328,7 +369,30 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 ),
               )),
           Container(
-              margin: EdgeInsets.fromLTRB(15, 20, 15, 20),
+            margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/restaurant.png', // 아이콘 경로
+                  height: 20, // 아이콘 높이
+                  width: 20, // 아이콘 너비
+                ),
+                SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
+                Text(
+                  "학식",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    // letterSpacing: 2.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+              margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
               child: (menulist != null)
                   ? SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -398,6 +462,29 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                       ),
                     )
                   : Center(child: Text('로딩중'))),
+          Container(
+            margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/megaphone.png', // 아이콘 경로
+                  height: 20, // 아이콘 높이
+                  width: 20, // 아이콘 너비
+                ),
+                SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
+                Text(
+                  "공지사항",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    // letterSpacing: 2.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
           TabBar(
             controller: _tabController,
             tabs: [
@@ -450,7 +537,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                     ),
                                     Divider(
                                         color: Colors.grey
-                                            .shade300), // Add a divider between items
+                                            .shade200), // Add a divider between items
                                   ],
                                 );
                               }),
@@ -500,7 +587,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                     ),
                                     Divider(
                                         color: Colors.grey
-                                            .shade300), // Add a divider between items
+                                            .shade200), // Add a divider between items
                                   ],
                                 );
                               }),
@@ -551,7 +638,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                     ),
                                     Divider(
                                         color: Colors.grey
-                                            .shade300), // Add a divider between items
+                                            .shade200), // Add a divider between items
                                   ],
                                 );
                               }),
