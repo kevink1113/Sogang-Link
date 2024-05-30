@@ -8,6 +8,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:soganglink/storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 class GptChat extends StatefulWidget {
   @override
@@ -94,6 +95,7 @@ class _GptChatState extends State<GptChat> {
                 final text = decoded['text'];
                 if (text != null && text.isNotEmpty) {
                   _updateGptMessage(_currentGptMessageText + text);
+                  HapticFeedback.lightImpact();
                 }
               } catch (e) {
                 print('Error decoding JSON: $e');

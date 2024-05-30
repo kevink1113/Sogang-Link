@@ -369,6 +369,106 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 ),
               )),
           Container(
+              margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
+              child: (menulist != null)
+                  ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Column(children: [
+                            Container(
+                              padding: EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // Container의 배경색
+                                borderRadius: BorderRadius.circular(20),
+                                // 둥근 모서리 반경 설정
+                              ),
+                              child: Image.asset(
+                                'assets/images/restaurant_1.png', // 아이콘 경로
+                                height: 25, // 아이콘 높이
+                                width: 25, // 아이콘 너비
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text("음식점 추천", style: TextStyle(fontSize: 11)),
+                          ]),
+                          SizedBox(width: 30),
+                          Column(children: [
+                            Container(
+                              padding: EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // Container의 배경색
+                                borderRadius: BorderRadius.circular(20),
+                                // 둥근 모서리 반경 설정
+                              ),
+                              child: Image.asset(
+                                'assets/images/building.png', // 아이콘 경로
+                                height: 25, // 아이콘 높이
+                                width: 25, // 아이콘 너비
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text("빈 강의실", style: TextStyle(fontSize: 11)),
+                          ]),
+                          SizedBox(width: 30),
+                          Column(children: [
+                            Container(
+                              padding: EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // Container의 배경색
+                                borderRadius: BorderRadius.circular(20),
+                                // 둥근 모서리 반경 설정
+                              ),
+                              child: Image.asset(
+                                'assets/images/book.png', // 아이콘 경로
+                                height: 25, // 아이콘 높이
+                                width: 25, // 아이콘 너비
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text("열람실 현황", style: TextStyle(fontSize: 11)),
+                          ]),
+                          SizedBox(width: 30),
+                          Column(children: [
+                            Container(
+                              padding: EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // Container의 배경색
+                                borderRadius: BorderRadius.circular(20),
+                                // 둥근 모서리 반경 설정
+                              ),
+                              child: Image.asset(
+                                'assets/images/score.png', // 아이콘 경로
+                                height: 25, // 아이콘 높이
+                                width: 25, // 아이콘 너비
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text("성적 계산기", style: TextStyle(fontSize: 11)),
+                          ]),
+                          SizedBox(width: 30),
+                          Column(children: [
+                            Container(
+                              padding: EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // Container의 배경색
+                                borderRadius: BorderRadius.circular(20),
+                                // 둥근 모서리 반경 설정
+                              ),
+                              child: Image.asset(
+                                'assets/images/sogang_icon.png', // 아이콘 경로
+                                height: 25, // 아이콘 높이
+                                width: 25, // 아이콘 너비
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text("SAINT", style: TextStyle(fontSize: 11)),
+                          ]),
+                        ],
+                      ),
+                    )
+                  : Center(child: Text('로딩중'))),
+          Container(
             margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
