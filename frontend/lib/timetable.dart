@@ -254,7 +254,7 @@ class _TimeTable extends State<TimeTable> {
             (index) {
               if (index % 2 == 0) {
                 return const Divider(
-                  color: Colors.grey,
+                  color: Colors.black38,
                   height: 0,
                 );
               }
@@ -272,7 +272,7 @@ class _TimeTable extends State<TimeTable> {
   List<Widget> buildDayColumn(int index, List<Widget> lecturesForTheDay) {
     return [
       const VerticalDivider(
-        color: Colors.grey,
+        color: Colors.black38,
         width: 0,
       ),
       Expanded(
@@ -293,7 +293,7 @@ class _TimeTable extends State<TimeTable> {
                   (index) {
                     if (index % 2 == 0) {
                       return const Divider(
-                        color: Colors.grey,
+                        color: Colors.black38,
                         height: 0,
                       );
                     }

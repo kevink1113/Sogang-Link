@@ -68,7 +68,6 @@ class SearchPageState extends State<SearchTag> {
 
   bool loaded = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -76,19 +75,19 @@ class SearchPageState extends State<SearchTag> {
     try {
       SecureStorage.getToken().then((token) {
         try {
-          http.get(Uri.parse("$url/maps/restaurants"),
-              headers: {"Authorization": "Token $token"}).then((
-              response) async {
+          http.get(Uri.parse("$url/maps/restaurants"), headers: {
+            "Authorization": "Token $token"
+          }).then((response) async {
             if (response.statusCode == 200) {
               listfood = jsonDecode(utf8.decode(response.bodyBytes));
               makelist(listfood);
               setState(() {
-                isSelectedPrices =
-                    List.generate(prices.length, (index) => false); // isSelectedPrices 초기화
-                isSelectedCate =
-                    List.generate(categorys.length, (index) => false); // isSelectedCate 초기화
-                isSelectedPlaces =
-                    List.generate(places.length, (index) => false); // isSelectedCate 초기화
+                isSelectedPrices = List.generate(
+                    prices.length, (index) => false); // isSelectedPrices 초기화
+                isSelectedCate = List.generate(
+                    categorys.length, (index) => false); // isSelectedCate 초기화
+                isSelectedPlaces = List.generate(
+                    places.length, (index) => false); // isSelectedCate 초기화
                 targetIndex = [];
                 loaded = true;
               });
@@ -103,8 +102,6 @@ class SearchPageState extends State<SearchTag> {
     } catch (e) {
       print(e);
     }
-
-
   }
 
   @override
@@ -114,360 +111,423 @@ class SearchPageState extends State<SearchTag> {
         appBar: AppBar(
           title: Text('음식점 검색기'),
         ),
-        body: (loaded) ? ListView(
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-                  child: Column(
-                    children: [
-                      // 태그 선택하는 박스
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Column(
-                            children: [
-                              // 메뉴 선택 줄
-                              Container(
-                                decoration: const BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: Colors.grey,
-                                      width: 0.5,
-                                      style: BorderStyle.solid,
-                                    ),
-                                  ),
-                                ),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
-                                    children: [
-                                      Container(
-                                        width: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[300],
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5),
-                                        alignment: Alignment.center,
-                                        child: const Text(
-                                          '메뉴',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontFamily: "NanumSquare_ac",
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 10,
-                                          ),
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Wrap(
-                                              spacing: 15,
-                                              runSpacing: 10,
-                                              children: [
-                                                for (int i = 0;
-                                                i < categorys.length;
-                                                i++)
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
-                                                    decoration: BoxDecoration(
-                                                      color: isSelectedCate[i]
-                                                          ? Colors.amber[300]
-                                                          : Colors.grey[200],
-                                                      border: Border.all(
-                                                        color: isSelectedCate[i]
-                                                            ? const Color
-                                                            .fromARGB(
-                                                            255, 255, 213, 79)
-                                                            : const Color
-                                                            .fromARGB(255,
-                                                            238, 238, 238),
-                                                        width: 3,
-                                                      ),
-                                                      borderRadius:
-                                                      BorderRadius.circular(
-                                                          50),
-                                                    ),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        isSelectedCate[i] =
-                                                        !isSelectedCate[i];
-                                                        clickBottons();
-                                                      },
-                                                      child: Text(
-                                                        categorys[i],
-                                                        style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontFamily:
-                                                          "NanumSquare_ac",
-                                                          fontWeight:
-                                                          FontWeight.w400,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+        body: (loaded)
+            ? ListView(
+                children: [
+                  Container(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+                    child: SingleChildScrollView(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+                        child: Column(
+                          children: [
+                            // 태그 선택하는 박스
+                            Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              // 장소 선택 줄
-                              Container(
-                                decoration: const BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: Colors.grey,
-                                      width: 0.5,
-                                      style: BorderStyle.solid,
-                                    ),
-                                  ),
-                                ),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
-                                    children: [
-                                      Container(
-                                        width: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[300],
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5),
-                                        alignment: Alignment.center,
-                                        child: const Text(
-                                          '장소',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontFamily: "NanumSquare_ac",
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 10,
-                                          ),
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Wrap(
-                                              spacing: 15,
-                                              runSpacing: 10,
-                                              children: [
-                                                for (int i = 0;
-                                                i < places.length;
-                                                i++)
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
-                                                    decoration: BoxDecoration(
-                                                      color: isSelectedPlaces[i]
-                                                          ? Colors.amber[300]
-                                                          : Colors.grey[200],
-                                                      border: Border.all(
-                                                        color: isSelectedPlaces[i]
-                                                            ? const Color
-                                                            .fromARGB(
-                                                            255, 255, 213, 79)
-                                                            : const Color
-                                                            .fromARGB(255,
-                                                            238, 238, 238),
-                                                        width: 3,
-                                                      ),
-                                                      borderRadius:
-                                                      BorderRadius.circular(
-                                                          50),
-                                                    ),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        isSelectedPlaces[i] =
-                                                        !isSelectedPlaces[i];
-                                                        clickBottons();
-                                                      },
-                                                      child: Text(
-                                                        places[i],
-                                                        style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontFamily:
-                                                          "NanumSquare_ac",
-                                                          fontWeight:
-                                                          FontWeight.w400,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              // 가격대 선택 줄
-                              IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment
-                                      .stretch,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Column(
                                   children: [
+                                    // 메뉴 선택 줄
                                     Container(
-                                      width: 80,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[300],
-                                      ),
-                                      padding:
-                                      const EdgeInsets.symmetric(vertical: 5),
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        '가격대',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontFamily: "NanumSquare_ac",
-                                          fontWeight: FontWeight.w400,
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Colors.grey,
+                                            width: 0.5,
+                                            style: BorderStyle.solid,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 10,
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Wrap(
-                                            spacing: 15,
-                                            runSpacing: 10,
-                                            children: [
-                                              for (int i = 0;
-                                              i < prices.length;
-                                              i++)
-                                                Container(
-                                                  padding:
+                                      child: IntrinsicHeight(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Container(
+                                              width: 80,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[300],
+                                              ),
+                                              padding:
                                                   const EdgeInsets.symmetric(
-                                                      horizontal: 10),
-                                                  decoration: BoxDecoration(
-                                                    color: isSelectedPrices[i]
-                                                        ? Colors.amber[300]
-                                                        : Colors.grey[200],
-                                                    border: Border.all(
-                                                      color: isSelectedPrices[i]
-                                                          ? const Color
-                                                          .fromARGB(
-                                                          255, 255, 213, 79)
-                                                          : const Color
-                                                          .fromARGB(
-                                                          255, 238, 238, 238),
-                                                      width: 3,
-                                                    ),
-                                                    borderRadius:
-                                                    BorderRadius.circular(50),
-                                                  ),
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      isSelectedPrices[i] =
-                                                      !isSelectedPrices[i];
-                                                      clickBottons();
-                                                    },
-                                                    child: Text(
-                                                      price_tags[i],
-                                                      style: const TextStyle(
-                                                        fontSize: 16,
-                                                        fontFamily:
-                                                        "NanumSquare_ac",
-                                                        fontWeight:
-                                                        FontWeight.w400,
-                                                      ),
-                                                    ),
+                                                      vertical: 5),
+                                              alignment: Alignment.center,
+                                              child: const Text(
+                                                '메뉴',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: "NanumSquare_ac",
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                  vertical: 10,
+                                                ),
+                                                child: Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Wrap(
+                                                    spacing: 15,
+                                                    runSpacing: 10,
+                                                    children: [
+                                                      for (int i = 0;
+                                                          i < categorys.length;
+                                                          i++)
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      10),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: isSelectedCate[
+                                                                    i]
+                                                                ? Colors
+                                                                    .amber[300]
+                                                                : Colors
+                                                                    .grey[200],
+                                                            border: Border.all(
+                                                              color: isSelectedCate[
+                                                                      i]
+                                                                  ? const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      255,
+                                                                      213,
+                                                                      79)
+                                                                  : const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      238,
+                                                                      238,
+                                                                      238),
+                                                              width: 3,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        50),
+                                                          ),
+                                                          child: InkWell(
+                                                            onTap: () {
+                                                              isSelectedCate[
+                                                                      i] =
+                                                                  !isSelectedCate[
+                                                                      i];
+                                                              clickBottons();
+                                                            },
+                                                            child: Text(
+                                                              categorys[i],
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 16,
+                                                                fontFamily:
+                                                                    "NanumSquare_ac",
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                    ],
                                                   ),
                                                 ),
-                                            ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    // 장소 선택 줄
+                                    Container(
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Colors.grey,
+                                            width: 0.5,
+                                            style: BorderStyle.solid,
                                           ),
                                         ),
+                                      ),
+                                      child: IntrinsicHeight(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Container(
+                                              width: 80,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[300],
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 5),
+                                              alignment: Alignment.center,
+                                              child: const Text(
+                                                '장소',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: "NanumSquare_ac",
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                  vertical: 10,
+                                                ),
+                                                child: Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Wrap(
+                                                    spacing: 15,
+                                                    runSpacing: 10,
+                                                    children: [
+                                                      for (int i = 0;
+                                                          i < places.length;
+                                                          i++)
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      10),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: isSelectedPlaces[
+                                                                    i]
+                                                                ? Colors
+                                                                    .amber[300]
+                                                                : Colors
+                                                                    .grey[200],
+                                                            border: Border.all(
+                                                              color: isSelectedPlaces[
+                                                                      i]
+                                                                  ? const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      255,
+                                                                      213,
+                                                                      79)
+                                                                  : const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      238,
+                                                                      238,
+                                                                      238),
+                                                              width: 3,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        50),
+                                                          ),
+                                                          child: InkWell(
+                                                            onTap: () {
+                                                              isSelectedPlaces[
+                                                                      i] =
+                                                                  !isSelectedPlaces[
+                                                                      i];
+                                                              clickBottons();
+                                                            },
+                                                            child: Text(
+                                                              places[i],
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 16,
+                                                                fontFamily:
+                                                                    "NanumSquare_ac",
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    // 가격대 선택 줄
+                                    IntrinsicHeight(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Container(
+                                            width: 80,
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[300],
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 5),
+                                            alignment: Alignment.center,
+                                            child: const Text(
+                                              '가격대',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontFamily: "NanumSquare_ac",
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 10,
+                                              ),
+                                              child: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Wrap(
+                                                  spacing: 15,
+                                                  runSpacing: 10,
+                                                  children: [
+                                                    for (int i = 0;
+                                                        i < prices.length;
+                                                        i++)
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 10),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              isSelectedPrices[
+                                                                      i]
+                                                                  ? Colors.amber[
+                                                                      300]
+                                                                  : Colors.grey[
+                                                                      200],
+                                                          border: Border.all(
+                                                            color: isSelectedPrices[
+                                                                    i]
+                                                                ? const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    255,
+                                                                    213,
+                                                                    79)
+                                                                : const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    238,
+                                                                    238,
+                                                                    238),
+                                                            width: 3,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(50),
+                                                        ),
+                                                        child: InkWell(
+                                                          onTap: () {
+                                                            isSelectedPrices[
+                                                                    i] =
+                                                                !isSelectedPrices[
+                                                                    i];
+                                                            clickBottons();
+                                                          },
+                                                          child: Text(
+                                                            price_tags[i],
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 16,
+                                                              fontFamily:
+                                                                  "NanumSquare_ac",
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Divider(
-                        thickness: 1.5,
-                        indent: 20,
-                        endIndent: 20,
-                      ),
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: targetIndex.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == targetIndex.length) {
-                            return Container();
-                          } else {
-                            return ListTile(
-                              title: Text(listfood[targetIndex[index]]["name"]),
-                              subtitle:
-                              Text(listfood[targetIndex[index]]["OneLiner"]),
-                              contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 30),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          resultlist_with(
-                                              targetIndex[index], null)),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            const Divider(
+                              thickness: 1.5,
+                              indent: 20,
+                              endIndent: 20,
+                            ),
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: targetIndex.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == targetIndex.length) {
+                                  return Container();
+                                } else {
+                                  return ListTile(
+                                    title: Text(
+                                        listfood[targetIndex[index]]["name"]),
+                                    subtitle: Text(listfood[targetIndex[index]]
+                                        ["OneLiner"]),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 30),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                resultlist_with(
+                                                    targetIndex[index], null)),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                              separatorBuilder: (context, index) {
+                                return const Divider(
+                                  thickness: 1.5,
+                                  indent: 20,
+                                  endIndent: 20,
                                 );
                               },
-                            );
-                          }
-                        },
-                        separatorBuilder: (context, index) {
-                          return const Divider(
-                            thickness: 1.5,
-                            indent: 20,
-                            endIndent: 20,
-                          );
-                        },
-                      )
-                    ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-
-          ],
-        )
-            : Center(child: Text('로딩중'))
-    );
+                ],
+              )
+            : Center(child: Text('로딩중')));
   }
 }

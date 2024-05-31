@@ -55,6 +55,7 @@ dependencies:
   flutter_markdown: ^0.7.1
   cache_manager: ^1.0.0+4
   text_scroll: ^0.2.0
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:
