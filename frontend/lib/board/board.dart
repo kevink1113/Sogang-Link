@@ -134,7 +134,10 @@ class _Board extends State<Board> {
                                                   .content,
                                             ),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      // 수정 후 게시글들 다시 로드
+                                      ReloadList();
+                                    });
                                   },
                               ),
                               maxLines: 1,
@@ -175,7 +178,10 @@ class _Board extends State<Board> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => PostCreate()),
-                      );
+                      ).then((_) {
+                        // 수정 후 게시글들 다시 로드
+                        ReloadList();
+                      });
                     },
                     child: Icon(Icons.add),
                   ),
