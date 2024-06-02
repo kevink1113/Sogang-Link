@@ -13,6 +13,7 @@ import 'storage.dart'; // Import the secure storage class
 
 class TimeTable extends StatefulWidget {
   const TimeTable({Key? key}) : super(key: key);
+
   @override
   _TimeTable createState() => _TimeTable();
 }
@@ -143,18 +144,21 @@ class _TimeTable extends State<TimeTable> {
                         });
                   },
                   child: Container(
-                    width: MediaQuery.of(context).size.width / 5,
+                    width: MediaQuery.of(context).size.width * 4 / 21,
                     height: height,
                     decoration: BoxDecoration(
                       color: cs[count % (cs.length)],
-                      borderRadius: BorderRadius.all(Radius.circular(0)),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
                     ),
-                    child: Text(
-                      "${lecture.course.name}\n${lecture.course.classroom}",
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 3, 5, 3),
+                      child: Text(
+                        "${lecture.course.name}\n${lecture.course.classroom}",
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 )
