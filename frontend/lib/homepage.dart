@@ -330,8 +330,8 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                           const BoxConstraints(minWidth: double.infinity),
                       child: (courses.length != 0)
                           ? DataTable(
-                              horizontalMargin: 12.0,
-                              columnSpacing: 18.0,
+                              horizontalMargin: 6.0,
+                              columnSpacing: 9.0,
                               columns: [
                                 DataColumn(
                                     label: Text(
@@ -507,7 +507,18 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             ),
                             child: Column(
                               children: [
-                                Text(menulist!.BW.facility_name),
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        menulist!.BW.facility_name,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )),
+                                ),
                                 (bwmenus.length != 0)
                                     ? ConstrainedBox(
                                         constraints: const BoxConstraints(
@@ -516,9 +527,11 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                             horizontalMargin: 12.0,
                                             columnSpacing: 30.0,
                                             dataRowMaxHeight: double.infinity,
+                                            headingRowHeight: 0,
+                                            dividerThickness: 0,
                                             columns: [
-                                              DataColumn(label: Text("코너")),
-                                              DataColumn(label: Text("메뉴")),
+                                              DataColumn(label: Text("")),
+                                              DataColumn(label: Text("")),
                                             ],
                                             rows: bwmenus),
                                       )
@@ -539,7 +552,18 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             ),
                             child: Column(
                               children: [
-                                Text(menulist!.Em.facility_name),
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        menulist!.Em.facility_name,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )),
+                                ),
                                 (emmenus.length != 0)
                                     ? ConstrainedBox(
                                         constraints: const BoxConstraints(
@@ -548,9 +572,10 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                             horizontalMargin: 12.0,
                                             columnSpacing: 28.0,
                                             dataRowMaxHeight: double.infinity,
+                                            headingRowHeight: 0,
                                             columns: [
-                                              DataColumn(label: Text("코너")),
-                                              DataColumn(label: Text("메뉴")),
+                                              DataColumn(label: Text("")),
+                                              DataColumn(label: Text("")),
                                             ],
                                             rows: emmenus),
                                       )

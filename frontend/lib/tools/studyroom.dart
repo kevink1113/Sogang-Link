@@ -15,9 +15,20 @@ class StudyroomStatus extends StatefulWidget {
 }
 
 class _StudyroomStatus extends State<StudyroomStatus> {
+  final List<Map<String, dynamic>> readingRooms = [];
 
-  final List<Map<String, dynamic>> readingRooms = [
-  ];
+  final Map<dynamic, int> roomsnumber = {
+    "111 일반열람실": 2,
+    "112 일반열람실": 3,
+    "113 일반열람실": 4,
+    "133 일반열람실": 5,
+    "K관 열람실": 6,
+    "X관 대학원열람실": 8,
+    "PA관 열람실": 11,
+    "J관 일반열람실": 15,
+    "J관 노트북전용실": 16,
+  };
+
   @override
   void initState() {
     // TODO: implement initState
@@ -30,12 +41,15 @@ class _StudyroomStatus extends State<StudyroomStatus> {
             if (response.statusCode == 200) {
               var status = jsonDecode(utf8.decode(response.bodyBytes));
               for (final Map<String, dynamic> json in status) {
-                if(json["name"].indexOf('열람실') != -1){
-                  readingRooms.add({"name": json["name"], "totalSeats": json["total_seats"], "availableSeats": json["available_seats"]});
+                if (roomsnumber.containsKey(json["name"])) {
+                  readingRooms.add({
+                    "name": json["name"],
+                    "totalSeats": json["total_seats"],
+                    "availableSeats": json["available_seats"]
+                  });
                 }
               }
-              setState(() {
-              });
+              setState(() {});
             } else {
               print("로그인 실패");
             }
@@ -49,8 +63,6 @@ class _StudyroomStatus extends State<StudyroomStatus> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +71,9 @@ class _StudyroomStatus extends State<StudyroomStatus> {
         actions: [
           IconButton(
             icon: Icon(Icons.info_outline),
-            onPressed: _launchDetailsURL,
+            onPressed: () {
+              _launchDetailsURL('http://libseat.sogang.ac.kr/seat/domian5.asp');
+            },
           ),
         ],
       ),
@@ -73,45 +87,49 @@ class _StudyroomStatus extends State<StudyroomStatus> {
           final percentage = availableSeats / totalSeats;
 
           return Card(
-            margin: EdgeInsets.symmetric(vertical: 8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    room["name"],
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+              margin: EdgeInsets.symmetric(vertical: 8.0),
+              child: InkWell(
+                onTap: () {
+                  _launchDetailsURL(
+                      'http://libseat.sogang.ac.kr/seat/roomview5.asp?room_no=${roomsnumber[room["name"]]}');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        room["name"],
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8.0),
+                      Text("남은 좌석: $availableSeats / $totalSeats"),
+                      SizedBox(height: 8.0),
+                      LinearProgressIndicator(
+                        value: percentage,
+                        backgroundColor: Colors.grey.shade300,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          percentage > 0.5
+                              ? Colors.green
+                              : (percentage > 0.2 ? Colors.orange : Colors.red),
+                        ),
+                      ),
+                      SizedBox(height: 8.0),
+                      Text("${(percentage * 100).toStringAsFixed(1)}% 남음"),
+                    ],
                   ),
-                  SizedBox(height: 8.0),
-                  Text("남은 좌석: $availableSeats / $totalSeats"),
-                  SizedBox(height: 8.0),
-                  LinearProgressIndicator(
-                    value: percentage,
-                    backgroundColor: Colors.grey.shade300,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      percentage > 0.5
-                          ? Colors.green
-                          : (percentage > 0.2 ? Colors.orange : Colors.red),
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Text("${(percentage * 100).toStringAsFixed(1)}% 남음"),
-                ],
-              ),
-            ),
-          );
+                ),
+              ));
         },
       ),
     );
   }
 
-  void _launchDetailsURL() async {
-    Uri url = Uri.parse(
-        'http://libseat.sogang.ac.kr/seat/domian5.asp'); // 여기에 실제 URL을 넣으세요.
+  void _launchDetailsURL(String link) async {
+    Uri url = Uri.parse(link);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
