@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import '../storage.dart';
 
 class StudyroomStatus extends StatefulWidget {
-  StudyroomStatus({Key? key}) : super(key: key);
+  const StudyroomStatus({Key? key}) : super(key: key);
 
   @override
   _StudyroomStatus createState() => _StudyroomStatus();
@@ -67,10 +67,10 @@ class _StudyroomStatus extends State<StudyroomStatus> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('열람실 좌석 정보'),
+        title: const Text('열람실 좌석 정보'),
         actions: [
           IconButton(
-            icon: Icon(Icons.info_outline),
+            icon: const Icon(Icons.info_outline),
             onPressed: () {
               _launchDetailsURL('http://libseat.sogang.ac.kr/seat/domian5.asp');
             },
@@ -78,7 +78,7 @@ class _StudyroomStatus extends State<StudyroomStatus> {
         ],
       ),
       body: ListView.builder(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         itemCount: readingRooms.length,
         itemBuilder: (context, index) {
           final room = readingRooms[index];
@@ -87,7 +87,7 @@ class _StudyroomStatus extends State<StudyroomStatus> {
           final percentage = availableSeats / totalSeats;
 
           return Card(
-              margin: EdgeInsets.symmetric(vertical: 8.0),
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
               child: InkWell(
                 onTap: () {
                   _launchDetailsURL(
@@ -100,14 +100,14 @@ class _StudyroomStatus extends State<StudyroomStatus> {
                     children: [
                       Text(
                         room["name"],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       Text("남은 좌석: $availableSeats / $totalSeats"),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       LinearProgressIndicator(
                         value: percentage,
                         backgroundColor: Colors.grey.shade300,
@@ -117,7 +117,7 @@ class _StudyroomStatus extends State<StudyroomStatus> {
                               : (percentage > 0.2 ? Colors.orange : Colors.red),
                         ),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       Text("${(percentage * 100).toStringAsFixed(1)}% 남음"),
                     ],
                   ),

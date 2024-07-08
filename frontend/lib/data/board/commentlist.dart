@@ -18,7 +18,7 @@ class CommentList {
   CommentList({required this.commentlist});
 
   factory CommentList.fromJsonlist(List<dynamic> list) {
-    var comment_list = <Comments>[];
+    var commentList = <Comments>[];
     for (final Map<String, dynamic> json in list) {
       var comment = Comments(
           id: json['id'],
@@ -26,9 +26,9 @@ class CommentList {
           author: json['author'],
           date: DateTime.parse(json['created_at']),
           post: json['post']);
-      comment_list.add(comment);
+      commentList.add(comment);
     }
 
-    return CommentList(commentlist: comment_list);
+    return CommentList(commentlist: commentList);
   }
 }

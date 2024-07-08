@@ -9,7 +9,7 @@ void main() async {
 
   if (question != null && question.isNotEmpty) {
     // Replace this with your actual token
-    final token = '527faebec62c87affb7cf30e38d3e8beac327a41';
+    const token = '527faebec62c87affb7cf30e38d3e8beac327a41';
     await GPTstreamcall(token, question);
   } else {
     print('Question cannot be empty.');

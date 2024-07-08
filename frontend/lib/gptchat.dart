@@ -6,11 +6,12 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:soganglink/storage.dart';
-import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 
 class GptChat extends StatefulWidget {
+  const GptChat({super.key});
+
   @override
   _GptChatState createState() => _GptChatState();
 }
@@ -84,7 +85,7 @@ class _GptChatState extends State<GptChat> {
         return;
       }
 
-      response.stream.transform(utf8.decoder).transform(LineSplitter()).listen(
+      response.stream.transform(utf8.decoder).transform(const LineSplitter()).listen(
           (data) {
         data.split('\n').forEach((line) {
           if (line.startsWith("data: ")) {
@@ -157,7 +158,7 @@ class _GptChatState extends State<GptChat> {
       constraints: BoxConstraints(maxWidth: messageWidth.toDouble()),
       decoration: BoxDecoration(
         color: message.author.id == _user.id
-            ? Color(0xFF9e2a2f)
+            ? const Color(0xFF9e2a2f)
             : Colors.grey[200],
         borderRadius: BorderRadius.circular(8.0),
       ),

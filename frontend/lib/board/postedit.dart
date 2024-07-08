@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:soganglink/data/board/commentlist.dart';
 import 'package:soganglink/storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -22,13 +21,13 @@ class EditPostScreen extends StatelessWidget {
   Widget build(BuildContext context) {
 
 
-    final _formKey = GlobalKey<FormState>();
-    String _title = '';
-    String? _content = '';
+    final formKey = GlobalKey<FormState>();
+    String title = '';
+    String? content = '';
 
-    void _savePost() async {
-      if (_formKey.currentState!.validate()) {
-        _formKey.currentState!.save();
+    void savePost() async {
+      if (formKey.currentState!.validate()) {
+        formKey.currentState!.save();
 
         var request = Uri.parse("$url/posts/");
         try {
@@ -37,8 +36,8 @@ class EditPostScreen extends StatelessWidget {
               http.put(request, headers: {
                 "Authorization": "Token $token"
               }, body: {
-                "title": _title,
-                "content": _content,
+                "title": title,
+                "content": content,
                 "author": user.username
               }).then((response) {
                 if (response.statusCode == 201) {
@@ -60,17 +59,17 @@ class EditPostScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('글 수정'),
+        title: const Text('글 수정'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             children: [
-              Align(alignment: Alignment.centerLeft, child: Text("제목")),
+              const Align(alignment: Alignment.centerLeft, child: Text("제목")),
               TextFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -81,13 +80,13 @@ class EditPostScreen extends StatelessWidget {
                 },
                 initialValue: title,
                 onSaved: (value) {
-                  _title = value!;
+                  title = value!;
                 },
               ),
-              SizedBox(height: 20),
-              Align(alignment: Alignment.centerLeft, child: Text("내용")),
+              const SizedBox(height: 20),
+              const Align(alignment: Alignment.centerLeft, child: Text("내용")),
               TextFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 10,
@@ -99,17 +98,17 @@ class EditPostScreen extends StatelessWidget {
                 },
                 initialValue: content,
                 onSaved: (value) {
-                  _content = value!;
+                  content = value!;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _savePost,
-                child: Text('수정하기'),
+                onPressed: savePost,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  textStyle: TextStyle(fontSize: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  textStyle: const TextStyle(fontSize: 16),
                 ),
+                child: const Text('수정하기'),
               ),
             ],
           ),

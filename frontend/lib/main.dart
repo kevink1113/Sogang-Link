@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:soganglink/login.dart';
-import 'home.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +19,7 @@ class MyApp extends StatelessWidget {
 
         // Define the default brightness and colors.
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Color(0xFF9e2a2f),
+          seedColor: const Color(0xFF9e2a2f),
           // TRY THIS: Change to "Brightness.light"
           //           and see that all colors change
           //           to better contrast a light background.
@@ -50,7 +48,7 @@ class MyApp extends StatelessWidget {
         //   displaySmall: GoogleFonts.pacifico(),
         // ),
       ),
-      home: Login(),
+      home: const Login(),
     );
   }
 }

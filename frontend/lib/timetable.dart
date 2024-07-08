@@ -1,15 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:async';
 import 'dart:math';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'package:soganglink/data/courses/takes.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'login.dart';
 
-import 'storage.dart'; // Import the secure storage class
+// Import the secure storage class
 
 class TimeTable extends StatefulWidget {
   const TimeTable({Key? key}) : super(key: key);
@@ -30,15 +26,15 @@ class _TimeTable extends State<TimeTable> {
   Codec<String, String> stringToBase64 = utf8.fuse(base64);
   Color c = Colors.primaries[Random().nextInt(Colors.primaries.length)];
   List<Color> cs = [
-    Color.fromRGBO(94, 131, 193, 1),
-    Color.fromRGBO(198, 104, 91, 1),
-    Color.fromRGBO(196, 158, 82, 1),
-    Color.fromRGBO(209, 135, 80, 1),
-    Color.fromRGBO(125, 105, 185, 1),
-    Color.fromRGBO(157, 194, 100, 1),
-    Color.fromRGBO(91, 163, 106, 1),
-    Color.fromRGBO(96, 171, 155, 1),
-    Color.fromRGBO(170, 116, 192, 1),
+    const Color.fromRGBO(94, 131, 193, 1),
+    const Color.fromRGBO(198, 104, 91, 1),
+    const Color.fromRGBO(196, 158, 82, 1),
+    const Color.fromRGBO(209, 135, 80, 1),
+    const Color.fromRGBO(125, 105, 185, 1),
+    const Color.fromRGBO(157, 194, 100, 1),
+    const Color.fromRGBO(91, 163, 106, 1),
+    const Color.fromRGBO(96, 171, 155, 1),
+    const Color.fromRGBO(170, 116, 192, 1),
   ];
 
   @override
@@ -53,6 +49,7 @@ class _TimeTable extends State<TimeTable> {
       Size size = renderBox.size;
       return size;
     }
+    return null;
   }
 
   String formatSemester(int value) {
@@ -111,7 +108,7 @@ class _TimeTable extends State<TimeTable> {
                         backgroundColor: Colors.white,
                         context: context,
                         builder: (BuildContext context) {
-                          return Container(
+                          return SizedBox(
                             height: 200,
                             child: Center(
                               child: Column(
@@ -120,23 +117,23 @@ class _TimeTable extends State<TimeTable> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
                                   Text("과목: ${lecture.course.name}",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                       )),
                                   Text("교수명: ${lecture.course.advisor}",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                       )),
                                   Text("교실: ${lecture.course.classroom}",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                       )),
                                   (lecture.final_grade != null)
                                       ? Text("성적: ${lecture.final_grade}",
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 16,
                                           ))
-                                      : Text(" ")
+                                      : const Text(" ")
                                 ],
                               ),
                             ),
@@ -148,7 +145,7 @@ class _TimeTable extends State<TimeTable> {
                     height: height,
                     decoration: BoxDecoration(
                       color: cs[count % (cs.length)],
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(5, 3, 5, 3),
@@ -205,10 +202,10 @@ class _TimeTable extends State<TimeTable> {
                         HapticFeedback.lightImpact();
                       },
                       backgroundColor: semester == value
-                          ? Color(0xFF9e2a2f)
+                          ? const Color(0xFF9e2a2f)
                           : Colors.grey.shade300,
-                      selectedColor: Color(0xFF9e2a2f),
-                      padding: EdgeInsets.symmetric(
+                      selectedColor: const Color(0xFF9e2a2f),
+                      padding: const EdgeInsets.symmetric(
                           horizontal: 10.0, vertical: 10.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),

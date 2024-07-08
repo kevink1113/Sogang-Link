@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:soganglink/tools/restaurant/result_with.dart';
 import 'data_fetch.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:cache_manager/cache_manager.dart';
 import 'package:http/http.dart' as http;
 
 import '../../login.dart';
@@ -109,7 +107,7 @@ class SearchPageState extends State<SearchTag> {
     return Scaffold(
         key: scaffoldKey,
         appBar: AppBar(
-          title: Text('음식점 검색기'),
+          title: const Text('음식점 검색기'),
         ),
         body: (loaded)
             ? ListView(
@@ -488,7 +486,7 @@ class SearchPageState extends State<SearchTag> {
                             ),
                             ListView.separated(
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: targetIndex.length + 1,
                               itemBuilder: (context, index) {
                                 if (index == targetIndex.length) {
@@ -528,6 +526,6 @@ class SearchPageState extends State<SearchTag> {
                   ),
                 ],
               )
-            : Center(child: Text('로딩중')));
+            : const Center(child: Text('로딩중')));
   }
 }

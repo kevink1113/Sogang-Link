@@ -22,7 +22,7 @@ class PostList {
   PostList({required this.postList});
 
   factory PostList.fromJsonlist(List<dynamic> list) {
-    var post_list = <Posts>[];
+    var postList = <Posts>[];
     for (final Map<String, dynamic> json in list) {
       var post = Posts(
           id: json['id'],
@@ -32,9 +32,9 @@ class PostList {
           date: DateTime.parse(json['created_at']),
           view_count: json['view_count'],
           sum_votes: json['sum_votes']);
-      post_list.add(post);
+      postList.add(post);
     }
 
-    return PostList(postList: post_list);
+    return PostList(postList: postList);
   }
 }

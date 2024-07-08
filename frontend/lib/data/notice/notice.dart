@@ -21,7 +21,7 @@ class NoticeList {
   NoticeList({required this.noticelist});
 
   factory NoticeList.fromJsonlist(List<dynamic> list) {
-    var notice_list = <Notice>[];
+    var noticeList = <Notice>[];
     for (final Map<String, dynamic> json in list) {
       var notice = Notice(
           id: json['id'],
@@ -30,9 +30,9 @@ class NoticeList {
           url: json['url'],
           writer: json['writer'],
           date: DateTime.parse(json['date']));
-      notice_list.add(notice);
+      noticeList.add(notice);
     }
 
-    return NoticeList(noticelist: notice_list);
+    return NoticeList(noticelist: noticeList);
   }
 }

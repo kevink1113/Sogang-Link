@@ -1,9 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:soganglink/data/courses/takes.dart';
 import 'package:soganglink/data/login/User.dart';
@@ -12,13 +9,15 @@ import 'storage.dart'; // Import the secure storage class
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 
-final String url = "http://34.64.245.20:8000";
+const String url = "http://34.64.245.20:8000";
 
 late User user;
 late Takes takes;
 late Set semester_list;
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -68,9 +67,9 @@ class _LoginState extends State<Login> {
         setState(() {
           isVerified = true;
         });
-        Future.delayed(Duration(seconds: 2), () {
+        Future.delayed(const Duration(seconds: 2), () {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => Home()));
+              context, MaterialPageRoute(builder: (_) => const Home()));
         });
       } else {
         print(response.body);
@@ -104,7 +103,7 @@ class _LoginState extends State<Login> {
         // });
         // Future.delayed(Duration(seconds: 0), () {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => Home()));
+            context, MaterialPageRoute(builder: (_) => const Home()));
         // });
       } else {
         showToast("로그인 실패");
@@ -215,7 +214,7 @@ class _LoginState extends State<Login> {
                       ),
                       child: IntrinsicHeight(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -279,7 +278,7 @@ class _LoginState extends State<Login> {
                                   onSubmitted: (value) => login(),
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               const Text(
                                 'SAINT 계정을 이용하여 로그인합니다.\n암호는 서버에 저장되지 않으며\n학사정보 연동에만 사용됩니다.',
                                 style: TextStyle(
@@ -288,7 +287,7 @@ class _LoginState extends State<Login> {
                                     fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
-                              Spacer(), // Use Spacer to push the button towards the bottom
+                              const Spacer(), // Use Spacer to push the button towards the bottom
                               Padding(
                                 padding: const EdgeInsets.only(
                                   top: 20,
@@ -303,7 +302,7 @@ class _LoginState extends State<Login> {
                                           ? 400
                                           : MediaQuery.of(context).size.width,
                                   decoration: BoxDecoration(
-                                      color: Color(0xFF9e2a2f),
+                                      color: const Color(0xFF9e2a2f),
                                       borderRadius: BorderRadius.circular(15)),
                                   child: TextButton(
                                     onPressed: () {

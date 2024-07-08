@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SecureStorage {
-  static final _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
   static const String _keyToken = 'token';
 
   static Future<void> setToken(String token) async {

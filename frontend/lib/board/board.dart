@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:soganglink/board/post.dart';
 import 'package:soganglink/board/writepost.dart';
-import 'package:soganglink/data/board/commentlist.dart';
 import 'package:soganglink/data/board/postlist.dart';
 import 'package:soganglink/storage.dart';
 import 'package:http/http.dart' as http;
@@ -25,23 +23,23 @@ class _Board extends State<Board> {
   late PostList post;
   bool loaded = false;
 
-  void ReloadList(){
+  void ReloadList() {
     var request = Uri.parse("$url/posts/");
     try {
       SecureStorage.getToken().then((token) {
         try {
           http.get(request, headers: {"Authorization": "Token $token"}).then(
-                  (response) {
-                if (response.statusCode == 200) {
-                  setState(() {
-                    post = PostList.fromJsonlist(
-                        jsonDecode(utf8.decode(response.bodyBytes)));
-                    loaded = true;
-                  });
-                } else {
-                  print("게시판 가져오기 실패");
-                }
+              (response) {
+            if (response.statusCode == 200) {
+              setState(() {
+                post = PostList.fromJsonlist(
+                    jsonDecode(utf8.decode(response.bodyBytes)));
+                loaded = true;
               });
+            } else {
+              print("게시판 가져오기 실패");
+            }
+          });
         } catch (e) {
           print("네트워크 오류");
         }
@@ -66,8 +64,8 @@ class _Board extends State<Board> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-      margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+      margin: const EdgeInsets.fromLTRB(20, 20, 20, 30),
       child: (loaded)
           ? (Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +84,7 @@ class _Board extends State<Board> {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.refresh),
+                        icon: const Icon(Icons.refresh),
                         onPressed: () {
                           setState(() {
                             loaded = false;
@@ -99,7 +97,7 @@ class _Board extends State<Board> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: min(post!.postList.length, 20),
+                    itemCount: min(post.postList.length, 20),
                     itemBuilder: ((context, index) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,8 +107,8 @@ class _Board extends State<Board> {
                             title: RichText(
                               textAlign: TextAlign.left,
                               text: TextSpan(
-                                text: post?.postList[index].title,
-                                style: TextStyle(
+                                text: post.postList[index].title,
+                                style: const TextStyle(
                                   fontSize: 18,
                                   color: Colors.black,
                                   overflow: TextOverflow.ellipsis,
@@ -120,19 +118,13 @@ class _Board extends State<Board> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            PostDetail(
-                                              id: post.postList[index].id,
-                                              title: post
-                                                  .postList[index].title,
-                                              author: post
-                                                  .postList[index].author,
-                                              date: post
-                                                  .postList[index].date,
-                                              content: post
-                                                  .postList[index]
-                                                  .content,
-                                            ),
+                                        builder: (context) => PostDetail(
+                                          id: post.postList[index].id,
+                                          title: post.postList[index].title,
+                                          author: post.postList[index].author,
+                                          date: post.postList[index].date,
+                                          content: post.postList[index].content,
+                                        ),
                                       ),
                                     ).then((_) {
                                       // 수정 후 게시글들 다시 로드
@@ -148,14 +140,14 @@ class _Board extends State<Board> {
                               children: [
                                 Text(
                                   post.postList[index].author,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey,
                                   ),
                                 ),
                                 Text(
                                   post.postList[index].date.toString(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey,
                                   ),
@@ -177,18 +169,19 @@ class _Board extends State<Board> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => PostCreate()),
+                        MaterialPageRoute(
+                            builder: (context) => const PostCreate()),
                       ).then((_) {
                         // 수정 후 게시글들 다시 로드
                         ReloadList();
                       });
                     },
-                    child: Icon(Icons.add),
+                    child: const Icon(Icons.add),
                   ),
                 )
               ],
             ))
-          : Center(child: Text('로딩중')),
+          : const Center(child: Text('로딩중')),
     );
   }
 }

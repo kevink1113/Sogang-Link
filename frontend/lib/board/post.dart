@@ -86,7 +86,7 @@ class _PostDetailState extends State<PostDetail> {
   }
 
   void _submitComment() {
-    if (!_commentController.text.isEmpty) {
+    if (_commentController.text.isNotEmpty) {
       var request = Uri.parse("$url/posts/${widget.id}/comments");
 
       try {
@@ -182,15 +182,15 @@ class _PostDetailState extends State<PostDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("게시글 상세"),
+          title: const Text("게시글 상세"),
           actions: (user.username == widget.author)
               ? [
                   IconButton(
-                    icon: Icon(Icons.edit),
+                    icon: const Icon(Icons.edit),
                     onPressed: _editPost,
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: _deletePost,
                   )
                 ]
@@ -202,55 +202,55 @@ class _PostDetailState extends State<PostDetail> {
           children: [
             Text(
               widget.title,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               "글쓴이: ${widget.author}",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             Text(
               "날짜: ${widget.date.toString()}",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               "조회수: $views",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             Text(
               "추천수: $likes",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             (widget.content != null)
                 ? Text(
                     widget.content!,
-                    style: TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 18),
                   )
-                : Text(
+                : const Text(
                     "내용이 없습니다.",
                     style: TextStyle(fontSize: 18),
                   ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               "댓글",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            Divider(color: Colors.grey),
+            const Divider(color: Colors.grey),
             TextField(
               controller: _commentController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: _submitComment,
-                child: Text("댓글 달기"),
+                child: const Text("댓글 달기"),
               ),
             ),
             Expanded(
@@ -268,12 +268,12 @@ class _PostDetailState extends State<PostDetail> {
                                   backgroundColor: Colors.grey,
                                   child: Text(
                                     commentlist.commentlist[index].author[0],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -281,7 +281,7 @@ class _PostDetailState extends State<PostDetail> {
                                     children: [
                                       Text(
                                         commentlist.commentlist[index].author,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -293,7 +293,7 @@ class _PostDetailState extends State<PostDetail> {
                                                 Text(
                                                   commentlist.commentlist[index]
                                                       .content!,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 14,
                                                   ),
                                                 ),
@@ -307,7 +307,7 @@ class _PostDetailState extends State<PostDetail> {
                                                           Alignment.centerRight,
                                                       child: IconButton(
                                                         icon:
-                                                            Icon(Icons.delete),
+                                                            const Icon(Icons.delete),
                                                         onPressed: () =>
                                                             _deleteComment(
                                                                 commentlist
@@ -319,7 +319,7 @@ class _PostDetailState extends State<PostDetail> {
                                                   )
                                               ],
                                             )
-                                          : Text(
+                                          : const Text(
                                               "내용 없음",
                                               style: TextStyle(
                                                 fontSize: 14,
@@ -333,7 +333,7 @@ class _PostDetailState extends State<PostDetail> {
                           );
                         },
                       )
-                    : Text("댓글 로딩중")),
+                    : const Text("댓글 로딩중")),
           ],
         ),
       ),

@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:soganglink/data/courses/takes.dart';
-import 'package:soganglink/data/login/User.dart';
-import 'package:soganglink/login.dart';
-import 'package:soganglink/storage.dart';
 import 'package:soganglink/tools/calcgrade.dart';
 import 'package:soganglink/tools/restaurant/search_tag.dart';
 import 'package:soganglink/tools/studyroom.dart';
-import 'package:wakelock/wakelock.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 
 class Tools extends StatefulWidget {
   const Tools({Key? key}) : super(key: key);
@@ -33,7 +25,7 @@ class _Tools extends State<Tools> {
 
     // TODO: implement build
     return Container(
-        alignment: Alignment(-0.95, -1.0),
+        alignment: const Alignment(-0.95, -1.0),
         decoration: BoxDecoration(
           color: Colors.white, // Container의 배경색
           borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
@@ -42,14 +34,14 @@ class _Tools extends State<Tools> {
           //   width: 2, // 테두리 두께
           // ),
         ),
-        margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+        margin: const EdgeInsets.fromLTRB(20, 20, 20, 30),
         child: Padding(
-          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               InkWell(
-                child: Center(
+                child: const Center(
                     child: Text(
                   "성적계산기",
                   style: TextStyle(
@@ -61,11 +53,11 @@ class _Tools extends State<Tools> {
                 )),
                 onTap: () {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => CalcGrade()));
+                      context, MaterialPageRoute(builder: (_) => const CalcGrade()));
                 },
               ),
               InkWell(
-                child: Center(
+                child: const Center(
                     child: Text(
                       "열람실 현황",
                       style: TextStyle(
@@ -77,11 +69,11 @@ class _Tools extends State<Tools> {
                     )),
                 onTap: () {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => StudyroomStatus()));
+                      context, MaterialPageRoute(builder: (_) => const StudyroomStatus()));
                 },
               ),
               InkWell(
-                child: Center(
+                child: const Center(
                     child: Text(
                       "음식점 검색",
                       style: TextStyle(
@@ -93,7 +85,7 @@ class _Tools extends State<Tools> {
                     )),
                 onTap: () {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => SearchTag()));
+                      context, MaterialPageRoute(builder: (_) => const SearchTag()));
                 },
               )
             ],

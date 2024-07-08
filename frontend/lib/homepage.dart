@@ -3,23 +3,19 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:soganglink/data/courses/takes.dart';
-import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/data/menu/menu.dart';
 import 'package:soganglink/data/notice/notice.dart';
 import 'package:soganglink/login.dart';
 import 'package:soganglink/storage.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock/wakelock.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 import 'package:http/http.dart' as http;
 
-NoticeList? notice = null;
-NoticeList? academic_notice = null;
-NoticeList? scholarship_notice = null;
-MenuList? menulist = null;
+NoticeList? notice;
+NoticeList? academic_notice;
+NoticeList? scholarship_notice;
+MenuList? menulist;
 DateTime today = DateTime.now();
 
 class HomePage extends StatefulWidget {
@@ -45,52 +41,50 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
     print("today : $today");
     _tabController = TabController(length: 3, vsync: this);
 
-    if (takes != null) {
-      for (Take lecture in takes.cousrses_takes) {
-        if (lecture.course.semester != semester) continue;
+    for (Take lecture in takes.cousrses_takes) {
+      if (lecture.course.semester != semester) continue;
 
-        String time = "";
+      String time = "";
 
-        if (lecture.course.start_time != null &&
-            lecture.course.end_time != null) {
-          DateTime start = DateTime(today.year, today.month, today.day, 9)
-              .add(Duration(minutes: lecture.course.start_time!));
-          DateTime end = DateTime(today.year, today.month, today.day, 9)
-              .add(Duration(minutes: lecture.course.end_time!));
-          time = "${start.hour}:${start.minute} ~ ${end.hour}:${end.minute}";
-        } else {
-          time = "?";
-        }
+      if (lecture.course.start_time != null &&
+          lecture.course.end_time != null) {
+        DateTime start = DateTime(today.year, today.month, today.day, 9)
+            .add(Duration(minutes: lecture.course.start_time!));
+        DateTime end = DateTime(today.year, today.month, today.day, 9)
+            .add(Duration(minutes: lecture.course.end_time!));
+        time = "${start.hour}:${start.minute} ~ ${end.hour}:${end.minute}";
+      } else {
+        time = "?";
+      }
 
-        for (var char in lecture.course.day!.runes) {
-          if (String.fromCharCode(char) == today.weekday.toString()) {
-            courses.add(DataRow(cells: [
-              DataCell(Text(
-                lecture.course.name,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 13,
-                ),
-              )),
-              DataCell(Text(
-                lecture.course.classroom!,
-                style: TextStyle(color: Colors.black, fontSize: 13),
-              )),
-              DataCell(Text(
-                lecture.course.advisor!,
-                style: TextStyle(color: Colors.black, fontSize: 13),
-              )),
-              DataCell(Text(
-                time,
-                style: TextStyle(color: Colors.black, fontSize: 13),
-              )),
-            ]));
-            break;
-          }
+      for (var char in lecture.course.day!.runes) {
+        if (String.fromCharCode(char) == today.weekday.toString()) {
+          courses.add(DataRow(cells: [
+            DataCell(Text(
+              lecture.course.name,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 13,
+              ),
+            )),
+            DataCell(Text(
+              lecture.course.classroom!,
+              style: const TextStyle(color: Colors.black, fontSize: 13),
+            )),
+            DataCell(Text(
+              lecture.course.advisor!,
+              style: const TextStyle(color: Colors.black, fontSize: 13),
+            )),
+            DataCell(Text(
+              time,
+              style: const TextStyle(color: Colors.black, fontSize: 13),
+            )),
+          ]));
+          break;
         }
       }
     }
-
+  
     try {
       SecureStorage.getToken().then((token) {
         try {
@@ -153,11 +147,11 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                       bwmenus.add(DataRow(cells: [
                         DataCell(Text(
                           key,
-                          style: TextStyle(color: Colors.black, fontSize: 13),
+                          style: const TextStyle(color: Colors.black, fontSize: 13),
                         )),
                         DataCell(Text(
                           menulist!.BW.items_by_date[today]![key][0],
-                          style: TextStyle(color: Colors.black, fontSize: 13),
+                          style: const TextStyle(color: Colors.black, fontSize: 13),
                           overflow: TextOverflow.visible,
                           softWrap: true,
                         )),
@@ -171,11 +165,11 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                         emmenus.add(DataRow(cells: [
                           DataCell(Text(
                             key,
-                            style: TextStyle(color: Colors.black, fontSize: 13),
+                            style: const TextStyle(color: Colors.black, fontSize: 13),
                           )),
                           DataCell(Text(
                             menulist!.Em.items_by_date[today]![key][0],
-                            style: TextStyle(color: Colors.black, fontSize: 13),
+                            style: const TextStyle(color: Colors.black, fontSize: 13),
                             overflow: TextOverflow.visible,
                             softWrap: true,
                           )),
@@ -211,7 +205,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 backgroundColor: Colors.white,
                 context: context,
                 builder: (BuildContext context) {
-                  return Container(
+                  return SizedBox(
                     height: 500,
                     child: Center(
                       child: Column(
@@ -228,13 +222,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                     width: 100,
                                     fit: BoxFit.contain,
                                   ))),
-                          SizedBox(height: 40), // Space between lines of text
+                          const SizedBox(height: 40), // Space between lines of text
                           QrImageView(
                             data: user.username,
                             version: QrVersions.auto,
                             size: 200.0,
                           ),
-                          SizedBox(height: 20), // Space between lines of text
+                          const SizedBox(height: 20), // Space between lines of text
                           Text("이름: ${user.name}"),
                           Text("소속: ${user.major}"),
                           Text("학번: ${user.username}"),
@@ -253,7 +247,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                 ),
                 height: 180,
-                margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                margin: const EdgeInsets.fromLTRB(15, 0, 15, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -273,7 +267,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               "모바일 학생증",
                               style: TextStyle(
                                 color: Colors.black,
@@ -291,7 +285,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 )),
           ),
           Container(
-            margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+            margin: const EdgeInsets.fromLTRB(25, 15, 0, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -300,8 +294,8 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   height: 20, // 아이콘 높이
                   width: 20, // 아이콘 너비
                 ),
-                SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
-                Text(
+                const SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
+                const Text(
                   "오늘의 강의",
                   style: TextStyle(
                     color: Colors.black,
@@ -314,25 +308,25 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
             ),
           ),
           Container(
-              alignment: Alignment(-0.95, -1.0),
+              alignment: const Alignment(-0.95, -1.0),
               decoration: BoxDecoration(
                 color: Colors.white, // Container의 배경색
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
               ),
-              margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
+              margin: const EdgeInsets.fromLTRB(15, 10, 15, 20),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     ConstrainedBox(
                       constraints:
                           const BoxConstraints(minWidth: double.infinity),
-                      child: (courses.length != 0)
+                      child: (courses.isNotEmpty)
                           ? DataTable(
                               horizontalMargin: 6.0,
                               columnSpacing: 9.0,
-                              columns: [
+                              columns: const [
                                 DataColumn(
                                     label: Text(
                                   "과목명",
@@ -363,13 +357,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                 )),
                               ],
                               rows: courses)
-                          : Center(child: Text('오늘은 공강입니다')),
+                          : const Center(child: Text('오늘은 공강입니다')),
                     ),
                   ],
                 ),
               )),
           Container(
-              margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
+              margin: const EdgeInsets.fromLTRB(15, 10, 15, 20),
               child: (menulist != null)
                   ? SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -377,7 +371,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                         children: [
                           Column(children: [
                             Container(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
                                 color: Colors.white, // Container의 배경색
                                 borderRadius: BorderRadius.circular(20),
@@ -389,13 +383,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                 width: 25, // 아이콘 너비
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Text("음식점 추천", style: TextStyle(fontSize: 11)),
+                            const SizedBox(height: 8),
+                            const Text("음식점 추천", style: TextStyle(fontSize: 11)),
                           ]),
-                          SizedBox(width: 30),
+                          const SizedBox(width: 30),
                           Column(children: [
                             Container(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
                                 color: Colors.white, // Container의 배경색
                                 borderRadius: BorderRadius.circular(20),
@@ -407,13 +401,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                 width: 25, // 아이콘 너비
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Text("빈 강의실", style: TextStyle(fontSize: 11)),
+                            const SizedBox(height: 8),
+                            const Text("빈 강의실", style: TextStyle(fontSize: 11)),
                           ]),
-                          SizedBox(width: 30),
+                          const SizedBox(width: 30),
                           Column(children: [
                             Container(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
                                 color: Colors.white, // Container의 배경색
                                 borderRadius: BorderRadius.circular(20),
@@ -425,13 +419,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                 width: 25, // 아이콘 너비
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Text("열람실 현황", style: TextStyle(fontSize: 11)),
+                            const SizedBox(height: 8),
+                            const Text("열람실 현황", style: TextStyle(fontSize: 11)),
                           ]),
-                          SizedBox(width: 30),
+                          const SizedBox(width: 30),
                           Column(children: [
                             Container(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
                                 color: Colors.white, // Container의 배경색
                                 borderRadius: BorderRadius.circular(20),
@@ -443,13 +437,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                 width: 25, // 아이콘 너비
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Text("성적 계산기", style: TextStyle(fontSize: 11)),
+                            const SizedBox(height: 8),
+                            const Text("성적 계산기", style: TextStyle(fontSize: 11)),
                           ]),
-                          SizedBox(width: 30),
+                          const SizedBox(width: 30),
                           Column(children: [
                             Container(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
                                 color: Colors.white, // Container의 배경색
                                 borderRadius: BorderRadius.circular(20),
@@ -461,15 +455,15 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                 width: 25, // 아이콘 너비
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Text("SAINT", style: TextStyle(fontSize: 11)),
+                            const SizedBox(height: 8),
+                            const Text("SAINT", style: TextStyle(fontSize: 11)),
                           ]),
                         ],
                       ),
                     )
-                  : Center(child: Text('로딩중'))),
+                  : const Center(child: Text('로딩중'))),
           Container(
-            margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+            margin: const EdgeInsets.fromLTRB(25, 15, 0, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -478,8 +472,8 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   height: 20, // 아이콘 높이
                   width: 20, // 아이콘 너비
                 ),
-                SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
-                Text(
+                const SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
+                const Text(
                   "학식",
                   style: TextStyle(
                     color: Colors.black,
@@ -492,7 +486,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
             ),
           ),
           Container(
-              margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
+              margin: const EdgeInsets.fromLTRB(15, 10, 15, 20),
               child: (menulist != null)
                   ? SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -508,18 +502,18 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                   child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
                                         menulist!.BW.facility_name,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       )),
                                 ),
-                                (bwmenus.length != 0)
+                                (bwmenus.isNotEmpty)
                                     ? ConstrainedBox(
                                         constraints: const BoxConstraints(
                                             minWidth: double.infinity),
@@ -529,13 +523,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                             dataRowMaxHeight: double.infinity,
                                             headingRowHeight: 0,
                                             dividerThickness: 0,
-                                            columns: [
+                                            columns: const [
                                               DataColumn(label: Text("")),
                                               DataColumn(label: Text("")),
                                             ],
                                             rows: bwmenus),
                                       )
-                                    : Center(child: Text('오늘은 학식이 없습니다.'))
+                                    : const Center(child: Text('오늘은 학식이 없습니다.'))
                               ],
                             ),
                           ),
@@ -553,18 +547,18 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                   child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
                                         menulist!.Em.facility_name,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       )),
                                 ),
-                                (emmenus.length != 0)
+                                (emmenus.isNotEmpty)
                                     ? ConstrainedBox(
                                         constraints: const BoxConstraints(
                                             minWidth: double.infinity),
@@ -573,22 +567,22 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                             columnSpacing: 28.0,
                                             dataRowMaxHeight: double.infinity,
                                             headingRowHeight: 0,
-                                            columns: [
+                                            columns: const [
                                               DataColumn(label: Text("")),
                                               DataColumn(label: Text("")),
                                             ],
                                             rows: emmenus),
                                       )
-                                    : Center(child: Text('오늘은 학식이 없습니다.'))
+                                    : const Center(child: Text('오늘은 학식이 없습니다.'))
                               ],
                             ),
                           )
                         ],
                       ),
                     )
-                  : Center(child: Text('로딩중'))),
+                  : const Center(child: Text('로딩중'))),
           Container(
-            margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+            margin: const EdgeInsets.fromLTRB(25, 15, 0, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -597,8 +591,8 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   height: 20, // 아이콘 높이
                   width: 20, // 아이콘 너비
                 ),
-                SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
-                Text(
+                const SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
+                const Text(
                   "공지사항",
                   style: TextStyle(
                     color: Colors.black,
@@ -612,7 +606,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
           ),
           TabBar(
             controller: _tabController,
-            tabs: [
+            tabs: const [
               Tab(text: '일반공지'),
               Tab(text: '학사공지'),
               Tab(text: '장학공지'),
@@ -629,15 +623,15 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                     color: Colors.white, // Container의 배경색
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
-                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
-                  margin: EdgeInsets.fromLTRB(15, 20, 15, 30),
+                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                  margin: const EdgeInsets.fromLTRB(15, 20, 15, 30),
                   child: (notice != null)
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ListView.builder(
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: min(notice!.noticelist.length, 20),
                               itemBuilder: ((context, index) {
                                 return Column(
@@ -647,7 +641,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                       textAlign: TextAlign.left,
                                       text: TextSpan(
                                         text: notice!.noticelist[index].title,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           color: Colors.black,
                                           overflow: TextOverflow.ellipsis,
@@ -669,7 +663,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             )
                           ],
                         )
-                      : Center(child: Text('로딩중')),
+                      : const Center(child: Text('로딩중')),
                 ),
                 Container(
                   alignment: Alignment.topLeft,
@@ -677,15 +671,15 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                     color: Colors.white, // Container의 배경색
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
-                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
-                  margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                  margin: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                   child: (academic_notice != null)
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ListView.builder(
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount:
                                   min(academic_notice!.noticelist.length, 20),
                               itemBuilder: ((context, index) {
@@ -697,7 +691,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                       text: TextSpan(
                                         text: academic_notice!
                                             .noticelist[index].title,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           color: Colors.black,
                                           overflow: TextOverflow.ellipsis,
@@ -719,7 +713,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             )
                           ],
                         )
-                      : Center(child: Text('로딩중')),
+                      : const Center(child: Text('로딩중')),
                 ),
                 Container(
                   alignment: Alignment.topLeft,
@@ -727,15 +721,15 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                     color: Colors.white, // Container의 배경색
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
-                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
-                  margin: EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                  margin: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                   child: (scholarship_notice != null)
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ListView.builder(
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: min(
                                   scholarship_notice!.noticelist.length, 20),
                               itemBuilder: ((context, index) {
@@ -747,7 +741,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                       text: TextSpan(
                                         text: scholarship_notice!
                                             .noticelist[index].title,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           color: Colors.black,
                                           overflow: TextOverflow.ellipsis,
@@ -770,7 +764,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                             )
                           ],
                         )
-                      : Center(child: Text('로딩중')),
+                      : const Center(child: Text('로딩중')),
                 ),
               ],
             ),

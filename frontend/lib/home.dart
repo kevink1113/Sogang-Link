@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:soganglink/board/board.dart';
-import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/homepage.dart';
 import 'package:soganglink/setting.dart';
 import 'package:soganglink/storage.dart';
@@ -11,10 +10,9 @@ import 'package:soganglink/timetable.dart';
 import 'package:soganglink/tools.dart';
 import 'gptchat.dart';
 import 'login.dart';
-import 'setting.dart';
 
 class Home extends StatefulWidget {
-  Home({Key? key}) : super(key: key);
+  const Home({Key? key}) : super(key: key);
   @override
   _HomeState createState() => _HomeState();
 }
@@ -26,7 +24,7 @@ class _HomeState extends State<Home> {
     const TimeTable(),
     const HomePage(),
     const Board(), // 게시판 페이지 예시로 임시로 HomePage 사용
-    GptChat(),
+    const GptChat(),
     const Setting(), // 설정 페이지 예시로 임시로 HomePage 사용
   ];
 
@@ -70,7 +68,7 @@ class _HomeState extends State<Home> {
             onPressed: () {
               SecureStorage.deleteToken();
               Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => Login()));
+                  context, MaterialPageRoute(builder: (_) => const Login()));
             },
           ),
         ],
@@ -95,7 +93,7 @@ class _HomeState extends State<Home> {
         //   ),
         // ),
         // backgroundColor: Color(0xFF9e2a2f), // AppBar 색상 변경
-        backgroundColor: Color.fromARGB(0, 0, 0, 0), // AppBar 색상 변경
+        backgroundColor: const Color.fromARGB(0, 0, 0, 0), // AppBar 색상 변경
         // elevation: 0, // AppBar 그림자 제거
         centerTitle: false, // 제목 중앙 정렬
       ),
@@ -133,10 +131,10 @@ class _HomeState extends State<Home> {
         ],
         currentIndex: _selectedIndex,
         selectedLabelStyle:
-            TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
+            const TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
         unselectedLabelStyle:
-            TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
-        selectedItemColor: Color(0xFF9e2a2f), // 선택된 아이템 색상 변경
+            const TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
+        selectedItemColor: const Color(0xFF9e2a2f), // 선택된 아이템 색상 변경
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed, // 4개 이상의 아이템에도 배경색 유지
         backgroundColor: Colors.white, // BottomNavigationBar 배경색 변경

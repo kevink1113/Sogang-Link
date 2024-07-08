@@ -6,6 +6,8 @@ import '../login.dart';
 import '../storage.dart';
 
 class PostCreate extends StatefulWidget {
+  const PostCreate({super.key});
+
   @override
   _PostCreateState createState() => _PostCreateState();
 }
@@ -51,7 +53,7 @@ class _PostCreateState extends State<PostCreate> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('새 글 쓰기'),
+        title: const Text('새 글 쓰기'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -59,9 +61,9 @@ class _PostCreateState extends State<PostCreate> {
           key: _formKey,
           child: Column(
             children: [
-              Align(alignment: Alignment.centerLeft, child: Text("제목")),
+              const Align(alignment: Alignment.centerLeft, child: Text("제목")),
               TextFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -74,10 +76,10 @@ class _PostCreateState extends State<PostCreate> {
                   _title = value!;
                 },
               ),
-              SizedBox(height: 20),
-              Align(alignment: Alignment.centerLeft, child: Text("내용")),
+              const SizedBox(height: 20),
+              const Align(alignment: Alignment.centerLeft, child: Text("내용")),
               TextFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 10,
@@ -91,14 +93,14 @@ class _PostCreateState extends State<PostCreate> {
                   _content = value!;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitPost,
-                child: Text('작성하기'),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  textStyle: TextStyle(fontSize: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  textStyle: const TextStyle(fontSize: 16),
                 ),
+                child: const Text('작성하기'),
               ),
             ],
           ),

@@ -80,7 +80,7 @@ class Result_with extends State<resultlist_with> {
       return Scaffold(
         key: scaffoldKey,
         appBar: AppBar(
-          title: Text('음식점'),
+          title: const Text('음식점'),
         ),
         body: Padding(
           //스크롤(열(컨테이너(행(가게이름,오리아이콘)),컨테이너(열(가게사진,설명,컨테이너(짧은설명문))))) 형태로 구성됨
@@ -172,7 +172,7 @@ class Result_with extends State<resultlist_with> {
                       Container(
                         alignment: Alignment.topCenter,
                         width: double.infinity,
-                        padding: EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(20),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(30),
                           child: img,
@@ -391,7 +391,7 @@ class Result_with extends State<resultlist_with> {
     } else {
       return Scaffold(
         appBar: AppBar(
-          title: Text('음식점'),
+          title: const Text('음식점'),
         ),
         body: Padding(
           //스크롤(열(컨테이너(행(가게이름,오리아이콘)),컨테이너(열(가게사진,설명,컨테이너(짧은설명문))))) 형태로 구성됨

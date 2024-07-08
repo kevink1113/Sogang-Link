@@ -1,13 +1,5 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:convert';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:cache_manager/cache_manager.dart';
-import 'package:http/http.dart' as http;
 
-import '../../login.dart';
-import '../../storage.dart';
 
 //전체 데이터를 받는 리스트. JSON 객체 형태로 저장됨.
 List<dynamic> listfood = [];

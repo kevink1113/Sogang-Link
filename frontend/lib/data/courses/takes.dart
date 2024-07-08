@@ -29,8 +29,8 @@ class Takes {
   Takes({required this.cousrses_takes, required this.semesters});
 
   factory Takes.fromJsonlist(List<dynamic> list) {
-    var course_list = <Take>[];
-    Set<int> sem = Set();
+    var courseList = <Take>[];
+    Set<int> sem = {};
     for (final Map<String, dynamic> json in list) {
       var take = Take(
           course: Course.fromJson(json["course"]),
@@ -38,9 +38,9 @@ class Takes {
           final_grade: json["final_grade"],
           real: json["real"]);
       sem.add(take.course.semester);
-      course_list.add(take);
+      courseList.add(take);
     }
 
-    return Takes(cousrses_takes: course_list, semesters: sem);
+    return Takes(cousrses_takes: courseList, semesters: sem);
   }
 }

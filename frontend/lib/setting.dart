@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:soganglink/data/courses/takes.dart';
-import 'package:soganglink/data/login/User.dart';
 import 'package:soganglink/login.dart';
 import 'package:soganglink/storage.dart';
-import 'package:wakelock/wakelock.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 var info = false;
@@ -37,32 +31,32 @@ class _Setting extends State<Setting> {
     return SettingsList(
       sections: [
         SettingsSection(
-          title: Text(
+          title: const Text(
             '공통',
           ),
           tiles: <SettingsTile>[
             SettingsTile.switchTile(
-              title: Text('개인정보동의'),
+              title: const Text('개인정보동의'),
               initialValue: info,
               onToggle: (value) {
                 setState(() {
                   info = !info;
                 });
               },
-              leading: Icon(Icons.vibration),
+              leading: const Icon(Icons.vibration),
             ),
           ],
         ),
         SettingsSection(
-          title: Text('계정'),
+          title: const Text('계정'),
           tiles: <SettingsTile>[
             SettingsTile.navigation(
-              leading: Icon(Icons.logout),
-              title: Text('로그아웃'),
+              leading: const Icon(Icons.logout),
+              title: const Text('로그아웃'),
               onPressed: ((context) {
                 SecureStorage.deleteToken();
                 Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => Login()));
+                    context, MaterialPageRoute(builder: (_) => const Login()));
               }),
             ),
           ],

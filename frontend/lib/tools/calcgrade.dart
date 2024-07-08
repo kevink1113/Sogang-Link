@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:soganglink/login.dart';
 
 class CalcGrade extends StatefulWidget {
-  CalcGrade({Key? key}) : super(key: key);
+  const CalcGrade({Key? key}) : super(key: key);
   @override
   _CalcGrade createState() => _CalcGrade();
 }
@@ -99,7 +99,7 @@ class _CalcGrade extends State<CalcGrade> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('성적 계산기'),
+        title: const Text('성적 계산기'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -108,23 +108,23 @@ class _CalcGrade extends State<CalcGrade> {
           children: [
             TextField(
               controller: subjectController,
-              decoration: InputDecoration(labelText: '과목명'),
+              decoration: const InputDecoration(labelText: '과목명'),
             ),
             TextField(
               controller: gradeController,
-              decoration: InputDecoration(labelText: '성적'),
+              decoration: const InputDecoration(labelText: '성적'),
               keyboardType: TextInputType.number,
             ),
             TextField(
               controller: creditController,
-              decoration: InputDecoration(labelText: '학점'),
+              decoration: const InputDecoration(labelText: '학점'),
               keyboardType: TextInputType.number,
             ),
             ElevatedButton(
               onPressed: _addSubject,
-              child: Text('추가'),
+              child: const Text('추가'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: subjects.length,
@@ -144,7 +144,7 @@ class _CalcGrade extends State<CalcGrade> {
             ),
             Text(
               '평균 학점: ${_calculateGPA().toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
             ),
           ],
         ),
