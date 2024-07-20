@@ -9,6 +9,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models import F
 import django_filters
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+from .models import Post, PostImage
+
 
 class PostFilter(django_filters.FilterSet):
     class Meta:
@@ -46,6 +50,19 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.save(update_fields=['view_count'])
         instance.refresh_from_db()
         return super().retrieve(request, *args, **kwargs)
+    
+
+class UploadPostImages(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, post_id):
+        post = Post.objects.get(id=post_id)
+        images = request.FILES.getlist('images')
+        for image in images:
+            PostImage.objects.create(post=post, image=image)
+        return Response(status=status.HTTP_201_CREATED)
+
+# 나머지 뷰 생략
 
 class CommentListCreateView(generics.ListCreateAPIView):
     queryset = Comment.objects.all()

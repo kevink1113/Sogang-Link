@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Post, Comment
+from .models import Post, PostImage, Comment
 from users.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -28,6 +28,13 @@ class PostSerializer(serializers.ModelSerializer):
         if request and request.query_params.get('anonymous') == 'true':
             ret.pop('author', None)
         return ret
+
+
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = '__all__'
+
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
