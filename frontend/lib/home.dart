@@ -44,7 +44,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     // printToken();
     return Scaffold(
-      backgroundColor: Colors.grey.shade200, // 밝은 회색으로 배경색 설정
+      // backgroundColor: Colors.grey.shade200, // 밝은 회색으로 배경색 설정
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         // leading: SvgPicture.asset(
         //   'assets/images/aa.svg',

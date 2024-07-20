@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:soganglink/data/courses/takes.dart';
 import 'package:soganglink/data/menu/menu.dart';
@@ -11,6 +12,10 @@ import 'package:soganglink/login.dart';
 import 'package:soganglink/storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
+
+import 'package:soganglink/tools/calcgrade.dart';
+import 'package:soganglink/tools/restaurant/search_tag.dart';
+import 'package:soganglink/tools/studyroom.dart';
 
 NoticeList? notice;
 NoticeList? academic_notice;
@@ -84,7 +89,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
         }
       }
     }
-  
+
     try {
       SecureStorage.getToken().then((token) {
         try {
@@ -147,11 +152,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                       bwmenus.add(DataRow(cells: [
                         DataCell(Text(
                           key,
-                          style: const TextStyle(color: Colors.black, fontSize: 13),
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 13),
                         )),
                         DataCell(Text(
                           menulist!.BW.items_by_date[today]![key][0],
-                          style: const TextStyle(color: Colors.black, fontSize: 13),
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 13),
                           overflow: TextOverflow.visible,
                           softWrap: true,
                         )),
@@ -165,11 +172,13 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                         emmenus.add(DataRow(cells: [
                           DataCell(Text(
                             key,
-                            style: const TextStyle(color: Colors.black, fontSize: 13),
+                            style: const TextStyle(
+                                color: Colors.black, fontSize: 13),
                           )),
                           DataCell(Text(
                             menulist!.Em.items_by_date[today]![key][0],
-                            style: const TextStyle(color: Colors.black, fontSize: 13),
+                            style: const TextStyle(
+                                color: Colors.black, fontSize: 13),
                             overflow: TextOverflow.visible,
                             softWrap: true,
                           )),
@@ -202,7 +211,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
               HapticFeedback.mediumImpact();
               showModalBottomSheet<void>(
                 showDragHandle: true,
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).cardColor,
                 context: context,
                 builder: (BuildContext context) {
                   return SizedBox(
@@ -222,13 +231,15 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                                     width: 100,
                                     fit: BoxFit.contain,
                                   ))),
-                          const SizedBox(height: 40), // Space between lines of text
+                          const SizedBox(
+                              height: 40), // Space between lines of text
                           QrImageView(
                             data: user.username,
                             version: QrVersions.auto,
                             size: 200.0,
                           ),
-                          const SizedBox(height: 20), // Space between lines of text
+                          const SizedBox(
+                              height: 20), // Space between lines of text
                           Text("이름: ${user.name}"),
                           Text("소속: ${user.major}"),
                           Text("학번: ${user.username}"),
@@ -243,7 +254,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 //모바일 학생증
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.white, // Container의 배경색
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                 ),
                 height: 180,
@@ -295,14 +306,10 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   width: 20, // 아이콘 너비
                 ),
                 const SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
-                const Text(
+
+                Text(
                   "오늘의 강의",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    // letterSpacing: 2.0,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
@@ -310,7 +317,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
           Container(
               alignment: const Alignment(-0.95, -1.0),
               decoration: BoxDecoration(
-                color: Colors.white, // Container의 배경색
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
               ),
               margin: const EdgeInsets.fromLTRB(15, 10, 15, 20),
@@ -369,95 +376,40 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          Column(children: [
-                            Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: Colors.white, // Container의 배경색
-                                borderRadius: BorderRadius.circular(20),
-                                // 둥근 모서리 반경 설정
-                              ),
-                              child: Image.asset(
-                                'assets/images/restaurant_1.png', // 아이콘 경로
-                                height: 25, // 아이콘 높이
-                                width: 25, // 아이콘 너비
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text("음식점 추천", style: TextStyle(fontSize: 11)),
-                          ]),
+                          MiniButton(
+                            title: "음식점 추천",
+                            iconPath: "assets/images/restaurant_1.png",
+                            route: MaterialPageRoute(
+                                builder: (context) => const SearchTag()),
+                          ),
                           const SizedBox(width: 30),
-                          Column(children: [
-                            Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: Colors.white, // Container의 배경색
-                                borderRadius: BorderRadius.circular(20),
-                                // 둥근 모서리 반경 설정
-                              ),
-                              child: Image.asset(
-                                'assets/images/building.png', // 아이콘 경로
-                                height: 25, // 아이콘 높이
-                                width: 25, // 아이콘 너비
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text("빈 강의실", style: TextStyle(fontSize: 11)),
-                          ]),
+                          MiniButton(
+                            title: "빈 강의실",
+                            iconPath: "assets/images/building.png",
+                            route: MaterialPageRoute(
+                                builder: (context) => const SearchTag()),
+                          ),
                           const SizedBox(width: 30),
-                          Column(children: [
-                            Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: Colors.white, // Container의 배경색
-                                borderRadius: BorderRadius.circular(20),
-                                // 둥근 모서리 반경 설정
-                              ),
-                              child: Image.asset(
-                                'assets/images/book.png', // 아이콘 경로
-                                height: 25, // 아이콘 높이
-                                width: 25, // 아이콘 너비
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text("열람실 현황", style: TextStyle(fontSize: 11)),
-                          ]),
+                          MiniButton(
+                            title: "열람실 현황",
+                            iconPath: "assets/images/book.png",
+                            route: MaterialPageRoute(
+                                builder: (context) => const StudyroomStatus()),
+                          ),
                           const SizedBox(width: 30),
-                          Column(children: [
-                            Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: Colors.white, // Container의 배경색
-                                borderRadius: BorderRadius.circular(20),
-                                // 둥근 모서리 반경 설정
-                              ),
-                              child: Image.asset(
-                                'assets/images/score.png', // 아이콘 경로
-                                height: 25, // 아이콘 높이
-                                width: 25, // 아이콘 너비
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text("성적 계산기", style: TextStyle(fontSize: 11)),
-                          ]),
+                          MiniButton(
+                            title: "성적 계산기",
+                            iconPath: "assets/images/score.png",
+                            route: MaterialPageRoute(
+                                builder: (context) => const CalcGrade()),
+                          ),
                           const SizedBox(width: 30),
-                          Column(children: [
-                            Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: Colors.white, // Container의 배경색
-                                borderRadius: BorderRadius.circular(20),
-                                // 둥근 모서리 반경 설정
-                              ),
-                              child: Image.asset(
-                                'assets/images/sogang_icon.png', // 아이콘 경로
-                                height: 25, // 아이콘 높이
-                                width: 25, // 아이콘 너비
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text("SAINT", style: TextStyle(fontSize: 11)),
-                          ]),
+                          MiniButton(
+                            title: "SAINT",
+                            iconPath: "assets/images/sogang_icon.png",
+                            route: MaterialPageRoute(
+                                builder: (context) => const SearchTag()),
+                          ),
                         ],
                       ),
                     )
@@ -473,14 +425,9 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   width: 20, // 아이콘 너비
                 ),
                 const SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
-                const Text(
+                Text(
                   "학식",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    // letterSpacing: 2.0,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
@@ -495,14 +442,15 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                           Container(
                             width: 400,
                             decoration: BoxDecoration(
-                              color: Colors.white, // Container의 배경색
+                              color: Theme.of(context).cardColor,
                               borderRadius:
                                   BorderRadius.circular(20), // 둥근 모서리 반경 설정
                             ),
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                   child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
@@ -540,14 +488,15 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                           Container(
                             width: 400,
                             decoration: BoxDecoration(
-                              color: Colors.white, // Container의 배경색
+                              color: Theme.of(context).cardColor,
                               borderRadius:
                                   BorderRadius.circular(20), // 둥근 모서리 반경 설정
                             ),
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                   child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
@@ -592,14 +541,9 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                   width: 20, // 아이콘 너비
                 ),
                 const SizedBox(width: 8), // 아이콘과 텍스트 사이의 간격
-                const Text(
+                Text(
                   "공지사항",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    // letterSpacing: 2.0,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
@@ -620,7 +564,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 Container(
                   alignment: Alignment.topLeft,
                   decoration: BoxDecoration(
-                    color: Colors.white, // Container의 배경색
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
                   padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
@@ -668,7 +612,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 Container(
                   alignment: Alignment.topLeft,
                   decoration: BoxDecoration(
-                    color: Colors.white, // Container의 배경색
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
                   padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
@@ -718,7 +662,7 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
                 Container(
                   alignment: Alignment.topLeft,
                   decoration: BoxDecoration(
-                    color: Colors.white, // Container의 배경색
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20), // 둥근 모서리 반경 설정
                   ),
                   padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
@@ -769,6 +713,46 @@ class _HomePage extends State<HomePage> with SingleTickerProviderStateMixin {
               ],
             ),
           )
+        ],
+      ),
+    );
+  }
+}
+
+class MiniButton extends StatelessWidget {
+  final String title;
+  final String iconPath;
+  final Route<dynamic> route;
+
+  const MiniButton({
+    Key? key,
+    required this.title,
+    required this.iconPath,
+    required this.route,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, route);
+      },
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Image.asset(
+              iconPath,
+              height: 25,
+              width: 25,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(title, style: const TextStyle(fontSize: 11)),
         ],
       ),
     );
