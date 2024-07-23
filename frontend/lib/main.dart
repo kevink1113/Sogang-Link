@@ -56,6 +56,9 @@ class _MyAppState extends State<MyApp> {
       _token = token;
     });
 
+    FirebaseMessaging.instance.unsubscribeFromTopic('일반공지');
+    FirebaseMessaging.instance.subscribeToTopic('general_notifications');
+
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Got a message whilst in the foreground!');

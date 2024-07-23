@@ -51,6 +51,7 @@ urlpatterns = [
     path('notice', NoticeViewSet.as_view(), name='notice'),
     path('maps/', include('maps.urls')),
     path('posts/', include('posts.urls')),
+    path('notices/', include('notices.urls')),
 ]
 
 if settings.DEBUG:

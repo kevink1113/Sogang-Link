@@ -1,9 +1,12 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from .models import Notice
 from .serializers import NoticeSerializer
+
+from .fcm import send_topic_notification
 
 class NoticeViewSet(APIView):
     # permission_classes = [IsAuthenticated]  # Apply any permissions you deem necessary
@@ -26,3 +29,19 @@ class NoticeViewSet(APIView):
     #         serializer.save()
     #         return Response(serializer.data, status=201)
     #     return Response(serializer.errors, status=400)
+
+
+def notify_topic(request):
+    # 예제 토픽, 실제로는 요청 데이터나 기타 로직에 따라 토픽을 설정해야 함
+    topic = 'general_notifications'
+    title = '공지사항'
+    body = '새로운 공지사항이 있습니다.'
+    
+    # 추가 데이터 (선택 사항)
+    data = {
+        'key1': 'value1',
+        'key2': 'value2',
+    }
+    
+    send_topic_notification(topic, title, body, data)
+    return JsonResponse({'status': 'success'})
