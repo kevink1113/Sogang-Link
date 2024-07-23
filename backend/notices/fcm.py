@@ -9,6 +9,7 @@ def send_topic_notification(topic, title, body, data=None):
     :param body: 알림 내용
     :param data: 추가 데이터 (선택 사항)
     """
+    print('Sending topic notification to', topic)
     message = messaging.Message(
         notification=messaging.Notification(
             title=title,

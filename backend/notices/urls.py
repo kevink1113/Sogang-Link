@@ -1,7 +1,6 @@
-from django.contrib import admin
-from django.urls  import path, include
-from . import views
+from django.urls  import path
+from .views import notify_topic
 
 urlpatterns = [
-  path('notify_topic', views.notify_topic),
+  path('notify_topic', notify_topic, name='notify_topic'),
 ]

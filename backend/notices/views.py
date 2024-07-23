@@ -42,6 +42,6 @@ def notify_topic(request):
         'key1': 'value1',
         'key2': 'value2',
     }
-    
+    print("notify_topic")
     send_topic_notification(topic, title, body, data)
     return JsonResponse({'status': 'success'})
